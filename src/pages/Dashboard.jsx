@@ -8,8 +8,9 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
-function StatCard({ title, value, sub, icon, tone = "default" }) {
+function StatCard({ title, value, sub, icon, tone = "default", to }) {
   const toneClass =
     tone === "gold"
       ? "text-amber-300"
@@ -17,7 +18,7 @@ function StatCard({ title, value, sub, icon, tone = "default" }) {
       ? "text-yellow-300"
       : "text-zinc-100";
 
-  return (
+  const content = (
     <div className="premium-card-soft p-5">
       <div className="flex items-center justify-between">
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
@@ -30,6 +31,14 @@ function StatCard({ title, value, sub, icon, tone = "default" }) {
       </div>
       <div className="mt-1 text-sm text-zinc-400">{sub}</div>
     </div>
+  );
+
+  return to ? (
+    <Link to={to} className="block transition hover:opacity-95">
+      {content}
+    </Link>
+  ) : (
+    content
   );
 }
 
@@ -47,8 +56,8 @@ function SectionCard({ title, action, children }) {
   );
 }
 
-function ActivityRow({ title, meta, badge }) {
-  return (
+function ActivityRow({ title, meta, badge, to }) {
+  const content = (
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-white/10 hover:bg-white/[0.03]">
       <div className="min-w-0">
         <div className="truncate text-sm font-medium text-zinc-100">{title}</div>
@@ -59,21 +68,37 @@ function ActivityRow({ title, meta, badge }) {
       </div>
     </div>
   );
+
+  return to ? (
+    <Link to={to} className="block">
+      {content}
+    </Link>
+  ) : (
+    content
+  );
 }
 
-function ActionRow({ title, desc }) {
-  return (
-    <button className="flex w-full items-center justify-between gap-4 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]">
+function ActionRow({ title, desc, to }) {
+  const content = (
+    <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]">
       <div>
         <div className="text-sm font-medium text-zinc-100">{title}</div>
         <div className="mt-1 text-sm text-zinc-400">{desc}</div>
       </div>
       <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
-    </button>
+    </div>
+  );
+
+  return to ? (
+    <Link to={to} className="block">
+      {content}
+    </Link>
+  ) : (
+    content
   );
 }
 
-function RegionRow({ region, status, note }) {
+function RegionRow({ region, status, note, to }) {
   const statusMap = {
     compliant: {
       label: "Compliant",
@@ -87,7 +112,7 @@ function RegionRow({ region, status, note }) {
 
   const item = statusMap[status];
 
-  return (
+  const content = (
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
       <div>
         <div className="text-sm font-medium text-zinc-100">{region}</div>
@@ -98,12 +123,19 @@ function RegionRow({ region, status, note }) {
       </div>
     </div>
   );
+
+  return to ? (
+    <Link to={to} className="block">
+      {content}
+    </Link>
+  ) : (
+    content
+  );
 }
 
 export default function Dashboard() {
   return (
     <div className="space-y-8">
-      {/* Page header */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
@@ -118,12 +150,15 @@ export default function Dashboard() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <button className="ghost-button px-4 py-3 text-sm">View activity</button>
-          <button className="gold-button px-5 py-3 text-sm">Generate document</button>
+          <Link to="/app/advisor" className="ghost-button px-4 py-3 text-sm">
+            View activity
+          </Link>
+          <Link to="/app/generator?template=Offer%20Letter" className="gold-button px-5 py-3 text-sm">
+            Generate document
+          </Link>
         </div>
       </div>
 
-      {/* KPI row */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Compliance"
@@ -131,12 +166,14 @@ export default function Dashboard() {
           sub="All regions aligned"
           tone="gold"
           icon={<ShieldCheck className="h-4 w-4" />}
+          to="/app/settings"
         />
         <StatCard
           title="Documents"
           value="12"
           sub="Active across workspace"
           icon={<FileText className="h-4 w-4" />}
+          to="/app/templates"
         />
         <StatCard
           title="Reviews"
@@ -144,26 +181,26 @@ export default function Dashboard() {
           sub="Require attention"
           tone="warning"
           icon={<AlertTriangle className="h-4 w-4" />}
+          to="/app/advisor"
         />
         <StatCard
           title="Last update"
           value="2h"
           sub="Since latest change"
           icon={<Clock3 className="h-4 w-4" />}
+          to="/app/generator?template=Employment%20Agreement"
         />
       </div>
 
-      {/* Main content grid */}
       <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-        {/* Left column */}
         <div className="space-y-6">
           <SectionCard
             title="Recent activity"
             action={
-              <button className="flex items-center gap-2 text-sm text-zinc-400 transition hover:text-zinc-200">
+              <Link to="/app/advisor" className="flex items-center gap-2 text-sm text-zinc-400 transition hover:text-zinc-200">
                 View all
                 <ArrowUpRight className="h-4 w-4" />
-              </button>
+              </Link>
             }
           >
             <div className="space-y-3">
@@ -171,16 +208,19 @@ export default function Dashboard() {
                 title="Offer letter signed"
                 meta="Ontario · 2 hours ago"
                 badge="Completed"
+                to="/app/generator?template=Offer%20Letter"
               />
               <ActivityRow
                 title="Remote work policy updated"
                 meta="Federal · Yesterday"
                 badge="Updated"
+                to="/app/generator?template=Employee%20Handbook"
               />
               <ActivityRow
                 title="New employee added"
                 meta="Québec · 2 days ago"
                 badge="Synced"
+                to="/app/templates"
               />
             </div>
           </SectionCard>
@@ -190,20 +230,22 @@ export default function Dashboard() {
               <ActionRow
                 title="Review probation clause"
                 desc="Confirm your standard language for Ontario offer templates."
+                to="/app/advisor"
               />
               <ActionRow
                 title="Update employee handbook"
                 desc="A recent policy edit should be reflected in the handbook master."
+                to="/app/generator?template=Employee%20Handbook"
               />
               <ActionRow
                 title="Verify Québec compliance"
                 desc="One template still needs a province-specific review pass."
+                to="/app/settings"
               />
             </div>
           </SectionCard>
         </div>
 
-        {/* Right column */}
         <div className="space-y-6">
           <SectionCard title="Compliance by region">
             <div className="space-y-3">
@@ -211,16 +253,19 @@ export default function Dashboard() {
                 region="Ontario"
                 status="compliant"
                 note="Latest review passed"
+                to="/app/settings"
               />
               <RegionRow
                 region="Québec"
                 status="review"
                 note="One template flagged for revision"
+                to="/app/advisor"
               />
               <RegionRow
                 region="Federal"
                 status="compliant"
                 note="No outstanding issues"
+                to="/app/settings"
               />
             </div>
           </SectionCard>
@@ -242,27 +287,35 @@ export default function Dashboard() {
             </div>
 
             <div className="grid gap-3">
-              <button className="gold-button w-full px-4 py-3 text-sm">Generate document</button>
-              <button className="ghost-button w-full px-4 py-3 text-sm">Ask advisor</button>
+              <Link to="/app/generator?template=Offer%20Letter" className="gold-button w-full px-4 py-3 text-center text-sm">
+                Generate document
+              </Link>
+              <Link to="/app/advisor" className="ghost-button w-full px-4 py-3 text-center text-sm">
+                Ask advisor
+              </Link>
             </div>
           </SectionCard>
 
           <SectionCard title="Health checks">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-                <div>
-                  <div className="text-sm font-medium text-zinc-100">Core documents available</div>
-                  <div className="text-sm text-zinc-400">Template workspace is active and ready</div>
+              <Link to="/app/templates" className="block">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                  <div>
+                    <div className="text-sm font-medium text-zinc-100">Core documents available</div>
+                    <div className="text-sm text-zinc-400">Template workspace is active and ready</div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-                <div>
-                  <div className="text-sm font-medium text-zinc-100">Advisor accessible</div>
-                  <div className="text-sm text-zinc-400">Guidance panel is configured for preview</div>
+              </Link>
+              <Link to="/app/advisor" className="block">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                  <div>
+                    <div className="text-sm font-medium text-zinc-100">Advisor accessible</div>
+                    <div className="text-sm text-zinc-400">Guidance panel is configured for preview</div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </SectionCard>
         </div>
