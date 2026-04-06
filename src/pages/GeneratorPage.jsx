@@ -25,6 +25,7 @@ const templateOptions = [
 ];
 
 const STORAGE_KEY = "dutiva.generatorDraft.v1";
+const SETTINGS_KEY = "dutiva.settings.v1";
 
 const defaultForm = {
   companyName: "Dutiva Canada",
@@ -139,9 +140,16 @@ export default function GeneratorPage() {
   const [searchParams] = useSearchParams();
 
   const savedDraft = loadFromStorage(STORAGE_KEY, null);
+  const savedSettings = loadFromStorage(SETTINGS_KEY, {});
+
+  const enrichedDefaults = {
+    ...defaultForm,
+    companyName: savedSettings.companyName || defaultForm.companyName,
+    jurisdiction: savedSettings.province || defaultForm.jurisdiction,
+  };
 
   const [template, setTemplate] = useState(savedDraft?.template || "Offer Letter");
-  const [form, setForm] = useState(savedDraft?.form || defaultForm);
+  const [form, setForm] = useState(savedDraft?.form || enrichedDefaults);
   const [statusMessage, setStatusMessage] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
 
@@ -190,7 +198,7 @@ In the full product, this becomes the export-ready document output.
   const handleReset = () => {
     removeFromStorage(STORAGE_KEY);
     setTemplate("Offer Letter");
-    setForm(defaultForm);
+    setForm(enrichedDefaults);
     setStatusMessage("Draft cleared and reset.");
     setTimeout(() => setStatusMessage(""), 2500);
   };
@@ -401,7 +409,7 @@ In the full product, this becomes the export-ready document output.
                   <div>
                     <div className="text-sm font-medium text-zinc-100">Persistent draft state</div>
                     <div className="mt-1 text-sm text-zinc-400">
-                      Your generator inputs now survive reloads, which makes the app feel much more real.
+                      Your generator inputs now survive reloads, and default to your workspace settings.
                     </div>
                   </div>
                 </div>
