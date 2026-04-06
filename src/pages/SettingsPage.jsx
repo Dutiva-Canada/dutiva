@@ -13,6 +13,8 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { loadFromStorage, saveToStorage, removeFromStorage } from "../utils/storage";
+import { useAuth } from "../context/AuthContext.jsx";
+import { supabase } from "../lib/supabase";
 
 const STORAGE_KEY = "dutiva.settings.v1";
 
@@ -79,28 +81,132 @@ function SummaryItem({ icon, title, desc, tone = "default" }) {
   );
 }
 
+function toDbPayload(form) {
+  return {
+    company_name: form.companyName,
+    legal_name: form.legalName,
+    email: form.email,
+    website: form.website,
+    province: form.province,
+    city: form.city,
+    primary_contact: form.primaryContact,
+    company_size: form.companySize,
+    language_default: form.languageDefault,
+    theme_default: form.themeDefault,
+    compliance_mode: form.complianceMode,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function fromDbRow(row) {
+  if (!row) return defaultSettings;
+
+  return {
+    companyName: row.company_name ?? defaultSettings.companyName,
+    legalName: row.legal_name ?? defaultSettings.legalName,
+    email: row.email ?? defaultSettings.email,
+    website: row.website ?? defaultSettings.website,
+    province: row.province ?? defaultSettings.province,
+    city: row.city ?? defaultSettings.city,
+    primaryContact: row.primary_contact ?? defaultSettings.primaryContact,
+    companySize: row.company_size ?? defaultSettings.companySize,
+    languageDefault: row.language_default ?? defaultSettings.languageDefault,
+    themeDefault: row.theme_default ?? defaultSettings.themeDefault,
+    complianceMode: row.compliance_mode ?? defaultSettings.complianceMode,
+  };
+}
+
 export default function SettingsPage() {
+  const { user } = useAuth();
   const [saved, setSaved] = useState(false);
   const [bannerText, setBannerText] = useState("Settings saved successfully.");
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [form, setForm] = useState(loadFromStorage(STORAGE_KEY, defaultSettings));
 
   useEffect(() => {
     saveToStorage(STORAGE_KEY, form);
   }, [form]);
 
-  const handleSave = () => {
-    saveToStorage(STORAGE_KEY, form);
-    setBannerText("Settings saved successfully.");
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+  useEffect(() => {
+    async function loadProfile() {
+      if (!user) {
+        setLoadingProfile(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+          const nextForm = fromDbRow(data);
+          setForm(nextForm);
+          saveToStorage(STORAGE_KEY, nextForm);
+        }
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+      } finally {
+        setLoadingProfile(false);
+      }
+    }
+
+    loadProfile();
+  }, [user]);
+
+  const handleSave = async () => {
+    try {
+      saveToStorage(STORAGE_KEY, form);
+
+      if (user) {
+        const payload = {
+          id: user.id,
+          ...toDbPayload(form),
+        };
+
+        const { error } = await supabase.from("profiles").upsert(payload);
+        if (error) throw error;
+      }
+
+      setBannerText("Settings saved successfully.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (error) {
+      console.error("Save failed:", error);
+      setBannerText("Could not save to Supabase yet. Local settings were kept.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    }
   };
 
-  const handleReset = () => {
-    removeFromStorage(STORAGE_KEY);
-    setForm(defaultSettings);
-    setBannerText("Settings reset to defaults.");
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+  const handleReset = async () => {
+    try {
+      removeFromStorage(STORAGE_KEY);
+      setForm(defaultSettings);
+
+      if (user) {
+        const payload = {
+          id: user.id,
+          ...toDbPayload(defaultSettings),
+        };
+
+        const { error } = await supabase.from("profiles").upsert(payload);
+        if (error) throw error;
+      }
+
+      setBannerText("Settings reset to defaults.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (error) {
+      console.error("Reset failed:", error);
+      setBannerText("Defaults restored locally, but Supabase update failed.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    }
   };
 
   return (
@@ -137,7 +243,16 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <SaveBanner visible={saved} text={bannerText} />
+      <SaveBanner
+        visible={saved}
+        text={bannerText}
+      />
+
+      {loadingProfile ? (
+        <div className="premium-card p-6">
+          <div className="text-sm text-zinc-300">Loading your workspace profile…</div>
+        </div>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-6">
@@ -281,14 +396,14 @@ export default function SettingsPage() {
               <SummaryItem
                 icon={<ShieldCheck className="h-5 w-5" />}
                 tone="gold"
-                title="Province-aware defaults"
-                desc="Stronger long-term foundation for real compliance workflows."
+                title="Supabase-ready profile"
+                desc="Settings now save locally and attempt to sync to your authenticated user profile."
               />
               <SummaryItem
                 icon={<Sparkles className="h-5 w-5" />}
                 tone="gold"
                 title="Premium workspace direction"
-                desc="This now feels more like a serious SaaS settings area instead of a placeholder screen."
+                desc="This now behaves more like a real SaaS settings screen instead of a static demo page."
               />
             </div>
           </SectionCard>
@@ -296,13 +411,13 @@ export default function SettingsPage() {
           <SectionCard title="Why this matters">
             <div className="space-y-3 text-sm text-zinc-300">
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                Makes the product feel like a real workspace instead of separate demo screens.
+                Your profile can now be tied to the authenticated user instead of only the browser.
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                Creates a natural place for future EN/FR and dark/light defaults.
+                This creates the foundation for true multi-device persistence later.
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                Sets up future Supabase-backed company profile persistence cleanly.
+                It also prepares the dashboard and generator to read real workspace data from Supabase.
               </div>
             </div>
           </SectionCard>
