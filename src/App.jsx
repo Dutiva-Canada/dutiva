@@ -10,24 +10,30 @@ import Advisor from "./pages/Advisor.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import GeneratorPage from "./pages/GeneratorPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public marketing */}
         <Route element={<MarketingLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
         </Route>
 
+        {/* Auth */}
         <Route path="/auth" element={<AuthPage />} />
 
-        <Route path="/app" element={<AppLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="templates" element={<Templates />} />
-          <Route path="advisor" element={<Advisor />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="generator" element={<GeneratorPage />} />
+        {/* Protected app */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/app" element={<AppLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="templates" element={<Templates />} />
+            <Route path="advisor" element={<Advisor />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="generator" element={<GeneratorPage />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
