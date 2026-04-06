@@ -6,6 +6,8 @@ import {
   Sparkles,
   FileText,
   ChevronRight,
+  Wand2,
+  CheckCircle2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -62,6 +64,21 @@ function SuggestionButton({ children, onClick }) {
   );
 }
 
+function ActionLink({ to, title, desc }) {
+  return (
+    <Link
+      to={to}
+      className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]"
+    >
+      <div>
+        <div className="text-sm font-medium text-zinc-100">{title}</div>
+        <div className="mt-1 text-sm text-zinc-400">{desc}</div>
+      </div>
+      <ChevronRight className="h-4 w-4 text-zinc-500" />
+    </Link>
+  );
+}
+
 export default function Advisor() {
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
@@ -99,7 +116,11 @@ export default function Advisor() {
 
         <div className="flex flex-wrap gap-3">
           <button className="ghost-button px-4 py-3 text-sm">View guidance history</button>
-          <Link to="/app/generator?template=Employment%20Agreement" className="gold-button px-5 py-3 text-sm">
+          <Link
+            to="/app/generator?template=Employment%20Agreement"
+            className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+          >
+            <Wand2 className="h-4 w-4" />
             Start from guidance
           </Link>
         </div>
@@ -154,7 +175,14 @@ export default function Advisor() {
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
-          <SectionCard title="Conversation">
+          <SectionCard
+            title="Conversation"
+            action={
+              <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
+                Guidance + workflow
+              </div>
+            }
+          >
             <div className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
               {messages.map((message, index) => (
                 <MessageBubble key={index} role={message.role} text={message.text} />
@@ -222,31 +250,47 @@ export default function Advisor() {
 
           <SectionCard title="Recommended next actions">
             <div className="space-y-3">
-              <Link
+              <ActionLink
                 to="/app/generator?template=Employment%20Agreement"
-                className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]"
-              >
-                <div>
-                  <div className="text-sm font-medium text-zinc-100">Open document builder</div>
-                  <div className="mt-1 text-sm text-zinc-400">
-                    Turn guidance into a draft workflow faster
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-zinc-500" />
-              </Link>
+                title="Open document builder"
+                desc="Turn guidance into a draft workflow faster"
+              />
 
-              <Link
+              <ActionLink
                 to="/app/generator?template=Offer%20Letter"
-                className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]"
-              >
+                title="Draft from advisor context"
+                desc="Move directly from guidance into a structured document workflow"
+              />
+
+              <ActionLink
+                to="/app/settings"
+                title="Review province defaults"
+                desc="Ensure the workspace context matches your compliance workflow"
+              />
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Workflow status">
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-300" />
                 <div>
-                  <div className="text-sm font-medium text-zinc-100">Draft from advisor context</div>
+                  <div className="text-sm font-medium text-zinc-100">Advisor handoff enabled</div>
                   <div className="mt-1 text-sm text-zinc-400">
-                    Move directly from guidance into a structured document workflow
+                    Guidance can now move directly into the generator flow.
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-zinc-500" />
-              </Link>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-300" />
+                <div>
+                  <div className="text-sm font-medium text-zinc-100">Workspace flow improving</div>
+                  <div className="mt-1 text-sm text-zinc-400">
+                    Separate screens now behave more like a connected product system.
+                  </div>
+                </div>
+              </div>
             </div>
           </SectionCard>
         </div>
