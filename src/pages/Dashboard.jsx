@@ -9,6 +9,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { loadFromStorage } from "../utils/storage";
+
+const SETTINGS_STORAGE_KEY = "dutiva.settings.v1";
 
 function StatCard({ title, value, sub, icon, tone = "default", to }) {
   const toneClass =
@@ -134,6 +137,9 @@ function RegionRow({ region, status, note, to }) {
 }
 
 export default function Dashboard() {
+  const savedSettings = loadFromStorage(SETTINGS_STORAGE_KEY, {});
+  const companyName = savedSettings.companyName || "Your workspace";
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -142,7 +148,7 @@ export default function Dashboard() {
             Dashboard
           </div>
           <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
-            Overview
+            {companyName}
           </h1>
           <p className="mt-3 max-w-2xl text-base text-zinc-400">
             A clearer operational view of compliance, document activity, and what needs attention next.
@@ -171,7 +177,7 @@ export default function Dashboard() {
         <StatCard
           title="Documents"
           value="12"
-          sub="Active across workspace"
+          sub={`Active for ${companyName}`}
           icon={<FileText className="h-4 w-4" />}
           to="/app/templates"
         />
@@ -229,7 +235,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               <ActionRow
                 title="Review probation clause"
-                desc="Confirm your standard language for Ontario offer templates."
+                desc={`Confirm standard language for ${companyName}.`}
                 to="/app/advisor"
               />
               <ActionRow
@@ -277,7 +283,7 @@ export default function Dashboard() {
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-zinc-100">Premium preview state</div>
+                  <div className="text-sm font-semibold text-zinc-100">{companyName} workspace active</div>
                   <p className="mt-2 text-sm leading-6 text-zinc-300">
                     Your dashboard now reflects a cleaner SaaS hierarchy: stronger metrics, clearer actions,
                     and more visible trust signals.
