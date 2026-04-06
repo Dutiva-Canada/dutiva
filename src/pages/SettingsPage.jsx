@@ -9,6 +9,7 @@ import {
   User2,
   Save,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 
 function SectionCard({ title, children, action }) {
@@ -41,6 +42,21 @@ function SaveBanner({ visible }) {
   return (
     <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-300">
       Settings saved successfully.
+    </div>
+  );
+}
+
+function SummaryItem({ icon, title, desc, tone = "default" }) {
+  const iconTone =
+    tone === "gold" ? "text-amber-300" : tone === "success" ? "text-emerald-300" : "text-zinc-300";
+
+  return (
+    <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+      <div className={`mt-0.5 ${iconTone}`}>{icon}</div>
+      <div>
+        <div className="text-sm font-medium text-zinc-100">{title}</div>
+        <div className="mt-1 text-sm text-zinc-400">{desc}</div>
+      </div>
     </div>
   );
 }
@@ -218,27 +234,33 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-6">
-          <SectionCard title="Workspace summary">
+          <SectionCard
+            title="Workspace summary"
+            action={
+              <div className="rounded-full border border-emerald-400/12 bg-emerald-400/8 px-3 py-1 text-xs font-medium text-emerald-300">
+                Active
+              </div>
+            }
+          >
             <div className="space-y-3">
-              <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-300" />
-                <div>
-                  <div className="text-sm font-medium text-zinc-100">Business profile configured</div>
-                  <div className="mt-1 text-sm text-zinc-400">
-                    Your generator, advisor, and dashboard can all use this as shared workspace context.
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                <ShieldCheck className="mt-0.5 h-5 w-5 text-amber-300" />
-                <div>
-                  <div className="text-sm font-medium text-zinc-100">Province-aware defaults</div>
-                  <div className="mt-1 text-sm text-zinc-400">
-                    Stronger long-term foundation for real compliance workflows.
-                  </div>
-                </div>
-              </div>
+              <SummaryItem
+                icon={<CheckCircle2 className="h-5 w-5" />}
+                tone="success"
+                title="Business profile configured"
+                desc="Your generator, advisor, and dashboard can all use this as shared workspace context."
+              />
+              <SummaryItem
+                icon={<ShieldCheck className="h-5 w-5" />}
+                tone="gold"
+                title="Province-aware defaults"
+                desc="Stronger long-term foundation for real compliance workflows."
+              />
+              <SummaryItem
+                icon={<Sparkles className="h-5 w-5" />}
+                tone="gold"
+                title="Premium workspace direction"
+                desc="This now feels more like a serious SaaS settings area instead of a placeholder screen."
+              />
             </div>
           </SectionCard>
 
