@@ -10,8 +10,10 @@ import {
   Wand2,
   X,
   Save,
+  RotateCcw,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+import { loadFromStorage, saveToStorage, removeFromStorage } from "../utils/storage";
 
 const templateOptions = [
   "Employment Agreement",
@@ -21,6 +23,19 @@ const templateOptions = [
   "Confidentiality Agreement",
   "Written Warning",
 ];
+
+const STORAGE_KEY = "dutiva.generatorDraft.v1";
+
+const defaultForm = {
+  companyName: "Dutiva Canada",
+  jurisdiction: "Ontario",
+  employeeName: "Sarah Chen",
+  jobTitle: "Marketing Coordinator",
+  salary: "$52,000",
+  startDate: "2026-05-01",
+  manager: "David Park",
+  notes: "Three-month probation. Full-time. Bi-weekly pay.",
+};
 
 function SectionCard({ title, children, action }) {
   return (
@@ -87,10 +102,7 @@ function ExportModal({ open, onClose, template }) {
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="ghost-button px-3 py-2 text-sm"
-          >
+          <button onClick={onClose} className="ghost-button px-3 py-2 text-sm">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -125,17 +137,11 @@ function ExportModal({ open, onClose, template }) {
 
 export default function GeneratorPage() {
   const [searchParams] = useSearchParams();
-  const [template, setTemplate] = useState("Offer Letter");
-  const [form, setForm] = useState({
-    companyName: "Dutiva Canada",
-    jurisdiction: "Ontario",
-    employeeName: "Sarah Chen",
-    jobTitle: "Marketing Coordinator",
-    salary: "$52,000",
-    startDate: "2026-05-01",
-    manager: "David Park",
-    notes: "Three-month probation. Full-time. Bi-weekly pay.",
-  });
+
+  const savedDraft = loadFromStorage(STORAGE_KEY, null);
+
+  const [template, setTemplate] = useState(savedDraft?.template || "Offer Letter");
+  const [form, setForm] = useState(savedDraft?.form || defaultForm);
   const [statusMessage, setStatusMessage] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
 
@@ -145,6 +151,10 @@ export default function GeneratorPage() {
       setTemplate(incomingTemplate);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEY, { template, form });
+  }, [template, form]);
 
   const preview = useMemo(() => {
     return `
@@ -172,7 +182,16 @@ In the full product, this becomes the export-ready document output.
   };
 
   const handleSave = () => {
+    saveToStorage(STORAGE_KEY, { template, form });
     setStatusMessage(`${template} draft saved successfully.`);
+    setTimeout(() => setStatusMessage(""), 2500);
+  };
+
+  const handleReset = () => {
+    removeFromStorage(STORAGE_KEY);
+    setTemplate("Offer Letter");
+    setForm(defaultForm);
+    setStatusMessage("Draft cleared and reset.");
     setTimeout(() => setStatusMessage(""), 2500);
   };
 
@@ -326,12 +345,21 @@ In the full product, this becomes the export-ready document output.
                   <Wand2 className="h-4 w-4" />
                   Generate preview
                 </button>
+
                 <button
                   onClick={handleSave}
                   className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
                 >
                   <Save className="h-4 w-4" />
                   Save draft
+                </button>
+
+                <button
+                  onClick={handleReset}
+                  className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Reset draft
                 </button>
               </div>
             </SectionCard>
@@ -371,9 +399,9 @@ In the full product, this becomes the export-ready document output.
                 <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                   <Sparkles className="mt-0.5 h-5 w-5 text-amber-300" />
                   <div>
-                    <div className="text-sm font-medium text-zinc-100">Premium product feel</div>
+                    <div className="text-sm font-medium text-zinc-100">Persistent draft state</div>
                     <div className="mt-1 text-sm text-zinc-400">
-                      A builder plus live preview feels much more credible than static template cards alone.
+                      Your generator inputs now survive reloads, which makes the app feel much more real.
                     </div>
                   </div>
                 </div>
