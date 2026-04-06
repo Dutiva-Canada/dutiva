@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import {
   FileText,
   LayoutDashboard,
@@ -8,6 +8,7 @@ import {
   Sparkles,
   ChevronRight,
   Wand2,
+  Plus,
 } from "lucide-react";
 
 const navItems = [
@@ -86,7 +87,7 @@ function Sidebar() {
             </div>
           </div>
           <div className="rounded-2xl border border-amber-400/10 bg-amber-400/6 px-3 py-3 text-sm text-zinc-300">
-            Built to centralize documents, guidance, and next actions in one premium workspace.
+            Centralize documents, guidance, and next actions in one premium workspace.
           </div>
         </div>
 
@@ -103,11 +104,16 @@ function Sidebar() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-zinc-100">Growth plan</div>
-                <div className="text-xs text-zinc-400">Best fit for active teams</div>
+                <div className="text-sm font-semibold text-zinc-100">Start faster</div>
+                <div className="text-xs text-zinc-400">Jump into document generation</div>
               </div>
             </div>
-            <button className="gold-button w-full px-4 py-3 text-sm">Generate document</button>
+            <Link
+              to="/app/generator?template=Offer%20Letter"
+              className="gold-button block w-full px-4 py-3 text-center text-sm"
+            >
+              Generate document
+            </Link>
           </div>
         </div>
       </div>
@@ -116,22 +122,79 @@ function Sidebar() {
 }
 
 function TopBar() {
+  const location = useLocation();
+
+  const getPageMeta = () => {
+    if (location.pathname.startsWith("/app/generator")) {
+      return {
+        badge: "Generator flow",
+        title: "Document workflow active",
+        ctaLabel: "Open templates",
+        ctaTo: "/app/templates",
+      };
+    }
+
+    if (location.pathname.startsWith("/app/advisor")) {
+      return {
+        badge: "Advisor",
+        title: "Guidance workspace",
+        ctaLabel: "Start from guidance",
+        ctaTo: "/app/generator?template=Employment%20Agreement",
+      };
+    }
+
+    if (location.pathname.startsWith("/app/templates")) {
+      return {
+        badge: "Templates",
+        title: "Template library",
+        ctaLabel: "New generation",
+        ctaTo: "/app/generator?template=Offer%20Letter",
+      };
+    }
+
+    if (location.pathname.startsWith("/app/settings")) {
+      return {
+        badge: "Settings",
+        title: "Workspace configuration",
+        ctaLabel: "Open generator",
+        ctaTo: "/app/generator?template=Offer%20Letter",
+      };
+    }
+
+    return {
+      badge: "Premium app preview",
+      title: "Operational workspace",
+      ctaLabel: "Generate document",
+      ctaTo: "/app/generator?template=Offer%20Letter",
+    };
+  };
+
+  const pageMeta = getPageMeta();
+
   return (
     <div className="sticky top-0 z-30 border-b border-white/6 bg-[#0A0C11]/80 backdrop-blur-xl">
-      <div className="flex min-h-[76px] items-center justify-between px-4 md:px-6 xl:px-8">
+      <div className="flex min-h-[76px] items-center justify-between gap-4 px-4 md:px-6 xl:px-8">
         <div className="flex items-center gap-3 xl:hidden">
           <BrandLockup />
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden min-w-0 items-center gap-3 md:flex">
           <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1.5 text-xs font-medium text-amber-300">
-            Premium app preview
+            {pageMeta.badge}
           </div>
+          <div className="truncate text-sm text-zinc-400">{pageMeta.title}</div>
         </div>
 
         <div className="flex items-center gap-3">
           <button className="ghost-button px-4 py-2 text-sm">EN / FR</button>
           <button className="ghost-button px-4 py-2 text-sm">Dark</button>
+          <Link
+            to={pageMeta.ctaTo}
+            className="gold-button inline-flex items-center gap-2 px-4 py-2 text-sm"
+          >
+            <Plus className="h-4 w-4" />
+            {pageMeta.ctaLabel}
+          </Link>
         </div>
       </div>
     </div>
