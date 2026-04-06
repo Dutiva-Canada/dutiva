@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Templates from "./pages/Templates.jsx";
 import Advisor from "./pages/Advisor.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
+import GeneratorPage from "./pages/GeneratorPage.jsx";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="templates" element={<Templates />} />
           <Route path="advisor" element={<Advisor />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="generator" element={<GeneratorPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
