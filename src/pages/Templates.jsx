@@ -146,6 +146,8 @@ export default function Templates() {
     });
   }, [category, search]);
 
+  const generatorLink = `/app/generator?template=${encodeURIComponent(selected.title)}`;
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -163,7 +165,7 @@ export default function Templates() {
 
         <div className="flex flex-wrap gap-3">
           <button className="ghost-button px-4 py-3 text-sm">Browse categories</button>
-          <Link to="/app/generator" className="gold-button px-5 py-3 text-sm">
+          <Link to={generatorLink} className="gold-button px-5 py-3 text-sm">
             New generation
           </Link>
         </div>
@@ -285,10 +287,10 @@ export default function Templates() {
               </div>
 
               <div className="mt-5 grid gap-3">
-                <Link to="/app/generator" className="gold-button w-full px-4 py-3 text-center text-sm">
+                <Link to={generatorLink} className="gold-button w-full px-4 py-3 text-center text-sm">
                   Start with AI assist
                 </Link>
-                <Link to="/app/generator" className="ghost-button w-full px-4 py-3 text-center text-sm">
+                <Link to={generatorLink} className="ghost-button w-full px-4 py-3 text-center text-sm">
                   Open manual builder
                 </Link>
               </div>
