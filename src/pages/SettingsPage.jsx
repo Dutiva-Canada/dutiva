@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Building2,
   Globe,
@@ -10,7 +10,25 @@ import {
   Save,
   CheckCircle2,
   Sparkles,
+  RotateCcw,
 } from "lucide-react";
+import { loadFromStorage, saveToStorage, removeFromStorage } from "../utils/storage";
+
+const STORAGE_KEY = "dutiva.settings.v1";
+
+const defaultSettings = {
+  companyName: "Dutiva Canada",
+  legalName: "Dutiva Canada Inc.",
+  email: "info@dutiva.ca",
+  website: "dutiva.ca",
+  province: "Ontario",
+  city: "Ottawa",
+  primaryContact: "Martin Constantineau",
+  companySize: "1-10",
+  languageDefault: "English",
+  themeDefault: "Dark",
+  complianceMode: "Canadian SMB",
+};
 
 function SectionCard({ title, children, action }) {
   return (
@@ -36,12 +54,12 @@ function Field({ label, icon, children }) {
   );
 }
 
-function SaveBanner({ visible }) {
+function SaveBanner({ visible, text = "Settings saved successfully." }) {
   if (!visible) return null;
 
   return (
     <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-300">
-      Settings saved successfully.
+      {text}
     </div>
   );
 }
@@ -63,21 +81,24 @@ function SummaryItem({ icon, title, desc, tone = "default" }) {
 
 export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
-  const [form, setForm] = useState({
-    companyName: "Dutiva Canada",
-    legalName: "Dutiva Canada Inc.",
-    email: "info@dutiva.ca",
-    website: "dutiva.ca",
-    province: "Ontario",
-    city: "Ottawa",
-    primaryContact: "Martin Constantineau",
-    companySize: "1-10",
-    languageDefault: "English",
-    themeDefault: "Dark",
-    complianceMode: "Canadian SMB",
-  });
+  const [bannerText, setBannerText] = useState("Settings saved successfully.");
+  const [form, setForm] = useState(loadFromStorage(STORAGE_KEY, defaultSettings));
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEY, form);
+  }, [form]);
 
   const handleSave = () => {
+    saveToStorage(STORAGE_KEY, form);
+    setBannerText("Settings saved successfully.");
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleReset = () => {
+    removeFromStorage(STORAGE_KEY);
+    setForm(defaultSettings);
+    setBannerText("Settings reset to defaults.");
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -105,10 +126,18 @@ export default function SettingsPage() {
             <Save className="h-4 w-4" />
             Save settings
           </button>
+
+          <button
+            onClick={handleReset}
+            className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </button>
         </div>
       </div>
 
-      <SaveBanner visible={saved} />
+      <SaveBanner visible={saved} text={bannerText} />
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-6">
