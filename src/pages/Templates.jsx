@@ -7,6 +7,7 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const templateCategories = [
   { id: "all", label: "All templates" },
@@ -147,7 +148,6 @@ export default function Templates() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
@@ -163,11 +163,12 @@ export default function Templates() {
 
         <div className="flex flex-wrap gap-3">
           <button className="ghost-button px-4 py-3 text-sm">Browse categories</button>
-          <button className="gold-button px-5 py-3 text-sm">New generation</button>
+          <Link to="/app/generator" className="gold-button px-5 py-3 text-sm">
+            New generation
+          </Link>
         </div>
       </div>
 
-      {/* Top metrics */}
       <div className="grid gap-4 md:grid-cols-3">
         <div className="premium-card-soft p-5">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
@@ -203,9 +204,7 @@ export default function Templates() {
         </div>
       </div>
 
-      {/* Main grid */}
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        {/* Left side */}
         <div className="space-y-6">
           <SectionCard
             title="Browse template library"
@@ -215,7 +214,6 @@ export default function Templates() {
               </div>
             }
           >
-            {/* Search */}
             <div className="relative mb-4">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
               <input
@@ -226,7 +224,6 @@ export default function Templates() {
               />
             </div>
 
-            {/* Filters */}
             <div className="mb-5 flex flex-wrap gap-2">
               {templateCategories.map((item) => (
                 <FilterPill
@@ -238,7 +235,6 @@ export default function Templates() {
               ))}
             </div>
 
-            {/* List */}
             <div className="space-y-3">
               {filteredTemplates.map((template) => (
                 <TemplateCard
@@ -252,7 +248,6 @@ export default function Templates() {
           </SectionCard>
         </div>
 
-        {/* Right side */}
         <div className="space-y-6">
           <SectionCard title="Selected template">
             <div className="rounded-[24px] border border-white/6 bg-white/[0.02] p-5">
@@ -290,8 +285,12 @@ export default function Templates() {
               </div>
 
               <div className="mt-5 grid gap-3">
-                <button className="gold-button w-full px-4 py-3 text-sm">Start with AI assist</button>
-                <button className="ghost-button w-full px-4 py-3 text-sm">Open manual builder</button>
+                <Link to="/app/generator" className="gold-button w-full px-4 py-3 text-center text-sm">
+                  Start with AI assist
+                </Link>
+                <Link to="/app/generator" className="ghost-button w-full px-4 py-3 text-center text-sm">
+                  Open manual builder
+                </Link>
               </div>
             </div>
           </SectionCard>
