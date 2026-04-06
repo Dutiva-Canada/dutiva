@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -10,6 +11,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { loadFromStorage } from "../utils/storage";
+import { useAuth } from "../context/AuthContext.jsx";
+import { supabase } from "../lib/supabase";
 
 const SETTINGS_STORAGE_KEY = "dutiva.settings.v1";
 
@@ -72,13 +75,7 @@ function ActivityRow({ title, meta, badge, to }) {
     </div>
   );
 
-  return to ? (
-    <Link to={to} className="block">
-      {content}
-    </Link>
-  ) : (
-    content
-  );
+  return to ? <Link to={to}>{content}</Link> : content;
 }
 
 function ActionRow({ title, desc, to }) {
@@ -92,13 +89,7 @@ function ActionRow({ title, desc, to }) {
     </div>
   );
 
-  return to ? (
-    <Link to={to} className="block">
-      {content}
-    </Link>
-  ) : (
-    content
-  );
+  return to ? <Link to={to}>{content}</Link> : content;
 }
 
 function RegionRow({ region, status, note, to }) {
@@ -127,18 +118,76 @@ function RegionRow({ region, status, note, to }) {
     </div>
   );
 
-  return to ? (
-    <Link to={to} className="block">
-      {content}
-    </Link>
-  ) : (
-    content
-  );
+  return to ? <Link to={to}>{content}</Link> : content;
+}
+
+function formatDateTime(value) {
+  if (!value) return "Recently";
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return "Recently";
+  }
 }
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const savedSettings = loadFromStorage(SETTINGS_STORAGE_KEY, {});
   const companyName = savedSettings.companyName || "Your workspace";
+
+  const [documents, setDocuments] = useState([]);
+  const [loadingDocs, setLoadingDocs] = useState(true);
+
+  useEffect(() => {
+    async function loadDocuments() {
+      if (!user) {
+        setLoadingDocs(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("documents")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setDocuments(data || []);
+      } catch (error) {
+        console.error("Failed to load dashboard documents:", error);
+      } finally {
+        setLoadingDocs(false);
+      }
+    }
+
+    loadDocuments();
+  }, [user]);
+
+  const documentCount = documents.length;
+  const latestDocument = documents[0];
+  const lastUpdated = latestDocument?.created_at
+    ? new Date(latestDocument.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    : "—";
+
+  const recentActivity =
+    documents.length > 0
+      ? documents.slice(0, 3).map((doc) => ({
+          id: doc.id,
+          title: doc.title || "Untitled document",
+          meta: formatDateTime(doc.created_at),
+          badge: "Saved",
+          to: "/app/generator",
+        }))
+      : [
+          {
+            id: "placeholder-1",
+            title: "No saved documents yet",
+            meta: "Start by creating your first document",
+            badge: "New",
+            to: "/app/generator",
+          },
+        ];
 
   return (
     <div className="space-y-8">
@@ -159,7 +208,7 @@ export default function Dashboard() {
           <Link to="/app/advisor" className="ghost-button px-4 py-3 text-sm">
             View activity
           </Link>
-          <Link to="/app/generator?template=Offer%20Letter" className="gold-button px-5 py-3 text-sm">
+          <Link to="/app/generator" className="gold-button px-5 py-3 text-sm">
             Generate document
           </Link>
         </div>
@@ -169,32 +218,32 @@ export default function Dashboard() {
         <StatCard
           title="Compliance"
           value="Compliant"
-          sub="All regions aligned"
+          sub="Workspace defaults configured"
           tone="gold"
           icon={<ShieldCheck className="h-4 w-4" />}
           to="/app/settings"
         />
         <StatCard
           title="Documents"
-          value="12"
+          value={loadingDocs ? "…" : String(documentCount)}
           sub={`Active for ${companyName}`}
           icon={<FileText className="h-4 w-4" />}
-          to="/app/templates"
+          to="/app/generator"
         />
         <StatCard
           title="Reviews"
-          value="2"
-          sub="Require attention"
+          value={loadingDocs ? "…" : documentCount > 0 ? "1" : "0"}
+          sub={documentCount > 0 ? "Advisor-ready workflow" : "No pending reviews"}
           tone="warning"
           icon={<AlertTriangle className="h-4 w-4" />}
           to="/app/advisor"
         />
         <StatCard
           title="Last update"
-          value="2h"
-          sub="Since latest change"
+          value={loadingDocs ? "…" : lastUpdated}
+          sub={latestDocument ? "Most recent saved doc" : "No documents yet"}
           icon={<Clock3 className="h-4 w-4" />}
-          to="/app/generator?template=Employment%20Agreement"
+          to="/app/generator"
         />
       </div>
 
@@ -203,49 +252,40 @@ export default function Dashboard() {
           <SectionCard
             title="Recent activity"
             action={
-              <Link to="/app/advisor" className="flex items-center gap-2 text-sm text-zinc-400 transition hover:text-zinc-200">
-                View all
+              <Link to="/app/generator" className="flex items-center gap-2 text-sm text-zinc-400 transition hover:text-zinc-200">
+                Open generator
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
             }
           >
             <div className="space-y-3">
-              <ActivityRow
-                title="Offer letter signed"
-                meta="Ontario · 2 hours ago"
-                badge="Completed"
-                to="/app/generator?template=Offer%20Letter"
-              />
-              <ActivityRow
-                title="Remote work policy updated"
-                meta="Federal · Yesterday"
-                badge="Updated"
-                to="/app/generator?template=Employee%20Handbook"
-              />
-              <ActivityRow
-                title="New employee added"
-                meta="Québec · 2 days ago"
-                badge="Synced"
-                to="/app/templates"
-              />
+              {recentActivity.map((item) => (
+                <ActivityRow
+                  key={item.id}
+                  title={item.title}
+                  meta={item.meta}
+                  badge={item.badge}
+                  to={item.to}
+                />
+              ))}
             </div>
           </SectionCard>
 
           <SectionCard title="Next actions">
             <div className="space-y-3">
               <ActionRow
-                title="Review probation clause"
-                desc={`Confirm standard language for ${companyName}.`}
+                title="Create or update a document"
+                desc={`Continue building documents for ${companyName}.`}
+                to="/app/generator"
+              />
+              <ActionRow
+                title="Review guidance in Advisor"
+                desc="Turn saved work into a guided compliance workflow."
                 to="/app/advisor"
               />
               <ActionRow
-                title="Update employee handbook"
-                desc="A recent policy edit should be reflected in the handbook master."
-                to="/app/generator?template=Employee%20Handbook"
-              />
-              <ActionRow
-                title="Verify Québec compliance"
-                desc="One template still needs a province-specific review pass."
+                title="Update workspace defaults"
+                desc="Keep your company profile and jurisdiction accurate."
                 to="/app/settings"
               />
             </div>
@@ -256,22 +296,22 @@ export default function Dashboard() {
           <SectionCard title="Compliance by region">
             <div className="space-y-3">
               <RegionRow
-                region="Ontario"
+                region={savedSettings.province || "Ontario"}
                 status="compliant"
-                note="Latest review passed"
+                note="Default workspace region"
                 to="/app/settings"
-              />
-              <RegionRow
-                region="Québec"
-                status="review"
-                note="One template flagged for revision"
-                to="/app/advisor"
               />
               <RegionRow
                 region="Federal"
                 status="compliant"
-                note="No outstanding issues"
+                note="Core workflow available"
                 to="/app/settings"
+              />
+              <RegionRow
+                region="Custom"
+                status={documentCount > 0 ? "review" : "compliant"}
+                note={documentCount > 0 ? "Review your saved documents" : "No outstanding issues"}
+                to="/app/advisor"
               />
             </div>
           </SectionCard>
@@ -285,15 +325,14 @@ export default function Dashboard() {
                 <div>
                   <div className="text-sm font-semibold text-zinc-100">{companyName} workspace active</div>
                   <p className="mt-2 text-sm leading-6 text-zinc-300">
-                    Your dashboard now reflects a cleaner SaaS hierarchy: stronger metrics, clearer actions,
-                    and more visible trust signals.
+                    Auth, saved settings, and saved documents are now connected into one product flow.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-3">
-              <Link to="/app/generator?template=Offer%20Letter" className="gold-button w-full px-4 py-3 text-center text-sm">
+              <Link to="/app/generator" className="gold-button w-full px-4 py-3 text-center text-sm">
                 Generate document
               </Link>
               <Link to="/app/advisor" className="ghost-button w-full px-4 py-3 text-center text-sm">
@@ -304,21 +343,23 @@ export default function Dashboard() {
 
           <SectionCard title="Health checks">
             <div className="space-y-3">
-              <Link to="/app/templates" className="block">
+              <Link to="/app/generator" className="block">
                 <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                   <CheckCircle2 className="h-5 w-5 text-emerald-300" />
                   <div>
-                    <div className="text-sm font-medium text-zinc-100">Core documents available</div>
-                    <div className="text-sm text-zinc-400">Template workspace is active and ready</div>
+                    <div className="text-sm font-medium text-zinc-100">Document storage available</div>
+                    <div className="text-sm text-zinc-400">
+                      {documentCount > 0 ? `${documentCount} saved document(s)` : "No saved documents yet"}
+                    </div>
                   </div>
                 </div>
               </Link>
-              <Link to="/app/advisor" className="block">
+              <Link to="/app/settings" className="block">
                 <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                   <CheckCircle2 className="h-5 w-5 text-emerald-300" />
                   <div>
-                    <div className="text-sm font-medium text-zinc-100">Advisor accessible</div>
-                    <div className="text-sm text-zinc-400">Guidance panel is configured for preview</div>
+                    <div className="text-sm font-medium text-zinc-100">Workspace profile active</div>
+                    <div className="text-sm text-zinc-400">Settings are available for your signed-in account</div>
                   </div>
                 </div>
               </Link>
