@@ -7,6 +7,7 @@ import {
   FileText,
   ChevronRight,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const initialMessages = [
   {
@@ -82,7 +83,6 @@ export default function Advisor() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
@@ -99,11 +99,12 @@ export default function Advisor() {
 
         <div className="flex flex-wrap gap-3">
           <button className="ghost-button px-4 py-3 text-sm">View guidance history</button>
-          <button className="gold-button px-5 py-3 text-sm">Start new thread</button>
+          <Link to="/app/generator?template=Employment%20Agreement" className="gold-button px-5 py-3 text-sm">
+            Start from guidance
+          </Link>
         </div>
       </div>
 
-      {/* Top cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <div className="premium-card-soft p-5">
           <div className="flex items-center justify-between">
@@ -151,9 +152,7 @@ export default function Advisor() {
         </div>
       </div>
 
-      {/* Main grid */}
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        {/* Chat column */}
         <div className="space-y-6">
           <SectionCard title="Conversation">
             <div className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
@@ -195,7 +194,6 @@ export default function Advisor() {
           </SectionCard>
         </div>
 
-        {/* Side column */}
         <div className="space-y-6">
           <SectionCard title="Why this feels better">
             <div className="space-y-3">
@@ -224,7 +222,10 @@ export default function Advisor() {
 
           <SectionCard title="Recommended next actions">
             <div className="space-y-3">
-              <button className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]">
+              <Link
+                to="/app/generator?template=Employment%20Agreement"
+                className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]"
+              >
                 <div>
                   <div className="text-sm font-medium text-zinc-100">Open document builder</div>
                   <div className="mt-1 text-sm text-zinc-400">
@@ -232,17 +233,20 @@ export default function Advisor() {
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-zinc-500" />
-              </button>
+              </Link>
 
-              <button className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]">
+              <Link
+                to="/app/generator?template=Offer%20Letter"
+                className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]"
+              >
                 <div>
-                  <div className="text-sm font-medium text-zinc-100">Review province defaults</div>
+                  <div className="text-sm font-medium text-zinc-100">Draft from advisor context</div>
                   <div className="mt-1 text-sm text-zinc-400">
-                    Ensure the guidance context matches your workspace
+                    Move directly from guidance into a structured document workflow
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-zinc-500" />
-              </button>
+              </Link>
             </div>
           </SectionCard>
         </div>
