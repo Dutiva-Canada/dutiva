@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -8,7 +8,7 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 const templateOptions = [
   "Employment Agreement",
@@ -61,6 +61,7 @@ function StepPill({ active, done, label, index }) {
 }
 
 export default function GeneratorPage() {
+  const [searchParams] = useSearchParams();
   const [template, setTemplate] = useState("Offer Letter");
   const [form, setForm] = useState({
     companyName: "Dutiva Canada",
@@ -72,6 +73,13 @@ export default function GeneratorPage() {
     manager: "David Park",
     notes: "Three-month probation. Full-time. Bi-weekly pay.",
   });
+
+  useEffect(() => {
+    const incomingTemplate = searchParams.get("template");
+    if (incomingTemplate && templateOptions.includes(incomingTemplate)) {
+      setTemplate(incomingTemplate);
+    }
+  }, [searchParams]);
 
   const preview = useMemo(() => {
     return `
