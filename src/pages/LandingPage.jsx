@@ -20,9 +20,9 @@ function Pill({ children }) {
   );
 }
 
-function FeatureCard({ icon, title, desc }) {
-  return (
-    <div className="premium-card-soft p-6">
+function FeatureCard({ icon, title, desc, to }) {
+  const content = (
+    <div className="premium-card-soft p-6 transition hover:translate-y-[-2px]">
       <div className="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
         {icon}
       </div>
@@ -30,12 +30,13 @@ function FeatureCard({ icon, title, desc }) {
       <div className="mt-2 text-sm leading-6 text-zinc-400">{desc}</div>
     </div>
   );
+
+  return to ? <Link to={to}>{content}</Link> : content;
 }
 
 export default function LandingPage() {
   return (
     <div className="marketing-shell min-h-screen">
-      {/* Hero */}
       <Section className="grid gap-10 py-14 md:py-20 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
         <div className="space-y-6">
           <Pill>HR compliance made simple for Canadian businesses</Pill>
@@ -52,18 +53,18 @@ export default function LandingPage() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              to="/app"
+              to="/app/generator?template=Offer%20Letter"
               className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
             >
-              Open app preview
+              Generate a document
               <ArrowRight className="h-4 w-4" />
             </Link>
 
             <Link
-              to="/pricing"
+              to="/app"
               className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm"
             >
-              View pricing
+              Open app preview
             </Link>
           </div>
 
@@ -95,7 +96,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Hero visual */}
         <div className="premium-card overflow-hidden rounded-[32px] p-0">
           <div className="grid gap-5 bg-[linear-gradient(180deg,rgba(18,22,30,0.98)_0%,rgba(14,17,24,0.98)_100%)] p-6">
             <div className="flex items-center justify-between border-b border-white/6 pb-4">
@@ -176,7 +176,6 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* Features */}
       <Section className="py-6 md:py-10">
         <div className="mb-8 max-w-3xl">
           <Pill>What makes Dutiva valuable</Pill>
@@ -191,21 +190,25 @@ export default function LandingPage() {
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <FeatureCard
+            to="/app/generator?template=Employment%20Agreement"
             icon={<FileText className="h-5 w-5" />}
             title="Tailored HR documents"
             desc="Generate cleaner, more professional HR documents with stronger workflow structure."
           />
           <FeatureCard
+            to="/app/settings"
             icon={<ShieldCheck className="h-5 w-5" />}
             title="Canada-first design"
             desc="Built around Canadian business realities instead of feeling retrofitted from generic software."
           />
           <FeatureCard
+            to="/app/generator?template=Offer%20Letter"
             icon={<Sparkles className="h-5 w-5" />}
             title="Guided generation"
             desc="Move from static templates toward a more guided drafting and review experience."
           />
           <FeatureCard
+            to="/app/advisor"
             icon={<MessageSquare className="h-5 w-5" />}
             title="Advisor support"
             desc="Get a more premium advisory experience that feels integrated with your document workflow."
@@ -213,7 +216,6 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* CTA */}
       <Section className="py-12 md:py-16">
         <div className="premium-card overflow-hidden rounded-[32px] p-8 md:p-10">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -229,12 +231,15 @@ export default function LandingPage() {
             </div>
 
             <div className="flex flex-wrap gap-3 lg:justify-end">
-              <Link to="/app" className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm">
-                Open app preview
+              <Link
+                to="/app/generator?template=Offer%20Letter"
+                className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+              >
+                Generate a document
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link to="/pricing" className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm">
-                View pricing
+              <Link to="/app" className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm">
+                Open app preview
               </Link>
             </div>
           </div>
