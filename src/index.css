@@ -49,6 +49,7 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -65,6 +66,24 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea,
+select {
+  appearance: none;
+}
+
+textarea {
+  resize: vertical;
 }
 
 ::selection {
@@ -174,10 +193,91 @@ select {
   background: rgba(255, 255, 255, 0.18);
 }
 
-@media (max-width: 960px) {
+/* Improve touch targets globally */
+.gold-button,
+.ghost-button,
+button,
+a[role="button"] {
+  min-height: 44px;
+}
+
+/* Prevent iOS zoom on focus */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Better pre blocks on small screens */
+pre {
+  overflow-x: auto;
+}
+
+/* Modal safety */
+@media (max-width: 768px) {
+  .premium-card,
+  .premium-card-soft {
+    border-radius: 20px;
+  }
+
+  .gold-button,
+  .ghost-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .metric-value {
+    letter-spacing: -0.03em;
+  }
+}
+
+@media (max-width: 640px) {
   body {
     background:
       radial-gradient(circle at top left, rgba(214, 168, 79, 0.08), transparent 18%),
       linear-gradient(180deg, #07090d 0%, #090b10 45%, #0e1218 100%);
+  }
+
+  .premium-card,
+  .premium-card-soft {
+    border-radius: 18px;
+  }
+
+  .scroll-area {
+    max-height: none !important;
+  }
+
+  pre {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+}
+
+/* Small-phone refinement */
+@media (max-width: 480px) {
+  :root {
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+  }
+
+  body {
+    font-size: 15px;
+  }
+
+  .gold-button,
+  .ghost-button {
+    min-height: 46px;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .premium-card,
+  .premium-card-soft {
+    border-radius: 16px;
+  }
+
+  pre {
+    font-size: 12.5px;
+    line-height: 1.6;
   }
 }
