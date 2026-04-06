@@ -1,4 +1,5 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-7xl px-4 md:px-6 ${className}`}>{children}</section>;
@@ -20,6 +21,7 @@ function PriceCard({
   features,
   featured = false,
   cta,
+  to,
 }) {
   return (
     <div
@@ -31,7 +33,7 @@ function PriceCard({
       {featured ? (
         <div className="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1 text-xs font-medium text-amber-300">
           <Sparkles className="h-3.5 w-3.5" />
-          Most popular
+          Most practical
         </div>
       ) : null}
 
@@ -56,14 +58,16 @@ function PriceCard({
         ))}
       </div>
 
-      <button
+      <Link
+        to={to}
         className={[
-          "mt-8 w-full px-4 py-3 text-sm",
+          "mt-8 inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm",
           featured ? "gold-button" : "ghost-button",
         ].join(" ")}
       >
         {cta}
-      </button>
+        <ArrowRight className="h-4 w-4" />
+      </Link>
     </div>
   );
 }
@@ -83,7 +87,7 @@ export default function PricingPage() {
 
           <p className="mt-4 text-lg leading-8 text-zinc-400">
             Built to feel premium and credible from the first impression. Simple enough for early
-            adoption, structured enough to support a more serious SaaS story.
+            adoption, structured enough to support a serious SaaS workflow.
           </p>
         </div>
 
@@ -94,10 +98,11 @@ export default function PricingPage() {
             desc="For early exploration, validation, and lightweight document generation."
             features={[
               "Core template access",
-              "Basic workspace experience",
-              "Early-stage evaluation flow",
+              "App preview access",
+              "Basic generator workflow",
             ]}
             cta="Start free"
+            to="/app/generator?template=Offer%20Letter"
           />
 
           <PriceCard
@@ -109,9 +114,10 @@ export default function PricingPage() {
             features={[
               "Expanded template access",
               "Premium dashboard + advisor experience",
-              "Better fit for real customer conversions",
+              "Better fit for real customer workflows",
             ]}
             cta="Choose Growth"
+            to="/app"
           />
 
           <PriceCard
@@ -124,7 +130,17 @@ export default function PricingPage() {
               "Room for future expansion",
             ]}
             cta="Talk to sales"
+            to="/app/settings"
           />
+        </div>
+
+        <div className="mt-10 rounded-[28px] border border-white/6 bg-white/[0.02] p-6 text-center">
+          <div className="text-sm font-medium text-zinc-100">
+            The strongest proof is now the product flow itself.
+          </div>
+          <div className="mt-2 text-sm text-zinc-400">
+            Pricing should lead naturally into the generator, advisor, and workspace experience you’ve built.
+          </div>
         </div>
       </Section>
     </div>
