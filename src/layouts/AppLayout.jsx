@@ -7,11 +7,13 @@ import {
   ShieldCheck,
   Sparkles,
   ChevronRight,
+  Wand2,
 } from "lucide-react";
 
 const navItems = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/app/templates", label: "Templates", icon: FileText },
+  { to: "/app/generator", label: "Generator", icon: Wand2 },
   { to: "/app/advisor", label: "Advisor", icon: MessageSquare },
   { to: "/app/settings", label: "Settings", icon: Settings },
 ];
