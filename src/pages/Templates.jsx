@@ -1,8 +1,316 @@
-export default function Templates() {
+import { useMemo, useState } from "react";
+import {
+  ChevronRight,
+  FileText,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Wand2,
+} from "lucide-react";
+
+const templateCategories = [
+  { id: "all", label: "All templates" },
+  { id: "hiring", label: "Hiring" },
+  { id: "policy", label: "Policy" },
+  { id: "termination", label: "Termination" },
+  { id: "discipline", label: "Discipline" },
+];
+
+const templateData = [
+  {
+    id: 1,
+    title: "Employment Agreement",
+    category: "hiring",
+    jurisdiction: "Canada-ready",
+    description: "Create a structured employment agreement with clear compensation, role, and terms.",
+  },
+  {
+    id: 2,
+    title: "Offer Letter",
+    category: "hiring",
+    jurisdiction: "Province-specific",
+    description: "Generate a clean, export-ready offer letter aligned with the employee’s province.",
+  },
+  {
+    id: 3,
+    title: "Termination Letter",
+    category: "termination",
+    jurisdiction: "Province-specific",
+    description: "Prepare a compliant termination letter with stronger workflow guidance.",
+  },
+  {
+    id: 4,
+    title: "Employee Handbook",
+    category: "policy",
+    jurisdiction: "Canada-ready",
+    description: "Build a handbook foundation that’s easier to maintain and update over time.",
+  },
+  {
+    id: 5,
+    title: "Confidentiality Agreement",
+    category: "policy",
+    jurisdiction: "Canada-ready",
+    description: "Protect confidential information with a polished standalone agreement.",
+  },
+  {
+    id: 6,
+    title: "Written Warning",
+    category: "discipline",
+    jurisdiction: "Province-specific",
+    description: "Document performance or conduct concerns in a more consistent disciplinary flow.",
+  },
+];
+
+function SectionCard({ title, children, action }) {
   return (
-    <div style={{ padding: '40px', color: 'white', background: '#0A0C11', minHeight: '100vh' }}>
-      <h1>Templates</h1>
-      <p>Generate compliant documents here.</p>
+    <section className="premium-card p-6">
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold text-zinc-100">{title}</h2>
+        {action ? <div>{action}</div> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function FilterPill({ active, label, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={[
+        "rounded-full px-4 py-2 text-sm font-medium transition",
+        active
+          ? "border border-amber-400/25 bg-amber-400/10 text-amber-300"
+          : "border border-white/8 bg-white/[0.02] text-zinc-300 hover:bg-white/[0.04]",
+      ].join(" ")}
+    >
+      {label}
+    </button>
+  );
+}
+
+function TemplateCard({ template, selected, onSelect }) {
+  return (
+    <button
+      onClick={() => onSelect(template)}
+      className={[
+        "group w-full rounded-[24px] border p-5 text-left transition",
+        selected
+          ? "border-amber-400/25 bg-amber-400/[0.06]"
+          : "border-white/6 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.03]",
+      ].join(" ")}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+            <FileText className="h-5 w-5" />
+          </div>
+
+          <div className="min-w-0">
+            <div className="text-base font-semibold text-zinc-100">{template.title}</div>
+            <div className="mt-2 text-sm leading-6 text-zinc-400">{template.description}</div>
+          </div>
+        </div>
+
+        <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-zinc-500 transition group-hover:text-zinc-300" />
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">
+          {template.jurisdiction}
+        </span>
+        <span className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium capitalize text-amber-300">
+          {template.category}
+        </span>
+      </div>
+    </button>
+  );
+}
+
+export default function Templates() {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [selected, setSelected] = useState(templateData[0]);
+
+  const filteredTemplates = useMemo(() => {
+    return templateData.filter((item) => {
+      const matchesCategory = category === "all" || item.category === category;
+      const q = search.trim().toLowerCase();
+      const matchesSearch =
+        q.length === 0 ||
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q);
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [category, search]);
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+            Templates
+          </div>
+          <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+            Generate documents
+          </h1>
+          <p className="mt-3 max-w-2xl text-base text-zinc-400">
+            A cleaner, more premium template workspace designed to make generation feel guided instead of generic.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button className="ghost-button px-4 py-3 text-sm">Browse categories</button>
+          <button className="gold-button px-5 py-3 text-sm">New generation</button>
+        </div>
+      </div>
+
+      {/* Top metrics */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="premium-card-soft p-5">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
+            Templates
+          </div>
+          <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">
+            16
+          </div>
+          <div className="mt-1 text-sm text-zinc-400">Bilingual document templates</div>
+        </div>
+
+        <div className="premium-card-soft p-5">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
+            Coverage
+          </div>
+          <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">
+            14
+          </div>
+          <div className="mt-1 text-sm text-zinc-400">Canadian jurisdictions supported</div>
+        </div>
+
+        <div className="premium-card-soft p-5">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
+              Workflow
+            </div>
+            <Sparkles className="h-4 w-4 text-amber-300" />
+          </div>
+          <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-amber-300">
+            Guided
+          </div>
+          <div className="mt-1 text-sm text-zinc-400">Designed to feel premium and structured</div>
+        </div>
+      </div>
+
+      {/* Main grid */}
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        {/* Left side */}
+        <div className="space-y-6">
+          <SectionCard
+            title="Browse template library"
+            action={
+              <div className="rounded-full border border-amber-400/10 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
+                Core product
+              </div>
+            }
+          >
+            {/* Search */}
+            <div className="relative mb-4">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search templates..."
+                className="w-full rounded-2xl border border-white/8 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-amber-400/20"
+              />
+            </div>
+
+            {/* Filters */}
+            <div className="mb-5 flex flex-wrap gap-2">
+              {templateCategories.map((item) => (
+                <FilterPill
+                  key={item.id}
+                  label={item.label}
+                  active={category === item.id}
+                  onClick={() => setCategory(item.id)}
+                />
+              ))}
+            </div>
+
+            {/* List */}
+            <div className="space-y-3">
+              {filteredTemplates.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  selected={selected.id === template.id}
+                  onSelect={setSelected}
+                />
+              ))}
+            </div>
+          </SectionCard>
+        </div>
+
+        {/* Right side */}
+        <div className="space-y-6">
+          <SectionCard title="Selected template">
+            <div className="rounded-[24px] border border-white/6 bg-white/[0.02] p-5">
+              <div className="flex items-start gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                  <FileText className="h-5 w-5" />
+                </div>
+
+                <div>
+                  <div className="text-lg font-semibold text-zinc-100">{selected.title}</div>
+                  <div className="mt-2 text-sm leading-6 text-zinc-400">{selected.description}</div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                  <ShieldCheck className="h-5 w-5 text-emerald-300" />
+                  <div>
+                    <div className="text-sm font-medium text-zinc-100">Compliance context</div>
+                    <div className="text-sm text-zinc-400">
+                      Guided for Canadian workflows with cleaner province-aware positioning.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                  <Wand2 className="h-5 w-5 text-amber-300" />
+                  <div>
+                    <div className="text-sm font-medium text-zinc-100">AI-assisted generation</div>
+                    <div className="text-sm text-zinc-400">
+                      Better setup for structured drafting, not just generic outputs.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3">
+                <button className="gold-button w-full px-4 py-3 text-sm">Start with AI assist</button>
+                <button className="ghost-button w-full px-4 py-3 text-sm">Open manual builder</button>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="What improved here">
+            <div className="space-y-3 text-sm text-zinc-300">
+              <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                Cleaner hierarchy so templates feel like a guided product flow.
+              </div>
+              <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                Stronger dark-mode contrast so cards and sections are clearly visible.
+              </div>
+              <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                More premium visual treatment aligned with the new landing page direction.
+              </div>
+            </div>
+          </SectionCard>
+        </div>
+      </div>
     </div>
   );
 }
