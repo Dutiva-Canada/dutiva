@@ -10,9 +10,17 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true;
 
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch(() => {
+      if (!mounted) return;
       setLoading(false);
     });
 
@@ -30,11 +38,13 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signIn = async (email) => {
+    if (!supabase) throw new Error("Authentication is not configured.");
     const { error } = await supabase.auth.signInWithOtp({ email });
     if (error) throw error;
   };
 
   const signOut = async () => {
+    if (!supabase) return;
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
