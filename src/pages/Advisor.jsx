@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Paperclip,
   Send,
@@ -10,6 +10,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const initialMessages = [
   {
@@ -80,23 +82,66 @@ function ActionLink({ to, title, desc }) {
 }
 
 export default function Advisor() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
+  const [province, setProvince] = useState("Ontario");
+  const [loading, setLoading] = useState(false);
+  const [advisorError, setAdvisorError] = useState(null);
 
-  const sendMessage = () => {
+  useEffect(() => {
+    async function loadProvince() {
+      if (!user || !supabase) return;
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("province")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (data?.province) setProvince(data.province);
+      } catch {
+        // fall back to default Ontario
+      }
+    }
+    loadProvince();
+  }, [user]);
+
+  const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed || loading) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", text: trimmed },
-      {
-        role: "assistant",
-        text: "This preview response shows how the advisor should feel: calm, authoritative, and operationally useful. In the real version, this should become context-aware based on province, company setup, and template history.",
-      },
-    ]);
+    const userMsg = { role: "user", text: trimmed };
+    const nextMessages = [...messages, userMsg];
+    setMessages(nextMessages);
     setInput("");
-  };
+    setLoading(true);
+    setAdvisorError(null);
+
+    try {
+      if (!supabase) throw new Error("Not configured");
+
+      const { data, error } = await supabase.functions.invoke("advisor-chat", {
+        body: { messages: nextMessages, province },
+      });
+
+      if (error) throw error;
+
+      const reply = data?.reply ?? "I'm unable to respond right now. Please try again.";
+      setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
+    } catch (err) {
+      console.error("Advisor error:", err);
+      setAdvisorError("Could not reach the advisor. Please check your connection and try again.");
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: "I'm unable to respond right now. Please try again in a moment.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }, [input, loading, messages, province]);
 
   return (
     <div className="space-y-8">
@@ -150,7 +195,7 @@ export default function Advisor() {
             <ShieldCheck className="h-4 w-4 text-emerald-300" />
           </div>
           <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">
-            Ontario
+            {province}
           </div>
           <div className="mt-1 text-sm text-zinc-400">
             Province-aware positioning for the preview
@@ -187,7 +232,20 @@ export default function Advisor() {
               {messages.map((message, index) => (
                 <MessageBubble key={index} role={message.role} text={message.text} />
               ))}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-400">
+                    Advisor is thinking...
+                  </div>
+                </div>
+              )}
             </div>
+
+            {advisorError && (
+              <div className="rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
+                {advisorError}
+              </div>
+            )}
 
             <div className="mt-4 flex flex-wrap gap-2">
               <SuggestionButton onClick={() => setInput("What is the minimum notice requirement in Ontario?")}>
@@ -210,11 +268,17 @@ export default function Advisor() {
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
                   placeholder="Ask a Canadian HR compliance question..."
                   className="min-h-[96px] flex-1 resize-none rounded-2xl border border-white/8 bg-[#0E1218] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/20"
                 />
 
-                <button onClick={sendMessage} className="gold-button shrink-0 px-4 py-3">
+                <button onClick={sendMessage} disabled={loading} className="gold-button shrink-0 px-4 py-3 disabled:opacity-50">
                   <Send className="h-4 w-4" />
                 </button>
               </div>
