@@ -121,16 +121,16 @@ export default function LandingPage() {
                 </div>
 
                 <div className="mb-3 ml-auto max-w-[88%] rounded-[20px] bg-[linear-gradient(180deg,#f0bb59_0%,#d6a84f_100%)] px-4 py-3 text-sm text-black">
-                  What’s the minimum notice for termination in Ontario?
+                  What's the minimum notice for termination in Ontario?
                 </div>
 
                 <div className="mb-3 max-w-[92%] rounded-[20px] border border-white/6 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100">
                   For most Ontario employees, statutory notice depends on length of service under the
-                  ESA. For 3 years of service, the minimum is 3 weeks’ notice or pay in lieu.
+                  ESA. For 3 years of service, the minimum is 3 weeks' notice or pay in lieu.
                 </div>
 
                 <div className="rounded-[18px] border border-white/8 bg-[#0E1218] px-4 py-3 text-sm text-zinc-500">
-                  Ask a question or attach a document…
+                  Ask a question or attach a document...
                 </div>
               </div>
 
@@ -163,7 +163,7 @@ export default function LandingPage() {
 
                   <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                     <div className="font-medium text-zinc-100">Employment Offer Letter</div>
-                    <div className="mt-1 text-sm text-zinc-400">Apr 5 · Ontario</div>
+                    <div className="mt-1 text-sm text-zinc-400">Apr 5 - Ontario</div>
                   </div>
 
                   <div className="mt-3 rounded-2xl border border-amber-400/10 bg-amber-400/6 px-4 py-4 text-sm text-zinc-300">
@@ -225,7 +225,7 @@ export default function LandingPage() {
                 Open the app preview and see the product direction live.
               </h3>
               <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-400">
-                The app preview now follows the same premium direction as the new landing page —
+                The app preview now follows the same premium direction as the new landing page -
                 stronger hierarchy, better contrast, and a more credible SaaS feel.
               </p>
             </div>

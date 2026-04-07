@@ -139,7 +139,7 @@ export default function PricingPage() {
             The strongest proof is now the product flow itself.
           </div>
           <div className="mt-2 text-sm text-zinc-400">
-            Pricing should lead naturally into the generator, advisor, and workspace experience you’ve built.
+            Pricing should lead naturally into the generator, advisor, and workspace experience you've built.
           </div>
         </div>
       </Section>

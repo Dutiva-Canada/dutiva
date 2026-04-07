@@ -8,8 +8,8 @@ Each task or investigation should create its own sub-folder using a descriptive 
 
 ```
 copilot-workspace/
-  fix-blank-app-issue/      ← notes and artifacts from the blank app fix investigation
-  feature-xyz/              ← notes for a specific feature
+  fix-blank-app-issue/      <- notes and artifacts from the blank app fix investigation
+  feature-xyz/              <- notes for a specific feature
 ```
 
 ## Guidelines

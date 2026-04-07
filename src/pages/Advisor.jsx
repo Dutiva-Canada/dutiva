@@ -18,7 +18,7 @@ const initialMessages = [
   },
   {
     role: "assistant",
-    text: "Yes — it is strongly recommended to define the probation period clearly in the employment agreement, including how termination may be handled during that period. That helps reduce ambiguity and creates a cleaner compliance workflow.",
+    text: "Yes - it is strongly recommended to define the probation period clearly in the employment agreement, including how termination may be handled during that period. That helps reduce ambiguity and creates a cleaner compliance workflow.",
   },
 ];
 
