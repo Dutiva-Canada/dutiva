@@ -399,7 +399,11 @@ export default function GeneratorPage() {
           .select("document_id, status")
           .eq("user_id", user.id);
         const map = {};
-        (sigs || []).forEach((s) => { map[s.document_id] = s.status; });
+        (sigs || []).forEach((s) => {
+          if (!map[s.document_id] || s.status === "pending") {
+            map[s.document_id] = s.status;
+          }
+        });
         setSignatureMap(map);
       } catch (error) {
         console.error("Failed to load documents:", error);

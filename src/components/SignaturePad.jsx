@@ -67,8 +67,6 @@ export default function SignaturePad({ onSignatureChange }) {
     if (!canvas) return;
     canvas.width = canvas.offsetWidth * window.devicePixelRatio;
     canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-    const ctx = canvas.getContext("2d");
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
   }, []);
 
   return (

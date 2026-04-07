@@ -41,5 +41,5 @@ create policy "Anyone can update signature by token"
   on public.signatures
   for update
   to anon
-  using (true)
-  with check (true);
+  using (status = 'pending')
+  with check (status = 'signed');
