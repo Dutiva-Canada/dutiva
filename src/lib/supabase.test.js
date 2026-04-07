@@ -1,15 +1,11 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
-// Mock @supabase/supabase-js so that importing supabase.js doesn't need
-// real credentials and doesn't attempt network calls.
+// vi.mock is hoisted by Vitest, so this mock is in place before the import below.
 vi.mock("@supabase/supabase-js", () => ({
   createClient: vi.fn(() => ({})),
 }));
 
-// We import after the mock is in place.
-const { sanitizeAppPath, buildMagicLinkRedirectUrl } = await import(
-  "./supabase"
-);
+import { sanitizeAppPath, buildMagicLinkRedirectUrl } from "./supabase";
 
 // ─── sanitizeAppPath ──────────────────────────────────────────────────────────
 

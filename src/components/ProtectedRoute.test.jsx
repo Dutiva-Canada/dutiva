@@ -61,7 +61,7 @@ describe("ProtectedRoute – auth configured, loading", () => {
 });
 
 describe("ProtectedRoute – auth configured, unauthenticated", () => {
-  it("redirects to /auth when the user is not signed in", () => {
+  it("shows the auth page when the user is not signed in", () => {
     useAuth.mockReturnValue({
       authConfigured: true,
       user: null,
