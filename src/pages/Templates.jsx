@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronRight,
   FileText,
@@ -148,6 +148,7 @@ function SectionCard({ title, children, action }) {
 function FilterPill({ active, label, onClick }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={[
         "rounded-full px-4 py-2 text-sm font-medium transition",
@@ -164,6 +165,7 @@ function FilterPill({ active, label, onClick }) {
 function TemplateCard({ template, selected, onSelect }) {
   return (
     <button
+      type="button"
       onClick={() => onSelect(template)}
       className={[
         "group w-full rounded-[24px] border p-5 text-left transition",
@@ -202,7 +204,8 @@ function TemplateCard({ template, selected, onSelect }) {
 export default function Templates() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
-  const [selected, setSelected] = useState(templateData[0]);
+  const [selected, setSelected] = useState(templateData[0] ?? null);
+  const categorySectionRef = useRef(null);
 
   const filteredTemplates = useMemo(() => {
     return templateData.filter((item) => {
@@ -217,7 +220,22 @@ export default function Templates() {
     });
   }, [category, search]);
 
-  const generatorLink = `/app/generator?template=${encodeURIComponent(selected.title)}`;
+  useEffect(() => {
+    if (filteredTemplates.length === 0) {
+      setSelected(null);
+      return;
+    }
+
+    setSelected((current) =>
+      current && filteredTemplates.some((item) => item.id === current.id)
+        ? current
+        : filteredTemplates[0],
+    );
+  }, [filteredTemplates]);
+
+  const generatorLink = selected
+    ? `/app/generator?template=${encodeURIComponent(selected.title)}`
+    : "/app/generator";
 
   return (
     <div className="space-y-8">
@@ -235,7 +253,13 @@ export default function Templates() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <button className="ghost-button px-4 py-3 text-sm">Browse categories</button>
+          <button
+            type="button"
+            onClick={() => categorySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className="ghost-button px-4 py-3 text-sm"
+          >
+            Browse categories
+          </button>
           <Link to={generatorLink} className="gold-button px-5 py-3 text-sm">
             New generation
           </Link>
@@ -297,7 +321,7 @@ export default function Templates() {
               />
             </div>
 
-            <div className="mb-5 flex flex-wrap gap-2">
+            <div ref={categorySectionRef} className="mb-5 flex flex-wrap gap-2">
               {templateCategories.map((item) => (
                 <FilterPill
                   key={item.id}
@@ -309,14 +333,20 @@ export default function Templates() {
             </div>
 
             <div className="space-y-3">
-              {filteredTemplates.map((template) => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  selected={selected.id === template.id}
-                  onSelect={setSelected}
-                />
-              ))}
+              {filteredTemplates.length === 0 ? (
+                <div className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.02] px-5 py-8 text-center text-sm text-zinc-400">
+                  No templates match that search yet. Clear the filters to browse the full library.
+                </div>
+              ) : (
+                filteredTemplates.map((template) => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
+                    selected={selected?.id === template.id}
+                    onSelect={setSelected}
+                  />
+                ))
+              )}
             </div>
           </SectionCard>
         </div>
@@ -324,47 +354,55 @@ export default function Templates() {
         <div className="space-y-6">
           <SectionCard title="Selected template">
             <div className="rounded-[24px] border border-white/6 bg-white/[0.02] p-5">
-              <div className="flex items-start gap-4">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
-                  <FileText className="h-5 w-5" />
-                </div>
+              {selected ? (
+                <>
+                  <div className="flex items-start gap-4">
+                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                      <FileText className="h-5 w-5" />
+                    </div>
 
-                <div>
-                  <div className="text-lg font-semibold text-zinc-100">{selected.title}</div>
-                  <div className="mt-2 text-sm leading-6 text-zinc-400">{selected.description}</div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                  <ShieldCheck className="h-5 w-5 text-emerald-300" />
-                  <div>
-                    <div className="text-sm font-medium text-zinc-100">Compliance context</div>
-                    <div className="text-sm text-zinc-400">
-                      Guided for Canadian workflows with cleaner province-aware positioning.
+                    <div>
+                      <div className="text-lg font-semibold text-zinc-100">{selected.title}</div>
+                      <div className="mt-2 text-sm leading-6 text-zinc-400">{selected.description}</div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                  <Wand2 className="h-5 w-5 text-amber-300" />
-                  <div>
-                    <div className="text-sm font-medium text-zinc-100">AI-assisted generation</div>
-                    <div className="text-sm text-zinc-400">
-                      Better setup for structured drafting, not just generic outputs.
+                  <div className="mt-5 grid gap-3">
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                      <ShieldCheck className="h-5 w-5 text-emerald-300" />
+                      <div>
+                        <div className="text-sm font-medium text-zinc-100">Compliance context</div>
+                        <div className="text-sm text-zinc-400">
+                          Guided for Canadian workflows with cleaner province-aware positioning.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                      <Wand2 className="h-5 w-5 text-amber-300" />
+                      <div>
+                        <div className="text-sm font-medium text-zinc-100">AI-assisted generation</div>
+                        <div className="text-sm text-zinc-400">
+                          Better setup for structured drafting, not just generic outputs.
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="mt-5 grid gap-3">
-                <Link to={generatorLink} className="gold-button w-full px-4 py-3 text-center text-sm">
-                  Start with AI assist
-                </Link>
-                <Link to={generatorLink} className="ghost-button w-full px-4 py-3 text-center text-sm">
-                  Open manual builder
-                </Link>
-              </div>
+                  <div className="mt-5 grid gap-3">
+                    <Link to={generatorLink} className="gold-button w-full px-4 py-3 text-center text-sm">
+                      Start with AI assist
+                    </Link>
+                    <Link to={generatorLink} className="ghost-button w-full px-4 py-3 text-center text-sm">
+                      Open manual builder
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.02] px-5 py-8 text-center text-sm text-zinc-400">
+                  Select a template or clear the filters to continue into the generator.
+                </div>
+              )}
             </div>
           </SectionCard>
 

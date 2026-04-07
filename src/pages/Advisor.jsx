@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Paperclip,
   Send,
@@ -15,14 +15,34 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 const initialMessages = [
   {
+    id: "seed-user",
     role: "user",
     text: "Do I need a probation clause in Ontario?",
+    createdAt: "2026-04-07T09:00:00.000Z",
   },
   {
+    id: "seed-assistant",
     role: "assistant",
     text: "Yes - it is strongly recommended to define the probation period clearly in the employment agreement, including how termination may be handled during that period. That helps reduce ambiguity and creates a cleaner compliance workflow.",
+    createdAt: "2026-04-07T09:01:00.000Z",
   },
 ];
+
+function createId(prefix) {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function formatMessageTime(value) {
+  try {
+    return new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  } catch {
+    return "Just now";
+  }
+}
 
 function SectionCard({ title, children, action }) {
   return (
@@ -58,6 +78,7 @@ function MessageBubble({ role, text }) {
 function SuggestionButton({ children, onClick }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/[0.05] hover:text-zinc-100"
     >
@@ -88,60 +109,119 @@ export default function Advisor() {
   const [province, setProvince] = useState("Ontario");
   const [loading, setLoading] = useState(false);
   const [advisorError, setAdvisorError] = useState(null);
+  const [attachments, setAttachments] = useState([]);
+  const fileInputRef = useRef(null);
+  const historyRef = useRef(null);
 
   useEffect(() => {
     async function loadProvince() {
       if (!user || !supabase) return;
+
       try {
         const { data } = await supabase
           .from("profiles")
           .select("province")
           .eq("id", user.id)
           .maybeSingle();
-        if (data?.province) setProvince(data.province);
+
+        if (data?.province) {
+          setProvince(data.province);
+        }
       } catch {
-        // fall back to default Ontario
+        // Keep the default province for preview mode.
       }
     }
+
     loadProvince();
   }, [user]);
+
+  const handleAttachmentChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    setAttachments((current) => [
+      ...current,
+      ...files.map((file) => ({
+        id: createId("attachment"),
+        name: file.name,
+        size: file.size,
+      })),
+    ]);
+
+    event.target.value = "";
+  };
+
+  const removeAttachment = (attachmentId) => {
+    setAttachments((current) => current.filter((item) => item.id !== attachmentId));
+  };
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
-    const userMsg = { role: "user", text: trimmed };
-    const nextMessages = [...messages, userMsg];
-    setMessages(nextMessages);
+    const createdAt = new Date().toISOString();
+    const attachmentNames = attachments.map((item) => item.name);
+    const attachmentSummary =
+      attachmentNames.length > 0 ? `\n\nAttachments: ${attachmentNames.join(", ")}` : "";
+
+    const userMessage = {
+      id: createId("user"),
+      role: "user",
+      text: trimmed,
+      createdAt,
+    };
+
+    const nextMessagesForModel = [
+      ...messages.map((message) => ({ role: message.role, text: message.text })),
+      {
+        role: "user",
+        text: `${trimmed}${attachmentSummary}`,
+      },
+    ];
+
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setAttachments([]);
     setLoading(true);
     setAdvisorError(null);
 
     try {
-      if (!supabase) throw new Error("Not configured");
+      if (!supabase) {
+        throw new Error("Advisor service is not configured.");
+      }
 
       const { data, error } = await supabase.functions.invoke("advisor-chat", {
-        body: { messages: nextMessages, province },
+        body: { messages: nextMessagesForModel, province },
       });
 
       if (error) throw error;
 
       const reply = data?.reply ?? "I'm unable to respond right now. Please try again.";
-      setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
-    } catch (err) {
-      console.error("Advisor error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: createId("assistant"),
+          role: "assistant",
+          text: reply,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    } catch (error) {
+      console.error("Advisor error:", error);
       setAdvisorError("Could not reach the advisor. Please check your connection and try again.");
       setMessages((prev) => [
         ...prev,
         {
+          id: createId("assistant"),
           role: "assistant",
           text: "I'm unable to respond right now. Please try again in a moment.",
+          createdAt: new Date().toISOString(),
         },
       ]);
     } finally {
       setLoading(false);
     }
-  }, [input, loading, messages, province]);
+  }, [attachments, input, loading, messages, province]);
 
   return (
     <div className="space-y-8">
@@ -160,7 +240,13 @@ export default function Advisor() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <button className="ghost-button px-4 py-3 text-sm">View guidance history</button>
+          <button
+            type="button"
+            onClick={() => historyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className="ghost-button px-4 py-3 text-sm"
+          >
+            View guidance history
+          </button>
           <Link
             to="/app/generator?template=Employment%20Agreement"
             className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
@@ -229,8 +315,17 @@ export default function Advisor() {
             }
           >
             <div className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
-              {messages.map((message, index) => (
-                <MessageBubble key={index} role={message.role} text={message.text} />
+              {messages.map((message) => (
+                <div key={message.id} className="space-y-2">
+                  <MessageBubble role={message.role} text={message.text} />
+                  <div
+                    className={`px-2 text-xs text-zinc-500 ${
+                      message.role === "user" ? "text-right" : "text-left"
+                    }`}
+                  >
+                    {formatMessageTime(message.createdAt)}
+                  </div>
+                </div>
               ))}
               {loading && (
                 <div className="flex justify-start">
@@ -241,11 +336,11 @@ export default function Advisor() {
               )}
             </div>
 
-            {advisorError && (
-              <div className="rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
+            {advisorError ? (
+              <div className="mt-4 rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
                 {advisorError}
               </div>
-            )}
+            ) : null}
 
             <div className="mt-4 flex flex-wrap gap-2">
               <SuggestionButton onClick={() => setInput("What is the minimum notice requirement in Ontario?")}>
@@ -260,17 +355,44 @@ export default function Advisor() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-white/6 bg-white/[0.02] p-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={handleAttachmentChange}
+                className="hidden"
+              />
+
+              {attachments.length > 0 ? (
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {attachments.map((attachment) => (
+                    <button
+                      key={attachment.id}
+                      type="button"
+                      onClick={() => removeAttachment(attachment.id)}
+                      className="rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs text-amber-300"
+                    >
+                      {attachment.name} x
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
               <div className="flex items-end gap-3">
-                <button className="ghost-button shrink-0 px-3 py-3">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="ghost-button shrink-0 px-3 py-3"
+                >
                   <Paperclip className="h-4 w-4" />
                 </button>
 
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
                       sendMessage();
                     }
                   }}
@@ -278,7 +400,12 @@ export default function Advisor() {
                   className="min-h-[96px] flex-1 resize-none rounded-2xl border border-white/8 bg-[#0E1218] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/20"
                 />
 
-                <button onClick={sendMessage} disabled={loading} className="gold-button shrink-0 px-4 py-3 disabled:opacity-50">
+                <button
+                  type="button"
+                  onClick={sendMessage}
+                  disabled={loading}
+                  className="gold-button shrink-0 px-4 py-3 disabled:opacity-50"
+                >
                   <Send className="h-4 w-4" />
                 </button>
               </div>
@@ -287,6 +414,32 @@ export default function Advisor() {
         </div>
 
         <div className="space-y-6">
+          <SectionCard
+            title="Guidance history"
+            action={
+              <div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">
+                {messages.length} messages
+              </div>
+            }
+          >
+            <div ref={historyRef} className="space-y-3">
+              {messages.slice(-6).map((message) => (
+                <div
+                  key={`history-${message.id}`}
+                  className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-medium text-zinc-100">
+                      {message.role === "user" ? "You" : "Advisor"}
+                    </div>
+                    <div className="text-xs text-zinc-500">{formatMessageTime(message.createdAt)}</div>
+                  </div>
+                  <div className="mt-2 text-sm leading-6 text-zinc-400">{message.text}</div>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+
           <SectionCard title="Why this feels better">
             <div className="space-y-3">
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">

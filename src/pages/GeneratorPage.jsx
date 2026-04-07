@@ -4,22 +4,24 @@ import {
   CheckCircle2,
   ChevronRight,
   Copy,
+  Download,
   ExternalLink,
   FileText,
+  FolderOpen,
+  Plus,
+  RotateCcw,
+  Save,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Wand2,
   X,
-  Save,
-  RotateCcw,
-  FolderOpen,
-  Trash2,
-  Plus,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
-import { loadFromStorage, saveToStorage, removeFromStorage } from "../utils/storage";
+import { loadFromStorage, removeFromStorage, saveToStorage } from "../utils/storage";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext.jsx";
+import { getStoredSettings } from "../utils/workspaceSettings";
 
 const templateOptions = [
   "Employment Agreement",
@@ -58,7 +60,6 @@ const CANADIAN_JURISDICTIONS = [
 ];
 
 const STORAGE_KEY = "dutiva.generatorDraft.v1";
-const SETTINGS_KEY = "dutiva.settings.v1";
 
 const defaultForm = {
   companyName: "Dutiva Canada",
@@ -74,6 +75,94 @@ const defaultForm = {
   performanceGoals: "",
   reviewDate: "",
 };
+
+function normalizeForm(value, fallbackForm) {
+  return {
+    ...fallbackForm,
+    ...(value && typeof value === "object" ? value : {}),
+  };
+}
+
+function getTemplateFromValue(value) {
+  return templateOptions.includes(value) ? value : "Offer Letter";
+}
+
+function getStoredDraft(defaults) {
+  const draft = loadFromStorage(STORAGE_KEY, null);
+  if (!draft || typeof draft !== "object") {
+    return null;
+  }
+
+  return {
+    template: getTemplateFromValue(draft.template),
+    form: normalizeForm(draft.form, defaults),
+  };
+}
+
+function openPrintPreview(template, content) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const printWindow = window.open("", "_blank", "noopener,noreferrer,width=960,height=720");
+  if (!printWindow) {
+    return false;
+  }
+
+  const doc = printWindow.document;
+  doc.documentElement.lang = "en";
+  doc.title = template;
+  doc.head.replaceChildren();
+  doc.body.replaceChildren();
+
+  const charsetMeta = doc.createElement("meta");
+  charsetMeta.setAttribute("charset", "utf-8");
+  doc.head.append(charsetMeta);
+
+  const style = doc.createElement("style");
+  style.textContent = `
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #111827;
+      background: #ffffff;
+    }
+
+    h1 {
+      margin: 0 0 24px;
+      font-size: 28px;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font: 15px/1.7 "Segoe UI", Arial, sans-serif;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+      }
+    }
+  `;
+  doc.head.append(style);
+
+  const heading = doc.createElement("h1");
+  heading.textContent = template;
+
+  const pre = doc.createElement("pre");
+  pre.textContent = content;
+
+  doc.body.replaceChildren(heading, pre);
+
+  window.setTimeout(() => {
+    printWindow.focus();
+    printWindow.print();
+  }, 150);
+
+  return true;
+}
 
 function SectionCard({ title, children, action }) {
   return (
@@ -95,8 +184,8 @@ function StepPill({ active, done, label, index }) {
         active
           ? "border border-amber-400/20 bg-amber-400/10 text-amber-300"
           : done
-          ? "border border-emerald-400/15 bg-emerald-400/8 text-emerald-300"
-          : "border border-white/8 bg-white/[0.03] text-zinc-400",
+            ? "border border-emerald-400/15 bg-emerald-400/8 text-emerald-300"
+            : "border border-white/8 bg-white/[0.03] text-zinc-400",
       ].join(" ")}
     >
       <div
@@ -105,8 +194,8 @@ function StepPill({ active, done, label, index }) {
           active
             ? "bg-amber-400/15 text-amber-300"
             : done
-            ? "bg-emerald-400/15 text-emerald-300"
-            : "bg-white/[0.05] text-zinc-500",
+              ? "bg-emerald-400/15 text-emerald-300"
+              : "bg-white/[0.05] text-zinc-500",
         ].join(" ")}
       >
         {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : index}
@@ -116,82 +205,147 @@ function StepPill({ active, done, label, index }) {
   );
 }
 
-function StatusToast({ text }) {
+function StatusToast({ text, tone = "success" }) {
   if (!text) return null;
 
+  const toneClass =
+    tone === "warning"
+      ? "border-yellow-400/15 bg-yellow-400/8 text-yellow-200"
+      : "border-emerald-400/15 bg-emerald-400/8 text-emerald-300";
+
   return (
-    <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-300">
+    <div className={`rounded-2xl border px-4 py-3 text-sm ${toneClass}`}>
       {text}
     </div>
   );
 }
 
-function ESignModal({ open, onClose, activeDocumentId, onSaveFirst, user }) {
+function ESignModal({
+  activeDocumentId,
+  onClose,
+  onExport,
+  onSaveDraft,
+  onSaveFirst,
+  onSignatureCreated,
+  open,
+  savingDraft,
+  template,
+  user,
+}) {
   const [signerName, setSignerName] = useState("");
   const [signerEmail, setSignerEmail] = useState("");
   const [sending, setSending] = useState(false);
-  const [signLink, setSignLink] = useState(null);
-  const [sendError, setSendError] = useState(null);
+  const [signLink, setSignLink] = useState("");
+  const [sendError, setSendError] = useState("");
 
-  const handleSend = useCallback(async () => {
-    if (!user) return;
-    setSending(true);
-    setSendError(null);
+  const resetModalState = useCallback(() => {
+    setSignerName("");
+    setSignerEmail("");
+    setSending(false);
+    setSignLink("");
+    setSendError("");
+  }, []);
+
+  const handleClose = useCallback(() => {
+    resetModalState();
+    onClose();
+  }, [onClose, resetModalState]);
+
+  const handleCopy = useCallback(async () => {
+    if (!signLink || !navigator?.clipboard?.writeText) {
+      return;
+    }
 
     try {
-      let docId = activeDocumentId;
-      if (!docId) {
-        docId = await onSaveFirst();
-        if (!docId) throw new Error("Failed to save document before sending.");
+      await navigator.clipboard.writeText(signLink);
+    } catch (error) {
+      console.error("Failed to copy sign link:", error);
+    }
+  }, [signLink]);
+
+  const handleSend = useCallback(async () => {
+    const normalizedName = signerName.trim();
+    const normalizedEmail = signerEmail.trim();
+
+    if (!normalizedName || !normalizedEmail || sending) {
+      return;
+    }
+
+    if (!user || !supabase) {
+      setSendError("Sign in is required before you can send a document for signature.");
+      return;
+    }
+
+    setSending(true);
+    setSendError("");
+
+    try {
+      let documentId = activeDocumentId;
+
+      if (!documentId) {
+        documentId = await onSaveFirst();
+        if (!documentId) {
+          throw new Error("Failed to save document before sending for signature.");
+        }
       }
 
       const { data, error } = await supabase
         .from("signatures")
         .insert({
           user_id: user.id,
-          document_id: docId,
-          signer_name: signerName,
-          signer_email: signerEmail,
+          document_id: documentId,
+          signer_name: normalizedName,
+          signer_email: normalizedEmail,
         })
-        .select()
+        .select("token, status")
         .single();
 
-      if (error) throw error;
-      setSignLink(`${window.location.origin}/sign/${data.token}`);
-    } catch (err) {
-      console.error(err);
+      if (error) {
+        throw error;
+      }
+
+      const nextLink = new URL(`/sign/${data.token}`, window.location.origin).toString();
+      setSignLink(nextLink);
+      onSignatureCreated(documentId, data.status || "pending");
+    } catch (error) {
+      console.error("Failed to create signing link:", error);
       setSendError("Failed to create signing link. Please try again.");
     } finally {
       setSending(false);
     }
-  }, [user, activeDocumentId, onSaveFirst, signerName, signerEmail]);
-
-  const handleClose = () => {
-    setSignerName("");
-    setSignerEmail("");
-    setSending(false);
-    setSignLink(null);
-    setSendError(null);
-    onClose();
-  };
-
-  const handleCopy = () => {
-    if (signLink) navigator.clipboard.writeText(signLink);
-  };
+  }, [
+    activeDocumentId,
+    onSaveFirst,
+    onSignatureCreated,
+    signerEmail,
+    signerName,
+    sending,
+    user,
+  ]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
       <div className="premium-card w-full max-w-lg p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <div className="text-lg font-semibold text-zinc-100">Send for signature</div>
             <div className="mt-1 text-sm text-zinc-400">
-              {signLink ? "Share this link with the signer." : "Enter the signer's details to generate a signing link."}
+              {signLink
+                ? "Share this link with the signer."
+                : `Save, export, or generate an e-signature link for ${template}.`}
             </div>
           </div>
-          <button onClick={handleClose} className="ghost-button px-3 py-2 text-sm">
+
+          <button type="button" onClick={handleClose} className="ghost-button px-3 py-2 text-sm">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -201,6 +355,7 @@ function ESignModal({ open, onClose, activeDocumentId, onSaveFirst, user }) {
             <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-300">
               Signing link created successfully.
             </div>
+
             <div className="flex gap-2">
               <input
                 readOnly
@@ -208,6 +363,7 @@ function ESignModal({ open, onClose, activeDocumentId, onSaveFirst, user }) {
                 className="flex-1 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
               />
               <button
+                type="button"
                 onClick={handleCopy}
                 className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
               >
@@ -215,7 +371,8 @@ function ESignModal({ open, onClose, activeDocumentId, onSaveFirst, user }) {
                 Copy link
               </button>
             </div>
-            <button onClick={handleClose} className="gold-button w-full px-4 py-3 text-sm">
+
+            <button type="button" onClick={handleClose} className="gold-button w-full px-4 py-3 text-sm">
               Done
             </button>
           </div>
@@ -226,43 +383,57 @@ function ESignModal({ open, onClose, activeDocumentId, onSaveFirst, user }) {
               <input
                 type="text"
                 value={signerName}
-                onChange={(e) => setSignerName(e.target.value)}
+                onChange={(event) => setSignerName(event.target.value)}
                 placeholder="e.g. Sarah Chen"
                 className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
               />
             </div>
+
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">Signer email</label>
               <input
                 type="email"
                 value={signerEmail}
-                onChange={(e) => setSignerEmail(e.target.value)}
+                onChange={(event) => setSignerEmail(event.target.value)}
                 placeholder="e.g. sarah@example.com"
                 className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
               />
             </div>
 
-            {sendError && (
+            {sendError ? (
               <div className="rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
                 {sendError}
               </div>
-            )}
+            ) : null}
 
             <div className="space-y-3">
               <button
+                type="button"
                 onClick={handleSend}
-                disabled={!signerName || !signerEmail || sending}
+                disabled={!signerName.trim() || !signerEmail.trim() || sending}
                 className="gold-button flex w-full items-center justify-between px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <span>{sending ? "Sending..." : "Send for e-signature"}</span>
                 <ExternalLink className="h-4 w-4" />
               </button>
+
               <button
-                onClick={handleClose}
+                type="button"
+                onClick={onSaveDraft}
+                disabled={savingDraft || sending}
+                className="ghost-button flex w-full items-center justify-between px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <span>{savingDraft ? "Saving draft..." : "Save draft"}</span>
+                <Save className="h-4 w-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={onExport}
                 className="ghost-button flex w-full items-center justify-between px-4 py-3 text-sm"
               >
-                <span>Export / save</span>
-                <ChevronRight className="h-4 w-4" />
+                <span>Print / save as PDF</span>
+                <Download className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -313,11 +484,11 @@ function parseDocBody(content, fallbackTemplate = "Offer Letter") {
   const template = lines[0]?.trim() || fallbackTemplate;
 
   const getValue = (label) => {
-    const line = lines.find((l) => l.startsWith(`${label}:`));
+    const line = lines.find((item) => item.startsWith(`${label}:`));
     return line ? line.replace(`${label}:`, "").trim() : "";
   };
 
-  const notesIndex = lines.findIndex((l) => l.trim() === "Notes:");
+  const notesIndex = lines.findIndex((item) => item.trim() === "Notes:");
   let notes = defaultForm.notes;
   if (notesIndex >= 0) {
     const tail = lines.slice(notesIndex + 1).join("\n");
@@ -347,20 +518,23 @@ export default function GeneratorPage() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
 
-  const savedDraft = loadFromStorage(STORAGE_KEY, null);
-  const savedSettings = loadFromStorage(SETTINGS_KEY, {});
+  const savedSettings = useMemo(() => getStoredSettings(), []);
+  const enrichedDefaults = useMemo(
+    () => ({
+      ...defaultForm,
+      companyName: savedSettings.companyName || defaultForm.companyName,
+      jurisdiction: savedSettings.province || defaultForm.jurisdiction,
+    }),
+    [savedSettings],
+  );
+  const savedDraft = useMemo(() => getStoredDraft(enrichedDefaults), [enrichedDefaults]);
 
-  const enrichedDefaults = {
-    ...defaultForm,
-    companyName: savedSettings.companyName || defaultForm.companyName,
-    jurisdiction: savedSettings.province || defaultForm.jurisdiction,
-  };
-
-  const [template, setTemplate] = useState(savedDraft?.template || "Offer Letter");
-  const [form, setForm] = useState(savedDraft?.form || enrichedDefaults);
+  const [template, setTemplate] = useState(() => savedDraft?.template || "Offer Letter");
+  const [form, setForm] = useState(() => savedDraft?.form || enrichedDefaults);
   const [statusMessage, setStatusMessage] = useState("");
+  const [statusTone, setStatusTone] = useState("success");
   const [showESignModal, setShowESignModal] = useState(false);
-
+  const [savingFromModal, setSavingFromModal] = useState(false);
   const [documents, setDocuments] = useState([]);
   const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [activeDocumentId, setActiveDocumentId] = useState(null);
@@ -377,71 +551,81 @@ export default function GeneratorPage() {
     saveToStorage(STORAGE_KEY, { template, form });
   }, [template, form]);
 
-  useEffect(() => {
-    async function loadDocuments() {
-      if (!user) {
+  const loadDocuments = useCallback(
+    async ({ showLoader = true } = {}) => {
+      if (showLoader) {
+        setLoadingDocuments(true);
+      }
+
+      if (!user || !supabase) {
+        setDocuments([]);
+        setSignatureMap({});
         setLoadingDocuments(false);
         return;
       }
 
       try {
-        const { data, error } = await supabase
+        const { data: docs, error: docsError } = await supabase
           .from("documents")
           .select("*")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
 
-        if (error) throw error;
-        setDocuments(data || []);
+        if (docsError) {
+          throw docsError;
+        }
 
-        const { data: sigs } = await supabase
+        setDocuments(docs || []);
+
+        const { data: signatures, error: signaturesError } = await supabase
           .from("signatures")
           .select("document_id, status")
           .eq("user_id", user.id);
-        const map = {};
-        (sigs || []).forEach((s) => {
-          if (!map[s.document_id] || s.status === "pending") {
-            map[s.document_id] = s.status;
+
+        if (signaturesError) {
+          throw signaturesError;
+        }
+
+        const nextSignatureMap = {};
+        (signatures || []).forEach((signature) => {
+          if (!nextSignatureMap[signature.document_id] || signature.status === "pending") {
+            nextSignatureMap[signature.document_id] = signature.status;
           }
         });
-        setSignatureMap(map);
+        setSignatureMap(nextSignatureMap);
       } catch (error) {
         console.error("Failed to load documents:", error);
+        setDocuments([]);
+        setSignatureMap({});
       } finally {
         setLoadingDocuments(false);
       }
-    }
+    },
+    [user],
+  );
 
+  useEffect(() => {
     loadDocuments();
-  }, [user]);
+  }, [loadDocuments]);
 
   const preview = useMemo(() => formatDocBody(template, form), [template, form]);
 
-  const refreshDocuments = async () => {
-    if (!user) return;
+  const showStatus = useCallback((message, tone = "success", duration = 2500) => {
+    setStatusTone(tone);
+    setStatusMessage(message);
+    window.setTimeout(() => setStatusMessage(""), duration);
+  }, []);
 
-    const { data, error } = await supabase
-      .from("documents")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+  const handleGenerate = useCallback(() => {
+    showStatus(`Preview updated for ${template}.`);
+  }, [showStatus, template]);
 
-    if (error) throw error;
-    setDocuments(data || []);
-  };
-
-  const handleGenerate = () => {
-    setStatusMessage(`Preview updated for ${template}.`);
-    setTimeout(() => setStatusMessage(""), 2500);
-  };
-
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       saveToStorage(STORAGE_KEY, { template, form });
 
-      if (!user) {
-        setStatusMessage("Saved locally only. Sign in to sync documents.");
-        setTimeout(() => setStatusMessage(""), 2500);
+      if (!user || !supabase) {
+        showStatus("Saved locally only. Sign in to sync documents.");
         return null;
       }
 
@@ -458,61 +642,63 @@ export default function GeneratorPage() {
           .eq("id", activeDocumentId)
           .eq("user_id", user.id);
 
-        if (error) throw error;
-        setStatusMessage(`${template} updated successfully.`);
-        await refreshDocuments();
-        setTimeout(() => setStatusMessage(""), 2500);
-        return activeDocumentId;
-      } else {
-        const { data, error } = await supabase
-          .from("documents")
-          .insert(payload)
-          .select()
-          .single();
+        if (error) {
+          throw error;
+        }
 
-        if (error) throw error;
-        setActiveDocumentId(data.id);
-        setStatusMessage(`${template} saved successfully.`);
-        await refreshDocuments();
-        setTimeout(() => setStatusMessage(""), 2500);
-        return data.id;
+        showStatus(`${template} updated successfully.`);
+        await loadDocuments({ showLoader: false });
+        return activeDocumentId;
       }
+
+      const { data, error } = await supabase
+        .from("documents")
+        .insert(payload)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setActiveDocumentId(data.id);
+      showStatus(`${template} saved successfully.`);
+      await loadDocuments({ showLoader: false });
+      return data.id;
     } catch (error) {
       console.error("Save failed:", error);
-      setStatusMessage("Could not save document.");
-      setTimeout(() => setStatusMessage(""), 3000);
+      showStatus("Could not save document.", "warning", 3000);
       return null;
     }
-  };
+  }, [activeDocumentId, form, loadDocuments, preview, showStatus, template, user]);
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     removeFromStorage(STORAGE_KEY);
     setActiveDocumentId(null);
-    setTemplate(
-      searchParams.get("template") && templateOptions.includes(searchParams.get("template"))
-        ? searchParams.get("template")
-        : "Offer Letter"
-    );
-    setForm(enrichedDefaults);
-  };
+    setTemplate(getTemplateFromValue(searchParams.get("template")));
+    setForm(normalizeForm(null, enrichedDefaults));
+  }, [enrichedDefaults, searchParams]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     resetState();
-    setStatusMessage("Draft cleared and reset.");
-    setTimeout(() => setStatusMessage(""), 2500);
-  };
+    showStatus("Draft cleared and reset.");
+  }, [resetState, showStatus]);
 
-  const handleLoadDocument = (doc) => {
-    const parsed = parseDocBody(doc.content, doc.title || "Offer Letter");
-    setActiveDocumentId(doc.id);
-    setTemplate(parsed.template);
-    setForm(parsed.form);
-    setStatusMessage(`Loaded "${doc.title}".`);
-    setTimeout(() => setStatusMessage(""), 2000);
-  };
+  const handleLoadDocument = useCallback(
+    (doc) => {
+      const parsed = parseDocBody(doc.content, doc.title || "Offer Letter");
+      setActiveDocumentId(doc.id);
+      setTemplate(parsed.template);
+      setForm(normalizeForm(parsed.form, enrichedDefaults));
+      showStatus(`Loaded "${doc.title || "Untitled document"}".`, "success", 2000);
+    },
+    [enrichedDefaults, showStatus],
+  );
 
-  const handleDeleteDocument = async () => {
-    if (!user || !activeDocumentId) return;
+  const handleDeleteDocument = useCallback(async () => {
+    if (!user || !supabase || !activeDocumentId) {
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -521,24 +707,58 @@ export default function GeneratorPage() {
         .eq("id", activeDocumentId)
         .eq("user_id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      await refreshDocuments();
+      await loadDocuments({ showLoader: false });
       resetState();
-      setStatusMessage("Document deleted.");
-      setTimeout(() => setStatusMessage(""), 2500);
+      showStatus("Document deleted.");
     } catch (error) {
       console.error("Delete failed:", error);
-      setStatusMessage("Could not delete document.");
-      setTimeout(() => setStatusMessage(""), 3000);
+      showStatus("Could not delete document.", "warning", 3000);
     }
-  };
+  }, [activeDocumentId, loadDocuments, resetState, showStatus, user]);
 
-  const handleNewDocument = () => {
+  const handleNewDocument = useCallback(() => {
     resetState();
-    setStatusMessage("Started a new document.");
-    setTimeout(() => setStatusMessage(""), 2000);
-  };
+    showStatus("Started a new document.", "success", 2000);
+  }, [resetState, showStatus]);
+
+  const handleExport = useCallback(() => {
+    const didOpen = openPrintPreview(template, preview);
+    showStatus(
+      didOpen
+        ? "Print window opened. Use your browser's save-as-PDF option to export."
+        : "Could not open the print window. Check whether pop-ups are blocked.",
+      didOpen ? "success" : "warning",
+      3500,
+    );
+  }, [preview, showStatus, template]);
+
+  const handleSaveFromModal = useCallback(async () => {
+    setSavingFromModal(true);
+
+    try {
+      const documentId = await handleSave();
+      if (documentId || !user || !supabase) {
+        setShowESignModal(false);
+      }
+    } finally {
+      setSavingFromModal(false);
+    }
+  }, [handleSave, user]);
+
+  const handleSignatureCreated = useCallback((documentId, status = "pending") => {
+    if (!documentId) {
+      return;
+    }
+
+    setSignatureMap((current) => ({
+      ...current,
+      [documentId]: status,
+    }));
+  }, []);
 
   return (
     <>
@@ -566,6 +786,7 @@ export default function GeneratorPage() {
             </Link>
 
             <button
+              type="button"
               onClick={() => setShowESignModal(true)}
               className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
             >
@@ -575,7 +796,7 @@ export default function GeneratorPage() {
           </div>
         </div>
 
-        <StatusToast text={statusMessage} />
+        <StatusToast text={statusMessage} tone={statusTone} />
 
         <div className="flex flex-wrap gap-3">
           <StepPill index={1} label="Template" done />
@@ -598,7 +819,7 @@ export default function GeneratorPage() {
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Template</label>
                   <select
                     value={template}
-                    onChange={(e) => setTemplate(e.target.value)}
+                    onChange={(event) => setTemplate(event.target.value)}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   >
                     {templateOptions.map((item) => (
@@ -613,12 +834,12 @@ export default function GeneratorPage() {
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Jurisdiction</label>
                   <select
                     value={form.jurisdiction}
-                    onChange={(e) => setForm({ ...form, jurisdiction: e.target.value })}
+                    onChange={(event) => setForm({ ...form, jurisdiction: event.target.value })}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   >
-                    {CANADIAN_JURISDICTIONS.map((j) => (
-                      <option key={j} value={j} className="bg-[#0E1218]">
-                        {j}
+                    {CANADIAN_JURISDICTIONS.map((jurisdiction) => (
+                      <option key={jurisdiction} value={jurisdiction} className="bg-[#0E1218]">
+                        {jurisdiction}
                       </option>
                     ))}
                   </select>
@@ -628,7 +849,7 @@ export default function GeneratorPage() {
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Company</label>
                   <input
                     value={form.companyName}
-                    onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+                    onChange={(event) => setForm({ ...form, companyName: event.target.value })}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   />
                 </div>
@@ -637,7 +858,7 @@ export default function GeneratorPage() {
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Employee</label>
                   <input
                     value={form.employeeName}
-                    onChange={(e) => setForm({ ...form, employeeName: e.target.value })}
+                    onChange={(event) => setForm({ ...form, employeeName: event.target.value })}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   />
                 </div>
@@ -646,7 +867,7 @@ export default function GeneratorPage() {
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Job title</label>
                   <input
                     value={form.jobTitle}
-                    onChange={(e) => setForm({ ...form, jobTitle: e.target.value })}
+                    onChange={(event) => setForm({ ...form, jobTitle: event.target.value })}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   />
                 </div>
@@ -655,7 +876,7 @@ export default function GeneratorPage() {
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Compensation</label>
                   <input
                     value={form.salary}
-                    onChange={(e) => setForm({ ...form, salary: e.target.value })}
+                    onChange={(event) => setForm({ ...form, salary: event.target.value })}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   />
                 </div>
@@ -664,7 +885,7 @@ export default function GeneratorPage() {
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Start date</label>
                   <input
                     value={form.startDate}
-                    onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                    onChange={(event) => setForm({ ...form, startDate: event.target.value })}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   />
                 </div>
@@ -673,7 +894,7 @@ export default function GeneratorPage() {
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Manager</label>
                   <input
                     value={form.manager}
-                    onChange={(e) => setForm({ ...form, manager: e.target.value })}
+                    onChange={(event) => setForm({ ...form, manager: event.target.value })}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   />
                 </div>
@@ -683,55 +904,58 @@ export default function GeneratorPage() {
                 <label className="mb-2 block text-sm font-medium text-zinc-300">Notes</label>
                 <textarea
                   value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  onChange={(event) => setForm({ ...form, notes: event.target.value })}
                   className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                 />
               </div>
 
-              {template === "Independent Contractor Agreement" && (
+              {template === "Independent Contractor Agreement" ? (
                 <>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-300">Contract Rate</label>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Contract rate</label>
                     <input
                       value={form.contractRate}
-                      onChange={(e) => setForm({ ...form, contractRate: e.target.value })}
+                      onChange={(event) => setForm({ ...form, contractRate: event.target.value })}
                       className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                     />
                   </div>
+
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-300">Scope of Work</label>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Scope of work</label>
                     <textarea
                       value={form.scopeOfWork}
-                      onChange={(e) => setForm({ ...form, scopeOfWork: e.target.value })}
+                      onChange={(event) => setForm({ ...form, scopeOfWork: event.target.value })}
                       className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                     />
                   </div>
                 </>
-              )}
+              ) : null}
 
-              {template === "Performance Improvement Plan (PIP)" && (
+              {template === "Performance Improvement Plan (PIP)" ? (
                 <>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-300">Performance Goals</label>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Performance goals</label>
                     <textarea
                       value={form.performanceGoals}
-                      onChange={(e) => setForm({ ...form, performanceGoals: e.target.value })}
+                      onChange={(event) => setForm({ ...form, performanceGoals: event.target.value })}
                       className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                     />
                   </div>
+
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-300">Review Date</label>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Review date</label>
                     <input
                       value={form.reviewDate}
-                      onChange={(e) => setForm({ ...form, reviewDate: e.target.value })}
+                      onChange={(event) => setForm({ ...form, reviewDate: event.target.value })}
                       className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                     />
                   </div>
                 </>
-              )}
+              ) : null}
 
               <div className="mt-5 flex flex-wrap gap-3">
                 <button
+                  type="button"
                   onClick={handleGenerate}
                   className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
                 >
@@ -740,6 +964,7 @@ export default function GeneratorPage() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={handleSave}
                   className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
                 >
@@ -748,6 +973,7 @@ export default function GeneratorPage() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={handleReset}
                   className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
                 >
@@ -756,6 +982,7 @@ export default function GeneratorPage() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={handleNewDocument}
                   className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
                 >
@@ -765,6 +992,7 @@ export default function GeneratorPage() {
 
                 {activeDocumentId ? (
                   <button
+                    type="button"
                     onClick={handleDeleteDocument}
                     className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
                   >
@@ -798,8 +1026,10 @@ export default function GeneratorPage() {
                 ) : (
                   documents.map((doc) => {
                     const active = doc.id === activeDocumentId;
+
                     return (
                       <button
+                        type="button"
                         key={doc.id}
                         onClick={() => handleLoadDocument(doc)}
                         className={[
@@ -817,16 +1047,19 @@ export default function GeneratorPage() {
                             <div className="mt-1 text-sm text-zinc-400">
                               {new Date(doc.created_at).toLocaleString()}
                             </div>
-                            {signatureMap[doc.id] && (
-                              <div className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${
-                                signatureMap[doc.id] === "signed"
-                                  ? "border-emerald-400/20 bg-emerald-400/8 text-emerald-300"
-                                  : "border-amber-400/20 bg-amber-400/8 text-amber-300"
-                              }`}>
+                            {signatureMap[doc.id] ? (
+                              <div
+                                className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${
+                                  signatureMap[doc.id] === "signed"
+                                    ? "border-emerald-400/20 bg-emerald-400/8 text-emerald-300"
+                                    : "border-amber-400/20 bg-amber-400/8 text-amber-300"
+                                }`}
+                              >
                                 {signatureMap[doc.id] === "signed" ? "Signed" : "Awaiting signature"}
                               </div>
-                            )}
+                            ) : null}
                           </div>
+
                           {active ? (
                             <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
                               Open
@@ -890,10 +1123,15 @@ export default function GeneratorPage() {
       </div>
 
       <ESignModal
-        open={showESignModal}
-        onClose={() => setShowESignModal(false)}
         activeDocumentId={activeDocumentId}
+        onClose={() => setShowESignModal(false)}
+        onExport={handleExport}
+        onSaveDraft={handleSaveFromModal}
         onSaveFirst={handleSave}
+        onSignatureCreated={handleSignatureCreated}
+        open={showESignModal}
+        savingDraft={savingFromModal}
+        template={template}
         user={user}
       />
     </>

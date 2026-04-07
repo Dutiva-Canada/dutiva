@@ -44,6 +44,9 @@ Create a new Supabase project and copy:
 
 Put those values in `.env.local` or in your hosting platform's environment variables using the names from `.env.example`.
 
+Set `VITE_SITE_URL` to your canonical production origin so magic links always return to the correct site.
+If you need a different callback target, set `VITE_AUTH_REDIRECT_URL` explicitly.
+
 ### 2. Apply the schema
 
 Run the SQL in `supabase/migrations/202604070001_initial_schema.sql` using either:
@@ -70,7 +73,23 @@ For local development:
 
 For deployed environments, also add your production domain and its `/auth` route.
 
+For example:
+
+- Site URL: `https://dutiva.ca`
+- Redirect URL: `https://dutiva.ca/auth`
+
 The app sends users back to `/auth?next=...`, then redirects them into the correct in-app page after the session is created.
+
+## GitHub Pages deployment
+
+This repo now includes:
+
+- `public/CNAME` so the custom domain is bundled into the build artifact
+- `public/404.html` plus `public/spa-route-recovery.js` so client-side routes like `/auth` work on GitHub Pages
+- `.github/workflows/deploy-pages.yml` to build and deploy `dist/` to GitHub Pages from `main`
+
+If `dutiva.ca` is meant to stay on GitHub Pages, make sure the repository Pages source is set to `GitHub Actions`.
+If you intend to host on Vercel instead, update the DNS records away from GitHub Pages because the live apex and `www` currently resolve there.
 
 ## Verification
 

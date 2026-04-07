@@ -12,29 +12,19 @@ import {
   Sparkles,
   RotateCcw,
 } from "lucide-react";
-import { loadFromStorage, saveToStorage, removeFromStorage } from "../utils/storage";
+import { saveToStorage, removeFromStorage } from "../utils/storage";
 import { useAuth } from "../context/AuthContext.jsx";
 import { supabase } from "../lib/supabase";
+import {
+  defaultSettings,
+  getStoredSettings,
+  normalizeSettings,
+  SETTINGS_STORAGE_KEY,
+} from "../utils/workspaceSettings";
 
-const STORAGE_KEY = "dutiva.settings.v1";
-
-const defaultSettings = {
-  companyName: "Dutiva Canada",
-  legalName: "Dutiva Canada Inc.",
-  email: "info@dutiva.ca",
-  website: "dutiva.ca",
-  province: "Ontario",
-  city: "Ottawa",
-  primaryContact: "Martin Constantineau",
-  companySize: "1-10",
-  languageDefault: "English",
-  themeDefault: "Dark",
-  complianceMode: "Canadian SMB",
-};
-
-function SectionCard({ title, children, action }) {
+function SectionCard({ id, title, children, action }) {
   return (
-    <section className="premium-card p-6">
+    <section id={id} className="premium-card scroll-mt-24 p-6">
       <div className="mb-5 flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-zinc-100">{title}</h2>
         {action ? <div>{action}</div> : null}
@@ -56,11 +46,16 @@ function Field({ label, icon, children }) {
   );
 }
 
-function SaveBanner({ visible, text = "Settings saved successfully." }) {
+function SaveBanner({ visible, text = "Settings saved successfully.", tone = "success" }) {
   if (!visible) return null;
 
+  const toneClass =
+    tone === "warning"
+      ? "border-yellow-400/15 bg-yellow-400/8 text-yellow-200"
+      : "border-emerald-400/15 bg-emerald-400/8 text-emerald-300";
+
   return (
-    <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-300">
+    <div className={`rounded-2xl border px-4 py-3 text-sm ${toneClass}`}>
       {text}
     </div>
   );
@@ -100,7 +95,7 @@ function toDbPayload(form) {
 function fromDbRow(row) {
   if (!row) return defaultSettings;
 
-  return {
+  return normalizeSettings({
     companyName: row.company_name ?? defaultSettings.companyName,
     legalName: row.legal_name ?? defaultSettings.legalName,
     email: row.primary_email ?? row.email ?? defaultSettings.email,
@@ -112,23 +107,24 @@ function fromDbRow(row) {
     languageDefault: row.language_default ?? defaultSettings.languageDefault,
     themeDefault: row.theme_default ?? defaultSettings.themeDefault,
     complianceMode: row.compliance_mode ?? defaultSettings.complianceMode,
-  };
+  });
 }
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
   const [bannerText, setBannerText] = useState("Settings saved successfully.");
+  const [bannerTone, setBannerTone] = useState("success");
   const [loadingProfile, setLoadingProfile] = useState(true);
-  const [form, setForm] = useState(loadFromStorage(STORAGE_KEY, defaultSettings));
+  const [form, setForm] = useState(() => getStoredSettings());
 
   useEffect(() => {
-    saveToStorage(STORAGE_KEY, form);
+    saveToStorage(SETTINGS_STORAGE_KEY, normalizeSettings(form));
   }, [form]);
 
   useEffect(() => {
     async function loadProfile() {
-      if (!user) {
+      if (!user || !supabase) {
         setLoadingProfile(false);
         return;
       }
@@ -145,7 +141,7 @@ export default function SettingsPage() {
         if (data) {
           const nextForm = fromDbRow(data);
           setForm(nextForm);
-          saveToStorage(STORAGE_KEY, nextForm);
+          saveToStorage(SETTINGS_STORAGE_KEY, nextForm);
         }
       } catch (error) {
         console.error("Failed to load profile:", error);
@@ -159,23 +155,26 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     try {
-      saveToStorage(STORAGE_KEY, form);
+      const normalizedForm = normalizeSettings(form);
+      saveToStorage(SETTINGS_STORAGE_KEY, normalizedForm);
 
-      if (user) {
+      if (user && supabase) {
         const payload = {
           id: user.id,
-          ...toDbPayload(form),
+          ...toDbPayload(normalizedForm),
         };
 
         const { error } = await supabase.from("profiles").upsert(payload);
         if (error) throw error;
       }
 
+      setBannerTone("success");
       setBannerText("Settings saved successfully.");
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (error) {
       console.error("Save failed:", error);
+      setBannerTone("warning");
       setBannerText("Could not save to Supabase yet. Local settings were kept.");
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -184,10 +183,10 @@ export default function SettingsPage() {
 
   const handleReset = async () => {
     try {
-      removeFromStorage(STORAGE_KEY);
+      removeFromStorage(SETTINGS_STORAGE_KEY);
       setForm(defaultSettings);
 
-      if (user) {
+      if (user && supabase) {
         const payload = {
           id: user.id,
           ...toDbPayload(defaultSettings),
@@ -197,11 +196,13 @@ export default function SettingsPage() {
         if (error) throw error;
       }
 
+      setBannerTone("success");
       setBannerText("Settings reset to defaults.");
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (error) {
       console.error("Reset failed:", error);
+      setBannerTone("warning");
       setBannerText("Defaults restored locally, but Supabase update failed.");
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -245,6 +246,7 @@ export default function SettingsPage() {
       <SaveBanner
         visible={saved}
         text={bannerText}
+        tone={bannerTone}
       />
 
       {loadingProfile ? (
@@ -256,6 +258,7 @@ export default function SettingsPage() {
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-6">
           <SectionCard
+            id="business-details"
             title="Business details"
             action={
               <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
@@ -335,7 +338,7 @@ export default function SettingsPage() {
             </div>
           </SectionCard>
 
-          <SectionCard title="Workspace defaults">
+          <SectionCard id="workspace-defaults" title="Workspace defaults">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Default language" icon={<Globe className="h-4 w-4" />}>
                 <select

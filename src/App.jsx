@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 const MarketingLayout = lazy(() => import("./layouts/MarketingLayout.jsx"));
@@ -52,8 +52,11 @@ export default function App() {
             <Route path="advisor" element={withSuspense(<Advisor />)} />
             <Route path="settings" element={withSuspense(<SettingsPage />)} />
             <Route path="generator" element={withSuspense(<GeneratorPage />)} />
+            <Route path="*" element={<Navigate to="/app" replace />} />
           </Route>
         </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -10,11 +10,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { loadFromStorage } from "../utils/storage";
 import { useAuth } from "../context/AuthContext.jsx";
 import { supabase } from "../lib/supabase";
-
-const SETTINGS_STORAGE_KEY = "dutiva.settings.v1";
+import { getStoredSettings } from "../utils/workspaceSettings";
 
 function StatCard({ title, value, sub, icon, tone = "default", to }) {
   const toneClass =
@@ -132,7 +130,7 @@ function formatDateTime(value) {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const savedSettings = loadFromStorage(SETTINGS_STORAGE_KEY, {});
+  const savedSettings = getStoredSettings();
   const companyName = savedSettings.companyName || "Your workspace";
 
   const [documents, setDocuments] = useState([]);
@@ -141,7 +139,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function loadDocuments() {
-      if (!user) {
+      if (!user || !supabase) {
         setLoadingDocs(false);
         return;
       }
@@ -357,7 +355,11 @@ export default function Dashboard() {
                   <div>
                     <div className="text-sm font-medium text-zinc-100">Document storage available</div>
                     <div className="text-sm text-zinc-400">
-                      {documentCount > 0 ? `${documentCount} saved document(s)` : "No saved documents yet"}
+                      {!user
+                        ? "Local draft storage is available in preview mode"
+                        : documentCount > 0
+                        ? `${documentCount} saved document(s)`
+                        : "No saved documents yet"}
                     </div>
                   </div>
                 </div>

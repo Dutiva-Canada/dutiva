@@ -188,8 +188,12 @@ function TopBar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="ghost-button px-4 py-2 text-sm">EN / FR</button>
-          <button className="ghost-button px-4 py-2 text-sm">Dark</button>
+          <Link to="/app/settings#workspace-defaults" className="ghost-button px-4 py-2 text-sm">
+            Language
+          </Link>
+          <Link to="/app/settings#workspace-defaults" className="ghost-button px-4 py-2 text-sm">
+            Theme
+          </Link>
           <Link
             to={pageMeta.ctaTo}
             className="gold-button inline-flex items-center gap-2 px-4 py-2 text-sm"
