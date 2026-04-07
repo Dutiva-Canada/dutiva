@@ -27,6 +27,33 @@ const templateOptions = [
   "Employee Handbook",
   "Confidentiality Agreement",
   "Written Warning",
+  "Independent Contractor Agreement",
+  "Non-Compete Agreement",
+  "Offer Letter (French/Quebec)",
+  "Remote Work Policy",
+  "Vacation & Leave Policy",
+  "Code of Conduct",
+  "Anti-Harassment Policy",
+  "Resignation Acceptance Letter",
+  "Layoff / WARN Notice",
+  "Performance Improvement Plan (PIP)",
+];
+
+const CANADIAN_JURISDICTIONS = [
+  "Alberta",
+  "British Columbia",
+  "Federal",
+  "Manitoba",
+  "New Brunswick",
+  "Newfoundland and Labrador",
+  "Northwest Territories",
+  "Nova Scotia",
+  "Nunavut",
+  "Ontario",
+  "Prince Edward Island",
+  "Quebec",
+  "Saskatchewan",
+  "Yukon",
 ];
 
 const STORAGE_KEY = "dutiva.generatorDraft.v1";
@@ -41,6 +68,10 @@ const defaultForm = {
   startDate: "2026-05-01",
   manager: "David Park",
   notes: "Three-month probation. Full-time. Bi-weekly pay.",
+  contractRate: "",
+  scopeOfWork: "",
+  performanceGoals: "",
+  reviewDate: "",
 };
 
 function SectionCard({ title, children, action }) {
@@ -142,6 +173,15 @@ function ExportModal({ open, onClose, template }) {
 }
 
 function formatDocBody(template, form) {
+  const extraLines = [
+    form.contractRate?.trim() ? `Contract rate: ${form.contractRate}` : null,
+    form.scopeOfWork?.trim() ? `Scope of work: ${form.scopeOfWork}` : null,
+    form.performanceGoals?.trim() ? `Performance goals: ${form.performanceGoals}` : null,
+    form.reviewDate?.trim() ? `Review date: ${form.reviewDate}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   return `
 ${template}
 
@@ -155,7 +195,7 @@ Manager: ${form.manager}
 
 Notes:
 ${form.notes}
-
+${extraLines ? `\n${extraLines}` : ""}
 This is a structured preview only.
 In the full product, this becomes the export-ready document output.
   `.trim();
@@ -195,6 +235,10 @@ function parseDocBody(content, fallbackTemplate = "Offer Letter") {
       startDate: getValue("Start date") || defaultForm.startDate,
       manager: getValue("Manager") || defaultForm.manager,
       notes,
+      contractRate: getValue("Contract rate") || "",
+      scopeOfWork: getValue("Scope of work") || "",
+      performanceGoals: getValue("Performance goals") || "",
+      reviewDate: getValue("Review date") || "",
     },
   };
 }
@@ -450,11 +494,17 @@ export default function GeneratorPage() {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-300">Jurisdiction</label>
-                  <input
+                  <select
                     value={form.jurisdiction}
                     onChange={(e) => setForm({ ...form, jurisdiction: e.target.value })}
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                  />
+                  >
+                    {CANADIAN_JURISDICTIONS.map((j) => (
+                      <option key={j} value={j} className="bg-[#0E1218]">
+                        {j}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -520,6 +570,48 @@ export default function GeneratorPage() {
                   className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                 />
               </div>
+
+              {template === "Independent Contractor Agreement" && (
+                <>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Contract Rate</label>
+                    <input
+                      value={form.contractRate}
+                      onChange={(e) => setForm({ ...form, contractRate: e.target.value })}
+                      className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Scope of Work</label>
+                    <textarea
+                      value={form.scopeOfWork}
+                      onChange={(e) => setForm({ ...form, scopeOfWork: e.target.value })}
+                      className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    />
+                  </div>
+                </>
+              )}
+
+              {template === "Performance Improvement Plan (PIP)" && (
+                <>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Performance Goals</label>
+                    <textarea
+                      value={form.performanceGoals}
+                      onChange={(e) => setForm({ ...form, performanceGoals: e.target.value })}
+                      className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-zinc-300">Review Date</label>
+                    <input
+                      value={form.reviewDate}
+                      onChange={(e) => setForm({ ...form, reviewDate: e.target.value })}
+                      className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="mt-5 flex flex-wrap gap-3">
                 <button
