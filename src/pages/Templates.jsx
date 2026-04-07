@@ -15,6 +15,7 @@ const templateCategories = [
   { id: "policy", label: "Policy" },
   { id: "termination", label: "Termination" },
   { id: "discipline", label: "Discipline" },
+  { id: "quebec", label: "Quebec" },
 ];
 
 const templateData = [
@@ -59,6 +60,76 @@ const templateData = [
     category: "discipline",
     jurisdiction: "Province-specific",
     description: "Document performance or conduct concerns in a more consistent disciplinary flow.",
+  },
+  {
+    id: 7,
+    title: "Independent Contractor Agreement",
+    category: "hiring",
+    jurisdiction: "Canada-ready",
+    description: "Define scope, rate, and deliverables for an independent contractor engagement.",
+  },
+  {
+    id: 8,
+    title: "Non-Compete Agreement",
+    category: "hiring",
+    jurisdiction: "Province-specific",
+    description: "Establish post-employment non-compete and non-solicitation terms within provincial limits.",
+  },
+  {
+    id: 9,
+    title: "Offer Letter (French/Quebec)",
+    category: "hiring",
+    jurisdiction: "Quebec",
+    description: "Generate a bilingual offer letter aligned with Quebec's Charter of the French Language.",
+  },
+  {
+    id: 10,
+    title: "Remote Work Policy",
+    category: "policy",
+    jurisdiction: "Canada-ready",
+    description: "Outline expectations, equipment, and eligibility criteria for remote and hybrid work arrangements.",
+  },
+  {
+    id: 11,
+    title: "Vacation & Leave Policy",
+    category: "policy",
+    jurisdiction: "Province-specific",
+    description: "Document statutory minimum leave entitlements by province with company-specific enhancements.",
+  },
+  {
+    id: 12,
+    title: "Code of Conduct",
+    category: "policy",
+    jurisdiction: "Canada-ready",
+    description: "Set clear workplace behaviour standards, reporting expectations, and consequences.",
+  },
+  {
+    id: 13,
+    title: "Anti-Harassment Policy",
+    category: "policy",
+    jurisdiction: "Canada-ready",
+    description: "Create a compliant anti-harassment and discrimination policy covering all protected grounds.",
+  },
+  {
+    id: 14,
+    title: "Resignation Acceptance Letter",
+    category: "termination",
+    jurisdiction: "Canada-ready",
+    description: "Formally acknowledge and accept an employee's resignation with offboarding next steps.",
+  },
+  {
+    id: 15,
+    title: "Layoff / WARN Notice",
+    category: "termination",
+    jurisdiction: "Province-specific",
+    description: "Issue a compliant mass layoff or individual notice aligned with provincial ESA requirements.",
+  },
+  {
+    id: 16,
+    title: "Performance Improvement Plan (PIP)",
+    category: "discipline",
+    jurisdiction: "Province-specific",
+    description: "Document performance gaps, measurable goals, timelines, and consequences in a structured PIP.",
   },
 ];
 

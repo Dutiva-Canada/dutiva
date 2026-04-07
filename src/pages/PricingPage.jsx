@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Check, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import { supabase } from "../lib/supabase";
 
 function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-7xl px-4 md:px-6 ${className}`}>{children}</section>;
@@ -22,6 +25,8 @@ function PriceCard({
   featured = false,
   cta,
   to,
+  onCheckout,
+  loading = false,
 }) {
   return (
     <div
@@ -58,21 +63,67 @@ function PriceCard({
         ))}
       </div>
 
-      <Link
-        to={to}
-        className={[
-          "mt-8 inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm",
-          featured ? "gold-button" : "ghost-button",
-        ].join(" ")}
-      >
-        {cta}
-        <ArrowRight className="h-4 w-4" />
-      </Link>
+      {onCheckout ? (
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onCheckout}
+          className={[
+            "mt-8 inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm disabled:opacity-60 disabled:cursor-not-allowed",
+            featured ? "gold-button" : "ghost-button",
+          ].join(" ")}
+        >
+          {loading ? "Redirecting..." : cta}
+          {!loading && <ArrowRight className="h-4 w-4" />}
+        </button>
+      ) : (
+        <Link
+          to={to}
+          className={[
+            "mt-8 inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm",
+            featured ? "gold-button" : "ghost-button",
+          ].join(" ")}
+        >
+          {cta}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      )}
     </div>
   );
 }
 
 export default function PricingPage() {
+  const { user } = useAuth();
+  const [checkingOut, setCheckingOut] = useState(null);
+  const [checkoutError, setCheckoutError] = useState(null);
+
+  const handleCheckout = async (plan) => {
+    if (!supabase || !user) {
+      window.location.href = "/auth";
+      return;
+    }
+
+    setCheckingOut(plan);
+    setCheckoutError(null);
+
+    try {
+      const successUrl = `${window.location.origin}/payment-success?plan=${plan}`;
+      const cancelUrl = `${window.location.origin}/pricing`;
+
+      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+        body: { plan, successUrl, cancelUrl },
+      });
+
+      if (error || !data?.url) throw new Error(error?.message ?? "Could not start checkout.");
+
+      window.location.href = data.url;
+    } catch (err) {
+      setCheckoutError(err.message ?? "Checkout failed. Please try again.");
+    } finally {
+      setCheckingOut(null);
+    }
+  };
+
   return (
     <div className="marketing-shell min-h-screen">
       <Section className="py-14 md:py-20">
@@ -117,7 +168,8 @@ export default function PricingPage() {
               "Better fit for real customer workflows",
             ]}
             cta="Choose Growth"
-            to="/app"
+            onCheckout={() => handleCheckout("growth")}
+            loading={checkingOut === "growth"}
           />
 
           <PriceCard
@@ -130,9 +182,16 @@ export default function PricingPage() {
               "Room for future expansion",
             ]}
             cta="Talk to sales"
-            to="/app/settings"
+            onCheckout={() => handleCheckout("advanced")}
+            loading={checkingOut === "advanced"}
           />
         </div>
+
+        {checkoutError && (
+          <div className="mt-6 rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-center text-sm text-red-300">
+            {checkoutError}
+          </div>
+        )}
 
         <div className="mt-10 rounded-[28px] border border-white/6 bg-white/[0.02] p-6 text-center">
           <div className="text-sm font-medium text-zinc-100">

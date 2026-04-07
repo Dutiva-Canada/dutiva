@@ -137,6 +137,7 @@ export default function Dashboard() {
 
   const [documents, setDocuments] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
+  const [pendingSignatures, setPendingSignatures] = useState(0);
 
   useEffect(() => {
     async function loadDocuments() {
@@ -154,6 +155,13 @@ export default function Dashboard() {
 
         if (error) throw error;
         setDocuments(data || []);
+
+        const { data: sigs } = await supabase
+          .from("signatures")
+          .select("status")
+          .eq("user_id", user.id);
+        const pending = (sigs || []).filter((s) => s.status === "pending").length;
+        setPendingSignatures(pending);
       } catch (error) {
         console.error("Failed to load dashboard documents:", error);
       } finally {
@@ -232,11 +240,11 @@ export default function Dashboard() {
         />
         <StatCard
           title="Reviews"
-          value={loadingDocs ? "..." : documentCount > 0 ? "1" : "0"}
-          sub={documentCount > 0 ? "Advisor-ready workflow" : "No pending reviews"}
+          value={loadingDocs ? "..." : String(pendingSignatures)}
+          sub={pendingSignatures > 0 ? "Awaiting signatures" : "No pending signatures"}
           tone="warning"
           icon={<AlertTriangle className="h-4 w-4" />}
-          to="/app/advisor"
+          to="/app/generator"
         />
         <StatCard
           title="Last update"
