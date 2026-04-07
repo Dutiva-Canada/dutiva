@@ -91,7 +91,7 @@ Deno.serve(async (req: Request) => {
   if (!customerId) {
     const customer = await stripePost("/customers", {
       email: user.email ?? "",
-      metadata: `user_id=${user.id}`,
+      "metadata[user_id]": user.id,
     }, stripeKey);
     customerId = customer.id;
     await supabase
