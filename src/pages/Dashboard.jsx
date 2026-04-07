@@ -168,7 +168,7 @@ export default function Dashboard() {
   const latestDocument = documents[0];
   const lastUpdated = latestDocument?.created_at
     ? new Date(latestDocument.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    : "—";
+    : "-";
 
   const recentActivity =
     documents.length > 0
@@ -225,14 +225,14 @@ export default function Dashboard() {
         />
         <StatCard
           title="Documents"
-          value={loadingDocs ? "…" : String(documentCount)}
+          value={loadingDocs ? "..." : String(documentCount)}
           sub={`Active for ${companyName}`}
           icon={<FileText className="h-4 w-4" />}
           to="/app/generator"
         />
         <StatCard
           title="Reviews"
-          value={loadingDocs ? "…" : documentCount > 0 ? "1" : "0"}
+          value={loadingDocs ? "..." : documentCount > 0 ? "1" : "0"}
           sub={documentCount > 0 ? "Advisor-ready workflow" : "No pending reviews"}
           tone="warning"
           icon={<AlertTriangle className="h-4 w-4" />}
@@ -240,7 +240,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Last update"
-          value={loadingDocs ? "…" : lastUpdated}
+          value={loadingDocs ? "..." : lastUpdated}
           sub={latestDocument ? "Most recent saved doc" : "No documents yet"}
           icon={<Clock3 className="h-4 w-4" />}
           to="/app/generator"

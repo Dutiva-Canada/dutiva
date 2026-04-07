@@ -30,7 +30,7 @@ const templateData = [
     title: "Offer Letter",
     category: "hiring",
     jurisdiction: "Province-specific",
-    description: "Generate a clean, export-ready offer letter aligned with the employee’s province.",
+    description: "Generate a clean, export-ready offer letter aligned with the employee's province.",
   },
   {
     id: 3,
@@ -44,7 +44,7 @@ const templateData = [
     title: "Employee Handbook",
     category: "policy",
     jurisdiction: "Canada-ready",
-    description: "Build a handbook foundation that’s easier to maintain and update over time.",
+    description: "Build a handbook foundation that's easier to maintain and update over time.",
   },
   {
     id: 5,

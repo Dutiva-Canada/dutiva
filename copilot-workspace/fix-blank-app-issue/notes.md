@@ -1,4 +1,4 @@
-# Fix: Blank App Issue — Investigation Notes
+# Fix: Blank App Issue - Investigation Notes
 
 **Session:** copilot/fix-blank-app-issue  
 **Date:** 2026-04-07
@@ -13,11 +13,11 @@ The app was showing a blank screen on load.
 
 ## Changes Made (reverted per user request)
 
-- `src/lib/supabase.js` — guarded `createClient()` so it returns `null` when env vars are missing.
-- `src/context/AuthContext.jsx` — added null checks around `supabase` calls.
-- `vercel.json` — added SPA rewrite rules.
-- `.gitignore` — added standard ignores.
-- `package-lock.json` — generated from `npm install`.
+- `src/lib/supabase.js` - guarded `createClient()` so it returns `null` when env vars are missing.
+- `src/context/AuthContext.jsx` - added null checks around `supabase` calls.
+- `vercel.json` - added SPA rewrite rules.
+- `.gitignore` - added standard ignores.
+- `package-lock.json` - generated from `npm install`.
 
 ## Notes
 

@@ -83,9 +83,9 @@ function SummaryItem({ icon, title, desc, tone = "default" }) {
 
 function toDbPayload(form) {
   return {
+    primary_email: form.email,
     company_name: form.companyName,
     legal_name: form.legalName,
-    email: form.email,
     website: form.website,
     province: form.province,
     city: form.city,
@@ -94,7 +94,6 @@ function toDbPayload(form) {
     language_default: form.languageDefault,
     theme_default: form.themeDefault,
     compliance_mode: form.complianceMode,
-    updated_at: new Date().toISOString(),
   };
 }
 
@@ -104,7 +103,7 @@ function fromDbRow(row) {
   return {
     companyName: row.company_name ?? defaultSettings.companyName,
     legalName: row.legal_name ?? defaultSettings.legalName,
-    email: row.email ?? defaultSettings.email,
+    email: row.primary_email ?? row.email ?? defaultSettings.email,
     website: row.website ?? defaultSettings.website,
     province: row.province ?? defaultSettings.province,
     city: row.city ?? defaultSettings.city,
@@ -250,7 +249,7 @@ export default function SettingsPage() {
 
       {loadingProfile ? (
         <div className="premium-card p-6">
-          <div className="text-sm text-zinc-300">Loading your workspace profile…</div>
+          <div className="text-sm text-zinc-300">Loading your workspace profile...</div>
         </div>
       ) : null}
 

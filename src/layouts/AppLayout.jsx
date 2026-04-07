@@ -37,7 +37,9 @@ function BrandLockup() {
   );
 }
 
-function SidebarLink({ to, icon: Icon, label, end = false }) {
+function SidebarLink({ to, icon, label, end = false }) {
+  const Icon = icon;
+
   return (
     <NavLink
       to={to}

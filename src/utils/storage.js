@@ -11,11 +11,15 @@ export function loadFromStorage(key, fallbackValue) {
 export function saveToStorage(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {}
+  } catch {
+    // Ignore storage write failures so the UI keeps working in restricted browsers.
+  }
 }
 
 export function removeFromStorage(key) {
   try {
     localStorage.removeItem(key);
-  } catch {}
+  } catch {
+    // Ignore storage cleanup failures for the same reason as saveToStorage.
+  }
 }

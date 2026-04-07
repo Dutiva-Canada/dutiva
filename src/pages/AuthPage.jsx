@@ -1,12 +1,41 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { sanitizeAppPath } from "../lib/supabase";
 
 export default function AuthPage() {
-  const { signIn, loading, user, signOut } = useAuth();
+  const { authConfigured, signIn, loading, user, signOut } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const nextPath = useMemo(() => {
+    const redirectParam = searchParams.get("next");
+    if (redirectParam) {
+      return sanitizeAppPath(redirectParam);
+    }
+
+    const fromLocation = location.state?.from;
+    if (!fromLocation) {
+      return "/app";
+    }
+
+    return sanitizeAppPath(
+      `${fromLocation.pathname || "/app"}${fromLocation.search || ""}${fromLocation.hash || ""}`,
+    );
+  }, [location.state, searchParams]);
+
+  useEffect(() => {
+    if (!authConfigured || loading || !user) {
+      return;
+    }
+
+    navigate(nextPath, { replace: true });
+  }, [authConfigured, loading, navigate, nextPath, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +44,7 @@ export default function AuthPage() {
     try {
       setSubmitting(true);
       setStatus("");
-      await signIn(email.trim());
+      await signIn(email.trim(), nextPath);
       setStatus("Magic link sent. Check your email to sign in.");
     } catch (error) {
       setStatus(error.message || "Unable to send magic link.");
@@ -63,11 +92,22 @@ export default function AuthPage() {
           <div className="mb-6">
             <div className="text-2xl font-semibold text-zinc-100">Welcome back</div>
             <div className="mt-2 text-sm text-zinc-400">
-              Enter your email and we’ll send you a secure sign-in link.
+              {authConfigured
+                ? "Enter your email and we'll send you a secure sign-in link."
+                : "Authentication isn't configured in this environment yet."}
             </div>
           </div>
 
-          {user ? (
+          {!authConfigured ? (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-amber-400/15 bg-amber-400/8 px-4 py-4 text-sm text-zinc-200">
+                Preview mode is available, so you can still explore the app locally without signing in.
+              </div>
+              <Link to="/app" className="gold-button block w-full px-4 py-3 text-center text-sm">
+                Continue to app preview
+              </Link>
+            </div>
+          ) : user ? (
             <div className="space-y-4">
               <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/8 px-4 py-4 text-sm text-emerald-300">
                 Signed in as {user.email}

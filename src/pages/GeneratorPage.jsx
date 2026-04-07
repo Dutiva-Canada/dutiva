@@ -324,13 +324,19 @@ export default function GeneratorPage() {
     }
   };
 
-  const handleReset = () => {
+  const resetState = () => {
     removeFromStorage(STORAGE_KEY);
     setActiveDocumentId(null);
-    setTemplate(searchParams.get("template") && templateOptions.includes(searchParams.get("template"))
-      ? searchParams.get("template")
-      : "Offer Letter");
+    setTemplate(
+      searchParams.get("template") && templateOptions.includes(searchParams.get("template"))
+        ? searchParams.get("template")
+        : "Offer Letter"
+    );
     setForm(enrichedDefaults);
+  };
+
+  const handleReset = () => {
+    resetState();
     setStatusMessage("Draft cleared and reset.");
     setTimeout(() => setStatusMessage(""), 2500);
   };
@@ -357,7 +363,7 @@ export default function GeneratorPage() {
       if (error) throw error;
 
       await refreshDocuments();
-      handleReset();
+      resetState();
       setStatusMessage("Document deleted.");
       setTimeout(() => setStatusMessage(""), 2500);
     } catch (error) {
@@ -368,11 +374,7 @@ export default function GeneratorPage() {
   };
 
   const handleNewDocument = () => {
-    setActiveDocumentId(null);
-    setTemplate(searchParams.get("template") && templateOptions.includes(searchParams.get("template"))
-      ? searchParams.get("template")
-      : "Offer Letter");
-    setForm(enrichedDefaults);
+    resetState();
     setStatusMessage("Started a new document.");
     setTimeout(() => setStatusMessage(""), 2000);
   };
@@ -415,8 +417,8 @@ export default function GeneratorPage() {
         <StatusToast text={statusMessage} />
 
         <div className="flex flex-wrap gap-3">
-          <StepPill index={1} label="Template" active done />
-          <StepPill index={2} label="Details" active done />
+          <StepPill index={1} label="Template" done />
+          <StepPill index={2} label="Details" done />
           <StepPill index={3} label="Preview" active />
         </div>
 
@@ -570,7 +572,7 @@ export default function GeneratorPage() {
                 <div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">
                   <div className="flex items-center gap-2">
                     <FolderOpen className="h-3.5 w-3.5" />
-                    {loadingDocuments ? "Loading…" : `${documents.length} saved`}
+                    {loadingDocuments ? "Loading..." : `${documents.length} saved`}
                   </div>
                 </div>
               }
@@ -578,7 +580,7 @@ export default function GeneratorPage() {
               <div className="space-y-3">
                 {loadingDocuments ? (
                   <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-sm text-zinc-400">
-                    Loading documents…
+                    Loading documents...
                   </div>
                 ) : documents.length === 0 ? (
                   <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-sm text-zinc-400">
