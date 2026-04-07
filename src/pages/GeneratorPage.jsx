@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
   ChevronRight,
-  Download,
+  Copy,
+  ExternalLink,
   FileText,
   ShieldCheck,
   Sparkles,
@@ -125,7 +126,59 @@ function StatusToast({ text }) {
   );
 }
 
-function ExportModal({ open, onClose, template }) {
+function ESignModal({ open, onClose, activeDocumentId, onSaveFirst, user }) {
+  const [signerName, setSignerName] = useState("");
+  const [signerEmail, setSignerEmail] = useState("");
+  const [sending, setSending] = useState(false);
+  const [signLink, setSignLink] = useState(null);
+  const [sendError, setSendError] = useState(null);
+
+  const handleSend = useCallback(async () => {
+    if (!user) return;
+    setSending(true);
+    setSendError(null);
+
+    try {
+      let docId = activeDocumentId;
+      if (!docId) {
+        docId = await onSaveFirst();
+        if (!docId) throw new Error("Failed to save document before sending.");
+      }
+
+      const { data, error } = await supabase
+        .from("signatures")
+        .insert({
+          user_id: user.id,
+          document_id: docId,
+          signer_name: signerName,
+          signer_email: signerEmail,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      setSignLink(`${window.location.origin}/sign/${data.token}`);
+    } catch (err) {
+      console.error(err);
+      setSendError("Failed to create signing link. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  }, [user, activeDocumentId, onSaveFirst, signerName, signerEmail]);
+
+  const handleClose = () => {
+    setSignerName("");
+    setSignerEmail("");
+    setSending(false);
+    setSignLink(null);
+    setSendError(null);
+    onClose();
+  };
+
+  const handleCopy = () => {
+    if (signLink) navigator.clipboard.writeText(signLink);
+  };
+
   if (!open) return null;
 
   return (
@@ -133,40 +186,87 @@ function ExportModal({ open, onClose, template }) {
       <div className="premium-card w-full max-w-lg p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <div className="text-lg font-semibold text-zinc-100">Export preview</div>
+            <div className="text-lg font-semibold text-zinc-100">Send for signature</div>
             <div className="mt-1 text-sm text-zinc-400">
-              This simulates the export flow for {template}.
+              {signLink ? "Share this link with the signer." : "Enter the signer's details to generate a signing link."}
             </div>
           </div>
-
-          <button onClick={onClose} className="ghost-button px-3 py-2 text-sm">
+          <button onClick={handleClose} className="ghost-button px-3 py-2 text-sm">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="space-y-3">
-          <button className="gold-button flex w-full items-center justify-between px-4 py-3 text-sm">
-            <span>Export as PDF</span>
-            <Download className="h-4 w-4" />
-          </button>
+        {signLink ? (
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-300">
+              Signing link created successfully.
+            </div>
+            <div className="flex gap-2">
+              <input
+                readOnly
+                value={signLink}
+                className="flex-1 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+              />
+              <button
+                onClick={handleCopy}
+                className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
+              >
+                <Copy className="h-4 w-4" />
+                Copy link
+              </button>
+            </div>
+            <button onClick={handleClose} className="gold-button w-full px-4 py-3 text-sm">
+              Done
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-zinc-300">Signer name</label>
+              <input
+                type="text"
+                value={signerName}
+                onChange={(e) => setSignerName(e.target.value)}
+                placeholder="e.g. Sarah Chen"
+                className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-zinc-300">Signer email</label>
+              <input
+                type="email"
+                value={signerEmail}
+                onChange={(e) => setSignerEmail(e.target.value)}
+                placeholder="e.g. sarah@example.com"
+                className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+              />
+            </div>
 
-          <button className="ghost-button flex w-full items-center justify-between px-4 py-3 text-sm">
-            <span>Save as draft</span>
-            <Save className="h-4 w-4" />
-          </button>
+            {sendError && (
+              <div className="rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
+                {sendError}
+              </div>
+            )}
 
-          <Link
-            to="/app/advisor"
-            className="ghost-button flex w-full items-center justify-between px-4 py-3 text-sm"
-          >
-            <span>Send to advisor for review</span>
-            <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="mt-5 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-sm text-zinc-400">
-          In the full product, this will connect to real export, e-signature, and document history.
-        </div>
+            <div className="space-y-3">
+              <button
+                onClick={handleSend}
+                disabled={!signerName || !signerEmail || sending}
+                className="gold-button flex w-full items-center justify-between px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <span>{sending ? "Sending..." : "Send for e-signature"}</span>
+                <ExternalLink className="h-4 w-4" />
+              </button>
+              <button
+                onClick={handleClose}
+                className="ghost-button flex w-full items-center justify-between px-4 py-3 text-sm"
+              >
+                <span>Export / save</span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -259,11 +359,12 @@ export default function GeneratorPage() {
   const [template, setTemplate] = useState(savedDraft?.template || "Offer Letter");
   const [form, setForm] = useState(savedDraft?.form || enrichedDefaults);
   const [statusMessage, setStatusMessage] = useState("");
-  const [showExportModal, setShowExportModal] = useState(false);
+  const [showESignModal, setShowESignModal] = useState(false);
 
   const [documents, setDocuments] = useState([]);
   const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [activeDocumentId, setActiveDocumentId] = useState(null);
+  const [signatureMap, setSignatureMap] = useState({});
 
   useEffect(() => {
     const incomingTemplate = searchParams.get("template");
@@ -292,6 +393,14 @@ export default function GeneratorPage() {
 
         if (error) throw error;
         setDocuments(data || []);
+
+        const { data: sigs } = await supabase
+          .from("signatures")
+          .select("document_id, status")
+          .eq("user_id", user.id);
+        const map = {};
+        (sigs || []).forEach((s) => { map[s.document_id] = s.status; });
+        setSignatureMap(map);
       } catch (error) {
         console.error("Failed to load documents:", error);
       } finally {
@@ -329,7 +438,7 @@ export default function GeneratorPage() {
       if (!user) {
         setStatusMessage("Saved locally only. Sign in to sync documents.");
         setTimeout(() => setStatusMessage(""), 2500);
-        return;
+        return null;
       }
 
       const payload = {
@@ -347,6 +456,9 @@ export default function GeneratorPage() {
 
         if (error) throw error;
         setStatusMessage(`${template} updated successfully.`);
+        await refreshDocuments();
+        setTimeout(() => setStatusMessage(""), 2500);
+        return activeDocumentId;
       } else {
         const { data, error } = await supabase
           .from("documents")
@@ -357,14 +469,15 @@ export default function GeneratorPage() {
         if (error) throw error;
         setActiveDocumentId(data.id);
         setStatusMessage(`${template} saved successfully.`);
+        await refreshDocuments();
+        setTimeout(() => setStatusMessage(""), 2500);
+        return data.id;
       }
-
-      await refreshDocuments();
-      setTimeout(() => setStatusMessage(""), 2500);
     } catch (error) {
       console.error("Save failed:", error);
       setStatusMessage("Could not save document.");
       setTimeout(() => setStatusMessage(""), 3000);
+      return null;
     }
   };
 
@@ -449,10 +562,10 @@ export default function GeneratorPage() {
             </Link>
 
             <button
-              onClick={() => setShowExportModal(true)}
+              onClick={() => setShowESignModal(true)}
               className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
             >
-              Export preview
+              Send for signature
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -700,6 +813,15 @@ export default function GeneratorPage() {
                             <div className="mt-1 text-sm text-zinc-400">
                               {new Date(doc.created_at).toLocaleString()}
                             </div>
+                            {signatureMap[doc.id] && (
+                              <div className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${
+                                signatureMap[doc.id] === "signed"
+                                  ? "border-emerald-400/20 bg-emerald-400/8 text-emerald-300"
+                                  : "border-amber-400/20 bg-amber-400/8 text-amber-300"
+                              }`}>
+                                {signatureMap[doc.id] === "signed" ? "Signed" : "Awaiting signature"}
+                              </div>
+                            )}
                           </div>
                           {active ? (
                             <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
@@ -763,10 +885,12 @@ export default function GeneratorPage() {
         </div>
       </div>
 
-      <ExportModal
-        open={showExportModal}
-        onClose={() => setShowExportModal(false)}
-        template={template}
+      <ESignModal
+        open={showESignModal}
+        onClose={() => setShowESignModal(false)}
+        activeDocumentId={activeDocumentId}
+        onSaveFirst={handleSave}
+        user={user}
       />
     </>
   );

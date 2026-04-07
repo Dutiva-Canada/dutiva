@@ -12,6 +12,7 @@ const Advisor = lazy(() => import("./pages/Advisor.jsx"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage.jsx"));
 const GeneratorPage = lazy(() => import("./pages/GeneratorPage.jsx"));
 const AuthPage = lazy(() => import("./pages/AuthPage.jsx"));
+const ESignPage = lazy(() => import("./pages/ESignPage.jsx"));
 
 function RouteLoader() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
         </Route>
 
         <Route path="/auth" element={withSuspense(<AuthPage />)} />
+        <Route path="/sign/:token" element={withSuspense(<ESignPage />)} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={withSuspense(<AppLayout />)}>
