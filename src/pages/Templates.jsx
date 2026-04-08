@@ -424,10 +424,7 @@ export default function Templates() {
                 <div className="font-medium text-zinc-100">English and French</div>
                 <div className="mt-1 text-zinc-400">All 16 templates available in both official languages. Quebec templates reference the Charte de la langue française.</div>
               </div>
-              <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                <div className="font-medium text-zinc-100">Not legal advice</div>
-                <div className="mt-1 text-zinc-400">Dutiva provides general HR compliance guidance and document templates. For specific legal situations, consult a qualified employment lawyer in your province.</div>
-              </div>
+
             </div>
           </SectionCard>
         </div>

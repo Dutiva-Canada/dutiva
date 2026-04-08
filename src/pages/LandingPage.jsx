@@ -178,9 +178,7 @@ export default function LandingPage() {
                     <div className="mt-1 text-sm text-zinc-400">Apr 5 - Ontario</div>
                   </div>
 
-                  <div className="mt-3 rounded-2xl border border-amber-400/10 bg-amber-400/6 px-4 py-4 text-sm text-zinc-300">
-                    General HR guidance only. Not legal advice.
-                  </div>
+
                 </div>
               </div>
             </div>
@@ -244,7 +242,7 @@ export default function LandingPage() {
               Not a team that Googled it.
             </p>
             <p className="mt-3 text-sm text-zinc-500">
-              Built in Ottawa, Canada · PIPEDA-compliant · General HR guidance only, not legal advice
+              Built in Ottawa, Canada · PIPEDA-compliant
             </p>
           </div>
         </div>

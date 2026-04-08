@@ -49,7 +49,6 @@ const CANADIAN_JURISDICTIONS = [
   "Northwest Territories", "Nunavut", "Yukon",
 ];
 
-// Timestamps relative to page-load so demo messages never show stale times
 function createInitialMessages() {
   const now = Date.now();
   return [
@@ -79,9 +78,6 @@ function formatMessageTime(value) {
   } catch { return "Just now"; }
 }
 
-// ─── Advisor API — streaming SSE consumer ────────────────────────────────────
-// Calls /api/advisor-chat which pipes HF SSE directly.
-// onToken(partialText) is called on every new chunk so the UI updates live.
 async function callAdvisorAPI(messagesForModel, province, lawUpdates = [], onToken) {
   const response = await fetch("/api/advisor-chat", {
     method: "POST",
@@ -89,7 +85,6 @@ async function callAdvisorAPI(messagesForModel, province, lawUpdates = [], onTok
     body: JSON.stringify({ messages: messagesForModel, province, lawUpdates }),
   });
 
-  // Non-streaming error (e.g. 429, 503)
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.error || `Advisor API error (${response.status})`);
@@ -106,7 +101,7 @@ async function callAdvisorAPI(messagesForModel, province, lawUpdates = [], onTok
 
     buffer += decoder.decode(value, { stream: true });
     const lines = buffer.split("\n");
-    buffer = lines.pop() ?? ""; // keep incomplete line for next chunk
+    buffer = lines.pop() ?? "";
 
     for (const line of lines) {
       if (!line.startsWith("data: ")) continue;
@@ -132,7 +127,7 @@ function ESACalculator() {
   const [province, setProvince] = useState(settings.province || "Ontario");
   const [years, setYears] = useState("");
   const [annualSalary, setAnnualSalary] = useState("");
-  const [largePay, setLargePay] = useState(false); // ON: payroll ≥ $2.5M
+  const [largePay, setLargePay] = useState(false);
   const [result, setResult] = useState(null);
 
   const calculate = () => {
@@ -144,7 +139,6 @@ function ESACalculator() {
     const noticeWeeks = getNoticeWeeks(province, y);
     const payInLieu = noticeWeeks * weeklyWage;
 
-    // Ontario severance: 5+ years AND (payroll ≥ $2.5M or part of mass term)
     let severanceWeeks = 0;
     let severanceNote = "";
     if (province === "Ontario") {
@@ -156,7 +150,7 @@ function ESACalculator() {
       }
     } else if (province === "Federal") {
       if (y >= 1) {
-        severanceWeeks = Math.min(Math.floor(y) * 2, 0); // Federal: different calculation
+        severanceWeeks = Math.min(Math.floor(y) * 2, 0);
         severanceNote = "Canada Labour Code, s. 235 — contact legal counsel";
       }
     }
@@ -175,15 +169,7 @@ function ESACalculator() {
       Federal: "Canada Labour Code, s. 230",
     };
 
-    setResult({
-      noticeWeeks,
-      payInLieu,
-      weeklyWage,
-      severanceWeeks,
-      severancePay,
-      severanceNote,
-      actRef: actMap[province] || "applicable ESA",
-    });
+    setResult({ noticeWeeks, payInLieu, weeklyWage, severanceWeeks, severancePay, severanceNote, actRef: actMap[province] || "applicable ESA" });
   };
 
   const fmt = (n) => n.toLocaleString("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 });
@@ -201,52 +187,30 @@ function ESACalculator() {
       <div className="space-y-3">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-300">Province</label>
-          <select
-            value={province}
-            onChange={(e) => { setProvince(e.target.value); setResult(null); }}
-            className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none"
-          >
-            {CANADIAN_JURISDICTIONS.map((j) => (
-              <option key={j} value={j}>{j}</option>
-            ))}
+          <select value={province} onChange={(e) => { setProvince(e.target.value); setResult(null); }}
+            className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none">
+            {CANADIAN_JURISDICTIONS.map((j) => (<option key={j} value={j}>{j}</option>))}
           </select>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-300">Years of service</label>
-            <input
-              type="number"
-              min="0"
-              step="0.5"
-              placeholder="e.g. 3.5"
-              value={years}
+            <input type="number" min="0" step="0.5" placeholder="e.g. 3.5" value={years}
               onChange={(e) => { setYears(e.target.value); setResult(null); }}
-              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none"
-            />
+              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none" />
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-300">Annual salary ($)</label>
-            <input
-              type="number"
-              min="0"
-              step="1000"
-              placeholder="e.g. 65000"
-              value={annualSalary}
+            <input type="number" min="0" step="1000" placeholder="e.g. 65000" value={annualSalary}
               onChange={(e) => { setAnnualSalary(e.target.value); setResult(null); }}
-              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none"
-            />
+              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none" />
           </div>
         </div>
 
         {province === "Ontario" && (
           <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/6 bg-white/[0.02] px-3 py-2.5">
-            <input
-              type="checkbox"
-              checked={largePay}
-              onChange={(e) => { setLargePay(e.target.checked); setResult(null); }}
-              className="h-4 w-4 accent-amber-400"
-            />
+            <input type="checkbox" checked={largePay} onChange={(e) => { setLargePay(e.target.checked); setResult(null); }} className="h-4 w-4 accent-amber-400" />
             <span className="text-xs text-zinc-300">Employer payroll ≥ $2.5M (enables severance)</span>
           </label>
         )}
@@ -263,7 +227,6 @@ function ESACalculator() {
             <div className="mt-1 text-xl font-bold text-amber-300">{result.noticeWeeks} week{result.noticeWeeks !== 1 ? "s" : ""}</div>
             <div className="mt-0.5 text-xs text-zinc-400">Pay in lieu: {fmt(result.payInLieu)} · Weekly wage: {fmt(result.weeklyWage)}</div>
           </div>
-
           {(result.severanceWeeks > 0 || result.severanceNote) && (
             <div className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Severance pay</div>
@@ -277,15 +240,11 @@ function ESACalculator() {
               )}
             </div>
           )}
-
           <div className="rounded-xl border border-emerald-400/12 bg-emerald-400/6 px-4 py-3">
             <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Total minimum exposure</div>
-            <div className="mt-1 text-xl font-bold text-emerald-300">
-              {fmt(result.payInLieu + result.severancePay)}
-            </div>
+            <div className="mt-1 text-xl font-bold text-emerald-300">{fmt(result.payInLieu + result.severancePay)}</div>
             <div className="mt-0.5 text-xs text-zinc-500">{result.actRef} · statutory only</div>
           </div>
-
           <p className="text-xs text-zinc-500 pt-1">Common-law reasonable notice often exceeds statutory minimums. Consult legal counsel before terminating.</p>
         </div>
       )}
@@ -328,19 +287,10 @@ function MessageBubble({ role, text }) {
   );
 }
 
-/**
- * MarkdownText — renders assistant responses with proper visual hierarchy.
- * Handles: paragraphs, bullet lists (- / * / •), **bold**, *italic*.
- * Detects and visually demotes the "This is general guidance" disclaimer.
- * Applied only to assistant bubbles; user bubbles stay plain text.
- */
-// Strips any variant of the "general guidance / not legal advice" disclaimer
-// the model might still produce, regardless of phrasing or position.
 const DISCLAIMER_RE = /[\n\s]*(?:note[:\s]+)?this is (?:general guidance[,.]?\s*(?:and\s+)?not legal advice|meant? for informational purposes[^.]*)\s*\.?\s*(?:consult[^.]*\.)?/gi;
 
 function MarkdownText({ text }) {
   const cleaned = text.replace(DISCLAIMER_RE, "").trim();
-  const mainText = cleaned;
 
   function parseInline(str) {
     const parts = [];
@@ -357,7 +307,7 @@ function MarkdownText({ text }) {
     return parts;
   }
 
-  const blocks = mainText.split(/\n\n+/).filter(Boolean);
+  const blocks = cleaned.split(/\n\n+/).filter(Boolean);
 
   function renderBlock(block, i) {
     const lines = block.split("\n");
@@ -383,17 +333,13 @@ function MarkdownText({ text }) {
     );
   }
 
-  return (
-    <div className="leading-7">
-      {blocks.map(renderBlock)}
-    </div>
-  );
+  return <div className="leading-7">{blocks.map(renderBlock)}</div>;
 }
 
 function SuggestionButton({ children, onClick }) {
   return (
     <button type="button" onClick={onClick}
-      className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/[0.05] hover:text-zinc-100">
+      className="shrink-0 whitespace-nowrap rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/[0.05] hover:text-zinc-100">
       {children}
     </button>
   );
@@ -422,37 +368,28 @@ export default function Advisor() {
   const [province, setProvince] = useState(settings.province || "Ontario");
   const [loading, setLoading] = useState(false);
   const [advisorError, setAdvisorError] = useState(null);
-  const [advisorReady, setAdvisorReady] = useState(null); // null=unknown, true=ok, false=error
+  const [advisorReady, setAdvisorReady] = useState(null);
   const [attachments, setAttachments] = useState([]);
   const [lawUpdates, setLawUpdates] = useState([]);
-  const [rateLimitWarning, setRateLimitWarning] = useState(null); // client-side rate limit msg
+  const [rateLimitWarning, setRateLimitWarning] = useState(null);
   const fileInputRef = useRef(null);
-  const chatScrollRef = useRef(null);  // the overflow-auto chat container
+  const chatScrollRef = useRef(null);
   const prevMsgCountRef = useRef(0);
-  const msgTimestampsRef = useRef([]); // tracks user message timestamps for client-side rate limiting
+  const msgTimestampsRef = useRef([]);
 
-  // Load province from profile and recent law updates
   useEffect(() => {
     async function load() {
       if (!user || !supabase) return;
       try {
         const { data: profile } = await supabase.from("profiles").select("province").eq("id", user.id).maybeSingle();
         if (profile?.province) setProvince(profile.province);
-
-        const { data: updates } = await supabase
-          .from("law_updates")
-          .select("*")
-          .order("detected_at", { ascending: false })
-          .limit(10);
+        const { data: updates } = await supabase.from("law_updates").select("*").order("detected_at", { ascending: false }).limit(10);
         if (updates) setLawUpdates(updates);
       } catch { /* ignore */ }
     }
     load();
   }, [user]);
 
-  // Smart scroll: only jump to bottom when a NEW bubble is added (not on
-  // every streaming token). Scrolls the chat container directly via scrollTo
-  // so the outer page is never affected.
   useEffect(() => {
     if (messages.length > prevMsgCountRef.current) {
       prevMsgCountRef.current = messages.length;
@@ -474,30 +411,20 @@ export default function Advisor() {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
-    // ── Client-side rate limiting: max 10 user messages per minute ────────────
     const now = Date.now();
     const windowMs = 60_000;
     const maxMsgs = 10;
-    // Prune timestamps older than 1 minute
-    msgTimestampsRef.current = msgTimestampsRef.current.filter(
-      (t) => now - t < windowMs
-    );
+    msgTimestampsRef.current = msgTimestampsRef.current.filter((t) => now - t < windowMs);
     if (msgTimestampsRef.current.length >= maxMsgs) {
       const oldest = msgTimestampsRef.current[0];
       const secsLeft = Math.ceil((windowMs - (now - oldest)) / 1000);
-      setRateLimitWarning(
-        `You've sent ${maxMsgs} messages in the last minute. Please wait ${secsLeft}s before sending again.`
-      );
+      setRateLimitWarning(`You've sent ${maxMsgs} messages in the last minute. Please wait ${secsLeft}s before sending again.`);
       return;
     }
     msgTimestampsRef.current.push(now);
     setRateLimitWarning(null);
-    // ─────────────────────────────────────────────────────────────────────────
 
-    const attachmentSummary = attachments.length > 0
-      ? `\n\nAttachments: ${attachments.map((a) => a.name).join(", ")}`
-      : "";
-
+    const attachmentSummary = attachments.length > 0 ? `\n\nAttachments: ${attachments.map((a) => a.name).join(", ")}` : "";
     const userMsg = { id: createId("user"), role: "user", text: trimmed, createdAt: new Date().toISOString() };
     const modelHistory = [
       ...messages.map((m) => ({ role: m.role, text: m.text })),
@@ -510,52 +437,25 @@ export default function Advisor() {
     setLoading(true);
     setAdvisorError(null);
 
-    // Insert a placeholder bubble immediately so the user sees activity
     const streamId = createId("assistant");
     const streamTs = new Date().toISOString();
-    setMessages((prev) => [
-      ...prev,
-      { id: streamId, role: "assistant", text: "", createdAt: streamTs, streaming: true },
-    ]);
+    setMessages((prev) => [...prev, { id: streamId, role: "assistant", text: "", createdAt: streamTs, streaming: true }]);
 
     try {
-      const reply = await callAdvisorAPI(
-        modelHistory,
-        province,
-        lawUpdates,
-        (partial) => {
-          // Update the streaming bubble token-by-token
-          setMessages((prev) =>
-            prev.map((m) => (m.id === streamId ? { ...m, text: partial } : m))
-          );
-        }
-      );
-
-      // Finalize — remove streaming flag, set full text
+      const reply = await callAdvisorAPI(modelHistory, province, lawUpdates, (partial) => {
+        setMessages((prev) => prev.map((m) => (m.id === streamId ? { ...m, text: partial } : m)));
+      });
       setAdvisorReady(true);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === streamId ? { ...m, text: reply, streaming: false } : m
-        )
-      );
+      setMessages((prev) => prev.map((m) => m.id === streamId ? { ...m, text: reply, streaming: false } : m));
     } catch (err) {
       console.error("Advisor error:", err);
       const isConfig = err.message?.includes("HF_TOKEN not configured");
-      // Only permanently flag a config error — timeouts/network errors leave
-      // advisorReady as-is so the yellow "Setup required" banner never shows
-      // just because a warm model took too long on one request.
       if (isConfig) setAdvisorReady(false);
       const msg = isConfig
         ? "The AI advisor isn't configured yet — add HF_TOKEN to your Vercel project environment variables."
         : err.message || "Could not reach the advisor. Please check your connection and try again.";
       setAdvisorError(msg);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === streamId
-            ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false }
-            : m
-        )
-      );
+      setMessages((prev) => prev.map((m) => m.id === streamId ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false } : m));
     } finally {
       setLoading(false);
     }
@@ -669,7 +569,6 @@ export default function Advisor() {
                 </div>
               </div>
             )}
-
           </div>
 
           {advisorError && (
@@ -690,63 +589,66 @@ export default function Advisor() {
             </div>
           )}
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          {/* Suggestion chips — horizontally scrollable on mobile to avoid overflow */}
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
-              {province} notice — 4 years
+              {province} notice · 4yr
             </SuggestionButton>
             <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
               Probation clause
             </SuggestionButton>
             <SuggestionButton onClick={() => setInput("When is severance pay required vs. notice pay?")}>
-              Severance vs. notice pay
+              Severance vs. notice
             </SuggestionButton>
             <SuggestionButton onClick={() => setInput(`What should an employment offer letter include to be compliant in ${province}?`)}>
               Offer letter checklist
             </SuggestionButton>
           </div>
 
-          {/* Persistent legal disclaimer — shown once, not repeated per message */}
-          <p className="mt-4 flex items-center gap-1.5 text-xs text-zinc-500">
-            <ShieldCheck className="h-3 w-3 shrink-0 text-zinc-600" />
-            General guidance only — not legal advice. Consult qualified legal counsel for your specific situation.
-          </p>
-
-          <div className="mt-3 rounded-[24px] border border-white/6 bg-white/[0.02] p-3">
-            <input ref={fileInputRef} type="file" multiple onChange={handleAttachmentChange} className="hidden" />
-            {attachments.length > 0 && (
-              <div className="mb-3 flex flex-wrap gap-2">
-                {attachments.map((a) => (
-                  <button key={a.id} type="button" onClick={() => setAttachments((c) => c.filter((x) => x.id !== a.id))}
-                    className="inline-flex items-center gap-1 rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs text-amber-300">
-                    {a.name} <X className="h-3 w-3" />
-                  </button>
-                ))}
-              </div>
-            )}
-            <div className="flex items-end gap-3">
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="ghost-button shrink-0 px-3 py-3">
-                <Paperclip className="h-4 w-4" />
-              </button>
-              <textarea value={input} onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                placeholder="Ask a Canadian HR compliance question..."
-                className="min-h-[96px] flex-1 resize-none rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/20" />
-              <button type="button" onClick={sendMessage} disabled={loading || !trimmedInput(input)}
-                className="gold-button shrink-0 px-4 py-3 disabled:opacity-50">
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* AI disclosure */}
-          <div className="mt-3 flex items-start gap-2 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
-            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500" />
-            <p className="text-[11px] leading-5 text-zinc-500">
-              {t(
-                "AI-generated responses can contain errors. Always verify important HR and legal decisions with a qualified professional before acting.",
-                "Les réponses générées par IA peuvent contenir des erreurs. Vérifiez toujours les décisions RH et juridiques importantes avec un professionnel qualifié avant d'agir."
+          {/* Input + disclosure — pb-16 on mobile ensures it clears the fixed bottom nav */}
+          <div className="pb-16 xl:pb-0">
+            <div className="mt-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-3 shadow-sm">
+              <input ref={fileInputRef} type="file" multiple onChange={handleAttachmentChange} className="hidden" />
+              {attachments.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {attachments.map((a) => (
+                    <button key={a.id} type="button" onClick={() => setAttachments((c) => c.filter((x) => x.id !== a.id))}
+                      className="inline-flex items-center gap-1 rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs text-amber-300">
+                      {a.name} <X className="h-3 w-3" />
+                    </button>
+                  ))}
+                </div>
               )}
-            </p>
+              <div className="flex items-end gap-2">
+                <button type="button" onClick={() => fileInputRef.current?.click()}
+                  className="ghost-button shrink-0 px-3 py-2.5 text-zinc-400 hover:text-zinc-200">
+                  <Paperclip className="h-4 w-4" />
+                </button>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
+                  placeholder="Ask a question…"
+                  className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all"
+                />
+                <button type="button" onClick={sendMessage} disabled={loading || !trimmedInput(input)}
+                  className="gold-button shrink-0 px-4 py-3 disabled:opacity-40 transition-opacity">
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* AI disclosure */}
+            <div className="mt-3 flex items-start gap-2 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
+              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500" />
+              <p className="text-[11px] leading-5 text-zinc-500">
+                {t(
+                  "AI-generated responses can contain errors. Always verify important HR and legal decisions with a qualified professional before acting.",
+                  "Les réponses générées par IA peuvent contenir des erreurs. Vérifiez toujours les décisions RH et juridiques importantes avec un professionnel qualifié avant d'agir."
+                )}
+              </p>
+            </div>
           </div>
         </SectionCard>
 
