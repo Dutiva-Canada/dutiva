@@ -5,8 +5,8 @@ export const SETTINGS_STORAGE_KEY = "dutiva.settings.v1";
 export const defaultSettings = {
   companyName: "Dutiva Canada",
   legalName: "Dutiva Canada Inc.",
-  email: "info@dutiva.ca",
-  website: "dutiva.ca",
+  email: "",
+  website: "",
   province: "Ontario",
   city: "Ottawa",
   primaryContact: "Martin Constantineau",

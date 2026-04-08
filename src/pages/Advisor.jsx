@@ -464,7 +464,7 @@ export default function Advisor() {
   const hasLawUpdates = lawUpdates.length > 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-[140px] xl:pb-0">
       {/* Header */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -489,39 +489,39 @@ export default function Advisor() {
         </div>
       </div>
 
-      {/* Status cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="premium-card-soft p-5">
+      {/* Status cards — horizontal scroll on mobile, 3-col grid on md+ */}
+      <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+        <div className="premium-card-soft shrink-0 min-w-[200px] p-4 md:min-w-0 md:p-5">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">AI engine</div>
             <Sparkles className="h-4 w-4 text-amber-300" />
           </div>
-          <div className={`metric-value mt-3 text-3xl font-semibold tracking-tight ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-400"}`}>
+          <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight md:mt-3 md:text-3xl ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-400"}`}>
             {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
           </div>
-          <div className="mt-1 text-sm text-zinc-400">
+          <div className="mt-1 text-xs text-zinc-400 md:text-sm">
             {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API — live" : "AI advisor ready"}
           </div>
         </div>
 
-        <div className="premium-card-soft p-5">
+        <div className="premium-card-soft shrink-0 min-w-[200px] p-4 md:min-w-0 md:p-5">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
             <ShieldCheck className="h-4 w-4 text-emerald-300" />
           </div>
-          <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">{province}</div>
-          <div className="mt-1 text-sm text-zinc-400">14 Canadian jurisdictions supported</div>
+          <div className="metric-value mt-2 text-2xl font-semibold tracking-tight text-zinc-100 md:mt-3 md:text-3xl">{province}</div>
+          <div className="mt-1 text-xs text-zinc-400 md:text-sm">14 Canadian jurisdictions supported</div>
         </div>
 
-        <div className="premium-card-soft p-5">
+        <div className="premium-card-soft shrink-0 min-w-[200px] p-4 md:min-w-0 md:p-5">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Law updates</div>
             <FileText className="h-4 w-4 text-zinc-300" />
           </div>
-          <div className={`metric-value mt-3 text-3xl font-semibold tracking-tight ${hasLawUpdates ? "text-emerald-300" : "text-zinc-400"}`}>
+          <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight md:mt-3 md:text-3xl ${hasLawUpdates ? "text-emerald-300" : "text-zinc-400"}`}>
             {hasLawUpdates ? `${lawUpdates.length} new` : "Monitoring"}
           </div>
-          <div className="mt-1 text-sm text-zinc-400">
+          <div className="mt-1 text-xs text-zinc-400 md:text-sm">
             {hasLawUpdates ? "Recent legislative changes detected" : "Government websites watched daily"}
           </div>
         </div>
@@ -605,8 +605,8 @@ export default function Advisor() {
             </SuggestionButton>
           </div>
 
-          {/* Input + disclosure — pb-16 on mobile ensures it clears the fixed bottom nav */}
-          <div className="pb-16 xl:pb-0">
+          {/* Input + disclosure — hidden on mobile (uses fixed bar below); shown xl+ */}
+          <div className="hidden xl:block">
             <div className="mt-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-3 shadow-sm">
               <input ref={fileInputRef} type="file" multiple onChange={handleAttachmentChange} className="hidden" />
               {attachments.length > 0 && (
@@ -680,10 +680,47 @@ export default function Advisor() {
           </SectionCard>
         </div>
       </div>
+
+      {/* Mobile fixed chat input — sits above the 64px bottom nav */}
+      <MobileChatInputBar
+        input={input}
+        setInput={setInput}
+        loading={loading}
+        sendMessage={sendMessage}
+      />
     </div>
   );
 }
 
 function trimmedInput(val) {
   return val.trim();
+}
+
+// Exported so Advisor can render this outside its scroll context on mobile
+export function MobileChatInputBar({ input, setInput, loading, sendMessage }) {
+  return (
+    <div
+      className="xl:hidden fixed left-0 right-0 z-40 border-t border-white/10 bg-[rgba(10,12,18,0.95)] px-3 py-3 backdrop-blur-md"
+      style={{ bottom: "calc(64px + env(safe-area-inset-bottom))" }}
+    >
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
+          placeholder="Ask a question…"
+          className="flex-1 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.08] transition-all"
+        />
+        <button
+          type="button"
+          onClick={sendMessage}
+          disabled={loading || !trimmedInput(input)}
+          className="gold-button shrink-0 px-4 py-3 disabled:opacity-40 transition-opacity"
+        >
+          <Send className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
 }

@@ -261,8 +261,10 @@ function TopBar() {
           <div className="truncate text-sm text-zinc-400">{pageMeta.title}</div>
         </div>
         <div className="flex items-center gap-2">
-          <ThemeLangToggles />
-          <div className="mx-1 h-5 w-px" style={{ backgroundColor: "var(--border)" }} />
+          <div className="hidden sm:flex items-center gap-1">
+            <ThemeLangToggles />
+            <div className="mx-1 h-5 w-px" style={{ backgroundColor: "var(--border)" }} />
+          </div>
           <Link to="/app/advisor" className="ghost-button px-4 py-2 text-sm hidden sm:inline-flex">
             {t("Advisor", "Conseiller")}
           </Link>
