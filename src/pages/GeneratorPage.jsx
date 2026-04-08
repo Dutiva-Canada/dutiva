@@ -22,6 +22,7 @@ import { loadFromStorage, removeFromStorage, saveToStorage } from "../utils/stor
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext.jsx";
 import { getStoredSettings } from "../utils/workspaceSettings";
+import { formatDocBody } from "../utils/documentTemplates";
 
 const templateOptions = [
   "Employment Agreement",
@@ -443,34 +444,7 @@ function ESignModal({
   );
 }
 
-function formatDocBody(template, form) {
-  const extraLines = [
-    form.contractRate?.trim() ? `Contract rate: ${form.contractRate}` : null,
-    form.scopeOfWork?.trim() ? `Scope of work: ${form.scopeOfWork}` : null,
-    form.performanceGoals?.trim() ? `Performance goals: ${form.performanceGoals}` : null,
-    form.reviewDate?.trim() ? `Review date: ${form.reviewDate}` : null,
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  return `
-${template}
-
-Employer: ${form.companyName}
-Jurisdiction: ${form.jurisdiction}
-Employee: ${form.employeeName}
-Role: ${form.jobTitle}
-Compensation: ${form.salary}
-Start date: ${form.startDate}
-Manager: ${form.manager}
-
-Notes:
-${form.notes}
-${extraLines ? `\n${extraLines}` : ""}
-This is a structured preview only.
-In the full product, this becomes the export-ready document output.
-  `.trim();
-}
+// formatDocBody is imported from ../utils/documentTemplates
 
 function parseDocBody(content, fallbackTemplate = "Offer Letter") {
   if (!content || typeof content !== "string") {
@@ -492,7 +466,7 @@ function parseDocBody(content, fallbackTemplate = "Offer Letter") {
   let notes = defaultForm.notes;
   if (notesIndex >= 0) {
     const tail = lines.slice(notesIndex + 1).join("\n");
-    notes = tail.split("\n\nThis is a structured preview only.")[0]?.trim() || defaultForm.notes;
+    notes = tail.split("\n\n---\n\n")[0]?.trim() || defaultForm.notes;
   }
 
   return {

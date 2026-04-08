@@ -38,14 +38,14 @@ const templateData = [
     title: "Termination Letter",
     category: "termination",
     jurisdiction: "Province-specific",
-    description: "Prepare a compliant termination letter with stronger workflow guidance.",
+    description: "Generate an ESA-compliant termination letter with statutory notice, severance calculations, and final pay entitlements.",
   },
   {
     id: 4,
     title: "Employee Handbook",
     category: "policy",
     jurisdiction: "Canada-ready",
-    description: "Build a handbook foundation that's easier to maintain and update over time.",
+    description: "Generate a complete employee handbook covering conduct, hours, leave, health & safety, and discipline — adapted to your province.",
   },
   {
     id: 5,
@@ -59,7 +59,7 @@ const templateData = [
     title: "Written Warning",
     category: "discipline",
     jurisdiction: "Province-specific",
-    description: "Document performance or conduct concerns in a more consistent disciplinary flow.",
+    description: "Issue a formal written warning with incident description, corrective action required, and a clear escalation path.",
   },
   {
     id: 7,
@@ -248,7 +248,7 @@ export default function Templates() {
             Generate documents
           </h1>
           <p className="mt-3 max-w-2xl text-base text-zinc-400">
-            A cleaner, more premium template workspace designed to make generation feel guided instead of generic.
+            16 bilingual templates covering every Canadian province. Select a template, fill in your details, and export a compliant document in minutes.
           </p>
         </div>
 
@@ -297,7 +297,7 @@ export default function Templates() {
           <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-amber-300">
             Guided
           </div>
-          <div className="mt-1 text-sm text-zinc-400">Designed to feel premium and structured</div>
+          <div className="mt-1 text-sm text-zinc-400">AI-assisted form filling</div>
         </div>
       </div>
 
@@ -371,9 +371,9 @@ export default function Templates() {
                     <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                       <ShieldCheck className="h-5 w-5 text-emerald-300" />
                       <div>
-                        <div className="text-sm font-medium text-zinc-100">Compliance context</div>
+                        <div className="text-sm font-medium text-zinc-100">Province-specific compliance</div>
                         <div className="text-sm text-zinc-400">
-                          Guided for Canadian workflows with cleaner province-aware positioning.
+                          Every template cites the applicable Employment Standards Act for your jurisdiction.
                         </div>
                       </div>
                     </div>
@@ -381,20 +381,28 @@ export default function Templates() {
                     <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                       <Wand2 className="h-5 w-5 text-amber-300" />
                       <div>
-                        <div className="text-sm font-medium text-zinc-100">AI-assisted generation</div>
+                        <div className="text-sm font-medium text-zinc-100">AI-assisted form filling</div>
                         <div className="text-sm text-zinc-400">
-                          Better setup for structured drafting, not just generic outputs.
+                          Answer a few questions about the employee and situation — the document fills itself.
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-5 grid gap-3">
-                    <Link to={generatorLink} className="gold-button w-full px-4 py-3 text-center text-sm">
-                      Start with AI assist
+                    <Link
+                      to={generatorLink}
+                      className="gold-button inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm"
+                    >
+                      Generate document
+                      <ChevronRight className="h-4 w-4" />
                     </Link>
-                    <Link to={generatorLink} className="ghost-button w-full px-4 py-3 text-center text-sm">
-                      Open manual builder
+                    <Link
+                      to="/app/generator"
+                      className="ghost-button inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm"
+                    >
+                      Open blank builder
+                      <ChevronRight className="h-4 w-4" />
                     </Link>
                   </div>
                 </>
@@ -406,16 +414,19 @@ export default function Templates() {
             </div>
           </SectionCard>
 
-          <SectionCard title="What improved here">
-            <div className="space-y-3 text-sm text-zinc-300">
+          <SectionCard title="Compliance reference">
+            <div className="space-y-3 text-sm">
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                Cleaner hierarchy so templates feel like a guided product flow.
+                <div className="font-medium text-zinc-100">14 jurisdictions covered</div>
+                <div className="mt-1 text-zinc-400">ON · QC · BC · AB · MB · SK · NS · NB · NL · PEI · NT · NU · YT · Federal</div>
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                Stronger dark-mode contrast so cards and sections are clearly visible.
+                <div className="font-medium text-zinc-100">English and French</div>
+                <div className="mt-1 text-zinc-400">All 16 templates available in both official languages. Quebec templates reference the Charte de la langue française.</div>
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                More premium visual treatment aligned with the new landing page direction.
+                <div className="font-medium text-zinc-100">Not legal advice</div>
+                <div className="mt-1 text-zinc-400">Dutiva provides general HR compliance guidance and document templates. For specific legal situations, consult a qualified employment lawyer in your province.</div>
               </div>
             </div>
           </SectionCard>
