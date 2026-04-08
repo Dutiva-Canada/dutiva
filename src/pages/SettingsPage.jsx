@@ -267,10 +267,10 @@ export default function SettingsPage() {
               <Field label={t("Company size", "Taille de l'entreprise")} icon={<Building2 className="h-4 w-4" />}>
                 <select value={form.companySize} onChange={(e) => setForm({ ...form, companySize: e.target.value })}
                   className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none">
-                  <option className="bg-[#0E1218]">1-10</option>
-                  <option className="bg-[#0E1218]">11-50</option>
-                  <option className="bg-[#0E1218]">51-200</option>
-                  <option className="bg-[#0E1218]">200+</option>
+                  <option>1-10</option>
+                  <option>11-50</option>
+                  <option>51-200</option>
+                  <option>200+</option>
                 </select>
               </Field>
             </div>
@@ -287,9 +287,9 @@ export default function SettingsPage() {
                   }}
                   className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                 >
-                  <option className="bg-[#0E1218]">English</option>
-                  <option className="bg-[#0E1218]">French</option>
-                  <option className="bg-[#0E1218]">Bilingual</option>
+                  <option>English</option>
+                  <option>French</option>
+                  <option>Bilingual</option>
                 </select>
               </Field>
 
@@ -302,9 +302,9 @@ export default function SettingsPage() {
                   }}
                   className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                 >
-                  <option className="bg-[#0E1218]">Dark</option>
-                  <option className="bg-[#0E1218]">Light</option>
-                  <option className="bg-[#0E1218]">System</option>
+                  <option>Dark</option>
+                  <option>Light</option>
+                  <option>System</option>
                 </select>
               </Field>
 
@@ -314,9 +314,9 @@ export default function SettingsPage() {
                   onChange={(e) => setForm({ ...form, complianceMode: e.target.value })}
                   className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                 >
-                  <option className="bg-[#0E1218]">Canadian SMB</option>
-                  <option className="bg-[#0E1218]">Multi-province employer</option>
-                  <option className="bg-[#0E1218]">Custom</option>
+                  <option>Canadian SMB</option>
+                  <option>Multi-province employer</option>
+                  <option>Custom</option>
                 </select>
               </Field>
             </div>

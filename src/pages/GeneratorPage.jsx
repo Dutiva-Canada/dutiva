@@ -924,7 +924,7 @@ export default function GeneratorPage() {
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   >
                     {templateOptions.map((item) => (
-                      <option key={item} value={item} className="bg-[#0E1218]">
+                      <option key={item} value={item}>
                         {item}
                       </option>
                     ))}
@@ -939,7 +939,7 @@ export default function GeneratorPage() {
                     className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                   >
                     {CANADIAN_JURISDICTIONS.map((jurisdiction) => (
-                      <option key={jurisdiction} value={jurisdiction} className="bg-[#0E1218]">
+                      <option key={jurisdiction} value={jurisdiction}>
                         {jurisdiction}
                       </option>
                     ))}

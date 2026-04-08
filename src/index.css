@@ -140,6 +140,12 @@
   background-color: rgba(0,0,0,0.025) !important;
 }
 
+/* ── Native select option: always inherit theme bg/text ───────────────────── */
+option {
+  background-color: var(--bg-elevated);
+  color: var(--text);
+}
+
 /* ── Light theme: input fields ────────────────────────────────────────────── */
 [data-theme="light"] input,
 [data-theme="light"] textarea,
@@ -147,6 +153,11 @@
   background-color: var(--input-bg) !important;
   border-color: var(--input-border) !important;
   color: var(--text) !important;
+}
+
+[data-theme="light"] option {
+  background-color: var(--bg-elevated);
+  color: var(--text);
 }
 
 /* ── Light theme: scrollbar ────────────────────────────────────────────────── */

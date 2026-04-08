@@ -206,7 +206,7 @@ function ESACalculator() {
             className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none"
           >
             {CANADIAN_JURISDICTIONS.map((j) => (
-              <option key={j} value={j} className="bg-[#0E1218]">{j}</option>
+              <option key={j} value={j}>{j}</option>
             ))}
           </select>
         </div>
@@ -728,7 +728,7 @@ export default function Advisor() {
               <textarea value={input} onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                 placeholder="Ask a Canadian HR compliance question..."
-                className="min-h-[96px] flex-1 resize-none rounded-2xl border border-white/8 bg-[#0E1218] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/20" />
+                className="min-h-[96px] flex-1 resize-none rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/20" />
               <button type="button" onClick={sendMessage} disabled={loading || !trimmedInput(input)}
                 className="gold-button shrink-0 px-4 py-3 disabled:opacity-50">
                 <Send className="h-4 w-4" />
