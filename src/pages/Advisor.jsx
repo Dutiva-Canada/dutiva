@@ -74,25 +74,51 @@ function formatMessageTime(value) {
   } catch { return "Just now"; }
 }
 
-// ─── Advisor API (Vercel serverless → HF Inference, token stays private) ─────
-async function callAdvisorAPI(messagesForModel, province, lawUpdates = []) {
+// ─── Advisor API — streaming SSE consumer ────────────────────────────────────
+// Calls /api/advisor-chat which pipes HF SSE directly.
+// onToken(partialText) is called on every new chunk so the UI updates live.
+async function callAdvisorAPI(messagesForModel, province, lawUpdates = [], onToken) {
   const response = await fetch("/api/advisor-chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messages: messagesForModel,
-      province,
-      lawUpdates,
-    }),
+    body: JSON.stringify({ messages: messagesForModel, province, lawUpdates }),
   });
 
-  const data = await response.json().catch(() => ({}));
-
+  // Non-streaming error (e.g. 429, 503)
   if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
     throw new Error(data.error || `Advisor API error (${response.status})`);
   }
 
-  return data.reply ?? "Unable to generate a response.";
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let fullText = "";
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? ""; // keep incomplete line for next chunk
+
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      const payload = line.slice(6).trim();
+      if (payload === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(payload);
+        const token = parsed.choices?.[0]?.delta?.content ?? "";
+        if (token) {
+          fullText += token;
+          onToken?.(fullText);
+        }
+      } catch { /* ignore malformed SSE lines */ }
+    }
+  }
+
+  return fullText.trim() || "Unable to generate a response.";
 }
 
 // ─── ESA Calculator component ────────────────────────────────────────────────
@@ -381,29 +407,52 @@ export default function Advisor() {
     setLoading(true);
     setAdvisorError(null);
 
+    // Insert a placeholder bubble immediately so the user sees activity
+    const streamId = createId("assistant");
+    const streamTs = new Date().toISOString();
+    setMessages((prev) => [
+      ...prev,
+      { id: streamId, role: "assistant", text: "", createdAt: streamTs, streaming: true },
+    ]);
+
     try {
-      const reply = await callAdvisorAPI(modelHistory, province, lawUpdates);
+      const reply = await callAdvisorAPI(
+        modelHistory,
+        province,
+        lawUpdates,
+        (partial) => {
+          // Update the streaming bubble token-by-token
+          setMessages((prev) =>
+            prev.map((m) => (m.id === streamId ? { ...m, text: partial } : m))
+          );
+        }
+      );
+
+      // Finalize — remove streaming flag, set full text
       setAdvisorReady(true);
-      setMessages((prev) => [...prev, {
-        id: createId("assistant"),
-        role: "assistant",
-        text: reply,
-        createdAt: new Date().toISOString(),
-      }]);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === streamId ? { ...m, text: reply, streaming: false } : m
+        )
+      );
     } catch (err) {
       console.error("Advisor error:", err);
-      setAdvisorReady(false);
       const isConfig = err.message?.includes("HF_TOKEN not configured");
+      // Only permanently flag a config error — timeouts/network errors leave
+      // advisorReady as-is so the yellow "Setup required" banner never shows
+      // just because a warm model took too long on one request.
+      if (isConfig) setAdvisorReady(false);
       const msg = isConfig
         ? "The AI advisor isn't configured yet — add HF_TOKEN to your Vercel project environment variables."
         : err.message || "Could not reach the advisor. Please check your connection and try again.";
       setAdvisorError(msg);
-      setMessages((prev) => [...prev, {
-        id: createId("assistant"),
-        role: "assistant",
-        text: "I'm unable to respond right now. Please try again in a moment.",
-        createdAt: new Date().toISOString(),
-      }]);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === streamId
+            ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false }
+            : m
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -423,7 +472,7 @@ export default function Advisor() {
             Compliance copilot
           </h1>
           <p className="mt-3 max-w-2xl text-base text-zinc-400">
-            Ask any Canadian HR compliance question. Powered by Mistral AI, province-aware, and always current with the latest legislative changes.
+            Ask any Canadian HR compliance question. Province-aware and always current with the latest legislative changes.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -445,10 +494,10 @@ export default function Advisor() {
             <Sparkles className="h-4 w-4 text-amber-300" />
           </div>
           <div className={`metric-value mt-3 text-3xl font-semibold tracking-tight ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-400"}`}>
-            {advisorReady === false ? "Error" : advisorReady ? "Mistral-7B" : "Ready"}
+            {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
           </div>
           <div className="mt-1 text-sm text-zinc-400">
-            {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API — live" : "Vercel edge function wired"}
+            {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API — live" : "AI advisor ready"}
           </div>
         </div>
 
@@ -494,7 +543,7 @@ export default function Advisor() {
         {/* Left: Chat */}
         <SectionCard title="Conversation"
           action={<div className={`rounded-full border px-3 py-1 text-xs font-medium ${advisorReady === false ? "border-red-400/20 bg-red-400/8 text-red-300" : "border-amber-400/12 bg-amber-400/6 text-amber-300"}`}>
-            {advisorReady === false ? "Config required" : "Mistral-7B · Live"}
+            {advisorReady === false ? "Config required" : "Qwen 2.5 · Live"}
           </div>}>
 
           <div className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
@@ -506,10 +555,14 @@ export default function Advisor() {
                 </div>
               </div>
             ))}
-            {loading && (
+            {loading && messages[messages.length - 1]?.text === "" && (
               <div className="flex justify-start">
-                <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-400">
-                  Advisor is thinking...
+                <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-500">
+                  <span className="inline-flex gap-1">
+                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>·</span>
+                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>·</span>
+                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>·</span>
+                  </span>
                 </div>
               </div>
             )}
