@@ -61,7 +61,7 @@ function createInitialMessages() {
     {
       id: "seed-assistant",
       role: "assistant",
-      text: "Yes — it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.\n\nThis is general guidance, not legal advice.",
+      text: "Yes — it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.",
       createdAt: new Date(now - 60_000).toISOString(),
     },
   ];
@@ -333,11 +333,13 @@ function MessageBubble({ role, text }) {
  * Detects and visually demotes the "This is general guidance" disclaimer.
  * Applied only to assistant bubbles; user bubbles stay plain text.
  */
+// Strips any variant of the "general guidance / not legal advice" disclaimer
+// the model might still produce, regardless of phrasing or position.
+const DISCLAIMER_RE = /[\n\s]*(?:note[:\s]+)?this is (?:general guidance[,.]?\s*(?:and\s+)?not legal advice|meant? for informational purposes[^.]*)\s*\.?\s*(?:consult[^.]*\.)?/gi;
+
 function MarkdownText({ text }) {
-  const DISCLAIMER_RE = /\n*This is general guidance[,.]?\s*not legal advice\.?\s*$/i;
-  const dMatch = DISCLAIMER_RE.exec(text);
-  const mainText = dMatch ? text.slice(0, dMatch.index).trim() : text;
-  const disclaimer = dMatch ? text.slice(dMatch.index).trim() : null;
+  const cleaned = text.replace(DISCLAIMER_RE, "").trim();
+  const mainText = cleaned;
 
   function parseInline(str) {
     const parts = [];
@@ -383,11 +385,6 @@ function MarkdownText({ text }) {
   return (
     <div className="leading-7">
       {blocks.map(renderBlock)}
-      {disclaimer && (
-        <p className="mt-3 border-t border-white/8 pt-2.5 text-xs italic text-zinc-500">
-          {disclaimer}
-        </p>
-      )}
     </div>
   );
 }
@@ -678,7 +675,13 @@ export default function Advisor() {
             </SuggestionButton>
           </div>
 
-          <div className="mt-4 rounded-[24px] border border-white/6 bg-white/[0.02] p-3">
+          {/* Persistent legal disclaimer — shown once, not repeated per message */}
+          <p className="mt-4 flex items-center gap-1.5 text-xs text-zinc-500">
+            <ShieldCheck className="h-3 w-3 shrink-0 text-zinc-600" />
+            General guidance only — not legal advice. Consult qualified legal counsel for your specific situation.
+          </p>
+
+          <div className="mt-3 rounded-[24px] border border-white/6 bg-white/[0.02] p-3">
             <input ref={fileInputRef} type="file" multiple onChange={handleAttachmentChange} className="hidden" />
             {attachments.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">

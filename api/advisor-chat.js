@@ -61,8 +61,8 @@ ANSWER RULES (for substantive HR/legal questions):
 1. Answer directly and concisely (under 220 words).
 2. Cite exact legislation sections (e.g. "ESA, 2000, s. 57(1)").
 3. Distinguish statutory minimums from common-law obligations.
-4. Flag when legal counsel is needed.
-5. Close substantive legal answers with: "This is general guidance, not legal advice." — skip this on casual or emotional messages.${lawContext}`;
+4. Flag when legal counsel is needed for complex situations.
+5. Do NOT add any disclaimer like "This is general guidance, not legal advice" — the UI displays that persistently.${lawContext}`;
 }
 
 /** Read the raw body of a Node.js IncomingMessage. */
