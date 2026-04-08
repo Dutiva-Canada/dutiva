@@ -48,20 +48,24 @@ const CANADIAN_JURISDICTIONS = [
   "Northwest Territories", "Nunavut", "Yukon",
 ];
 
-const initialMessages = [
-  {
-    id: "seed-user",
-    role: "user",
-    text: "Do I need a probation clause in Ontario?",
-    createdAt: "2026-04-07T09:00:00.000Z",
-  },
-  {
-    id: "seed-assistant",
-    role: "assistant",
-    text: "Yes — it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.",
-    createdAt: "2026-04-07T09:01:00.000Z",
-  },
-];
+// Timestamps relative to page-load so demo messages never show stale times
+function createInitialMessages() {
+  const now = Date.now();
+  return [
+    {
+      id: "seed-user",
+      role: "user",
+      text: "Do I need a probation clause in Ontario?",
+      createdAt: new Date(now - 120_000).toISOString(),
+    },
+    {
+      id: "seed-assistant",
+      role: "assistant",
+      text: "Yes — it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.\n\nThis is general guidance, not legal advice.",
+      createdAt: new Date(now - 60_000).toISOString(),
+    },
+  ];
+}
 
 function createId(prefix) {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
@@ -306,15 +310,84 @@ function MessageBubble({ role, text }) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={[
-        "max-w-[88%] rounded-[22px] px-4 py-4 text-sm leading-7 shadow-sm",
+        "max-w-[88%] rounded-[22px] px-4 py-4 text-sm shadow-sm",
         isUser
-          ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium"
-          : "border border-white/6 bg-white/[0.03] text-zinc-100",
+          ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
+          : "border border-white/6 bg-white/[0.03] text-zinc-200",
       ].join(" ")}>
-        {text.split("\n").map((line, i) => (
-          <span key={i}>{line}{i < text.split("\n").length - 1 && <br />}</span>
-        ))}
+        {isUser ? (
+          text.split("\n").map((line, i, arr) => (
+            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+          ))
+        ) : (
+          <MarkdownText text={text} />
+        )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * MarkdownText — renders assistant responses with proper visual hierarchy.
+ * Handles: paragraphs, bullet lists (- / * / •), **bold**, *italic*.
+ * Detects and visually demotes the "This is general guidance" disclaimer.
+ * Applied only to assistant bubbles; user bubbles stay plain text.
+ */
+function MarkdownText({ text }) {
+  const DISCLAIMER_RE = /\n*This is general guidance[,.]?\s*not legal advice\.?\s*$/i;
+  const dMatch = DISCLAIMER_RE.exec(text);
+  const mainText = dMatch ? text.slice(0, dMatch.index).trim() : text;
+  const disclaimer = dMatch ? text.slice(dMatch.index).trim() : null;
+
+  function parseInline(str) {
+    const parts = [];
+    const re = /\*\*(.+?)\*\*|\*(.+?)\*/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(str)) !== null) {
+      if (m.index > last) parts.push(str.slice(last, m.index));
+      if (m[1]) parts.push(<strong key={m.index} className="font-semibold text-zinc-50">{m[1]}</strong>);
+      else       parts.push(<em     key={m.index} className="italic text-zinc-300">{m[2]}</em>);
+      last = re.lastIndex;
+    }
+    if (last < str.length) parts.push(str.slice(last));
+    return parts;
+  }
+
+  const blocks = mainText.split(/\n\n+/).filter(Boolean);
+
+  function renderBlock(block, i) {
+    const lines = block.split("\n");
+    const isList = lines.length > 0 && lines.every((l) => /^[-*•]\s/.test(l.trimStart()));
+    if (isList) {
+      return (
+        <ul key={i} className={`space-y-1.5 ${i > 0 ? "mt-2" : ""}`}>
+          {lines.map((line, j) => (
+            <li key={j} className="flex items-start gap-2.5">
+              <span className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/50" />
+              <span>{parseInline(line.replace(/^[-*•]\s/, ""))}</span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+    return (
+      <p key={i} className={i > 0 ? "mt-2" : ""}>
+        {lines.map((line, j) => (
+          <span key={j}>{parseInline(line)}{j < lines.length - 1 && <br />}</span>
+        ))}
+      </p>
+    );
+  }
+
+  return (
+    <div className="leading-7">
+      {blocks.map(renderBlock)}
+      {disclaimer && (
+        <p className="mt-3 border-t border-white/8 pt-2.5 text-xs italic text-zinc-500">
+          {disclaimer}
+        </p>
+      )}
     </div>
   );
 }
@@ -345,7 +418,7 @@ function ActionLink({ to, title, desc }) {
 export default function Advisor() {
   const { user } = useAuth();
   const settings = getStoredSettings();
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState(createInitialMessages);
   const [input, setInput] = useState("");
   const [province, setProvince] = useState(settings.province || "Ontario");
   const [loading, setLoading] = useState(false);
@@ -355,6 +428,7 @@ export default function Advisor() {
   const [lawUpdates, setLawUpdates] = useState([]);
   const fileInputRef = useRef(null);
   const bottomRef = useRef(null);
+  const prevMsgCountRef = useRef(0);
 
   // Load province from profile and recent law updates
   useEffect(() => {
@@ -375,10 +449,18 @@ export default function Advisor() {
     load();
   }, [user]);
 
-  // Auto-scroll on new messages
+  // Smart scroll: only jump when a NEW message bubble is added.
+  // Streaming token updates change content but not count, so the viewport
+  // stays put while the user reads — no more constant jerking to the bottom.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+    if (messages.length > prevMsgCountRef.current) {
+      prevMsgCountRef.current = messages.length;
+      // Small delay so the bubble is painted before we measure
+      requestAnimationFrame(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      });
+    }
+  }, [messages]);
 
   const handleAttachmentChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -543,7 +625,7 @@ export default function Advisor() {
         {/* Left: Chat */}
         <SectionCard title="Conversation"
           action={<div className={`rounded-full border px-3 py-1 text-xs font-medium ${advisorReady === false ? "border-red-400/20 bg-red-400/8 text-red-300" : "border-amber-400/12 bg-amber-400/6 text-amber-300"}`}>
-            {advisorReady === false ? "Config required" : "Qwen 2.5 · Live"}
+            {advisorReady === false ? "Config required" : `${province} · Live`}
           </div>}>
 
           <div className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
@@ -628,6 +710,14 @@ export default function Advisor() {
         <div className="space-y-6">
           <ESACalculator />
 
+          <SectionCard title="Next steps">
+            <div className="space-y-3">
+              <ActionLink to="/app/generator?template=Employment%20Agreement" title="Open document builder" desc="Turn guidance into a draft in one click" />
+              <ActionLink to="/app/generator?template=Termination%20Letter" title="Generate termination letter" desc="Pre-filled with ESA notice calculations" />
+              <ActionLink to="/app/settings" title="Verify province defaults" desc="Ensure jurisdiction context is correct" />
+            </div>
+          </SectionCard>
+
           <SectionCard title="Guidance history"
             action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">{messages.length} messages</div>}>
             <div className="space-y-3">
@@ -640,14 +730,6 @@ export default function Advisor() {
                   <div className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-400">{msg.text}</div>
                 </div>
               ))}
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Next steps">
-            <div className="space-y-3">
-              <ActionLink to="/app/generator?template=Employment%20Agreement" title="Open document builder" desc="Turn guidance into a draft in one click" />
-              <ActionLink to="/app/generator?template=Termination%20Letter" title="Generate termination letter" desc="Pre-filled with ESA notice calculations" />
-              <ActionLink to="/app/settings" title="Verify province defaults" desc="Ensure jurisdiction context is correct" />
             </div>
           </SectionCard>
         </div>
