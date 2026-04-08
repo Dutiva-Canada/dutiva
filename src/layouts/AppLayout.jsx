@@ -293,7 +293,7 @@ function MobileBottomNav() {
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      <div className="flex items-center justify-around">
+      <div className="flex h-16 items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -316,7 +316,7 @@ function MobileBottomNav() {
                     }`}
                   />
                   <span
-                    className={`text-[10px] font-semibold tracking-wide transition-colors ${
+                    className={`text-[10px] mt-0.5 leading-none transition-colors ${
                       isActive ? "text-amber-400" : "text-zinc-500"
                     }`}
                   >

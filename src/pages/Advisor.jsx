@@ -464,7 +464,7 @@ export default function Advisor() {
   const hasLawUpdates = lawUpdates.length > 0;
 
   return (
-    <div className="space-y-8 pb-[140px] xl:pb-0">
+    <div className="space-y-8 pb-[120px] xl:pb-6">
       {/* Header */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -474,11 +474,11 @@ export default function Advisor() {
           <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
             Compliance copilot
           </h1>
-          <p className="mt-3 max-w-2xl text-base text-zinc-400">
+          <p className="mt-3 max-w-2xl text-base text-zinc-400 hidden xl:block">
             Ask any Canadian HR compliance question. Province-aware and always current with the latest legislative changes.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="hidden xl:flex flex-wrap gap-3">
           <Link to="/app/generator?template=Employment%20Agreement" className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm">
             Open generator
           </Link>
@@ -490,8 +490,8 @@ export default function Advisor() {
       </div>
 
       {/* Status cards — horizontal scroll on mobile, 3-col grid on md+ */}
-      <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
-        <div className="premium-card-soft shrink-0 min-w-[200px] p-4 md:min-w-0 md:p-5">
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+        <div className="premium-card-soft shrink-0 min-w-[180px] p-4 md:min-w-0 md:p-5">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">AI engine</div>
             <Sparkles className="h-4 w-4 text-amber-300" />
@@ -504,7 +504,7 @@ export default function Advisor() {
           </div>
         </div>
 
-        <div className="premium-card-soft shrink-0 min-w-[200px] p-4 md:min-w-0 md:p-5">
+        <div className="premium-card-soft shrink-0 min-w-[180px] p-4 md:min-w-0 md:p-5">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
             <ShieldCheck className="h-4 w-4 text-emerald-300" />
@@ -513,7 +513,7 @@ export default function Advisor() {
           <div className="mt-1 text-xs text-zinc-400 md:text-sm">14 Canadian jurisdictions supported</div>
         </div>
 
-        <div className="premium-card-soft shrink-0 min-w-[200px] p-4 md:min-w-0 md:p-5">
+        <div className="premium-card-soft shrink-0 min-w-[180px] p-4 md:min-w-0 md:p-5">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Law updates</div>
             <FileText className="h-4 w-4 text-zinc-300" />
@@ -656,6 +656,8 @@ export default function Advisor() {
         <div className="space-y-6">
           <ESACalculator />
 
+          <div className="h-px bg-white/5" />
+
           <SectionCard title="Next steps">
             <div className="space-y-3">
               <ActionLink to="/app/generator?template=Employment%20Agreement" title="Open document builder" desc="Turn guidance into a draft in one click" />
@@ -663,6 +665,8 @@ export default function Advisor() {
               <ActionLink to="/app/settings" title="Verify province defaults" desc="Ensure jurisdiction context is correct" />
             </div>
           </SectionCard>
+
+          <div className="h-px bg-white/5" />
 
           <SectionCard title="Guidance history"
             action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">{messages.length} messages</div>}>
@@ -700,8 +704,13 @@ function trimmedInput(val) {
 export function MobileChatInputBar({ input, setInput, loading, sendMessage }) {
   return (
     <div
-      className="xl:hidden fixed left-0 right-0 z-40 border-t border-white/10 bg-[rgba(10,12,18,0.95)] px-3 py-3 backdrop-blur-md"
-      style={{ bottom: "calc(64px + env(safe-area-inset-bottom))" }}
+      className="xl:hidden fixed left-0 right-0 z-40 px-4 py-3 border-t"
+      style={{
+        bottom: 64,
+        background: 'rgba(10,12,18,0.95)',
+        borderColor: 'rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(12px)',
+      }}
     >
       <div className="flex items-center gap-2">
         <input
