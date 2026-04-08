@@ -739,12 +739,15 @@ export default function Advisor() {
           </div>
 
           {/* AI disclosure */}
-          <p className="mt-2 text-center text-[11px] leading-5 text-zinc-500">
-            {t(
-              "Dutiva Advisor is AI-powered and can make mistakes. Always verify important HR and legal decisions with a qualified professional.",
-              "Dutiva Conseiller est alimenté par l'IA et peut faire des erreurs. Vérifiez toujours les décisions RH et juridiques importantes avec un professionnel qualifié."
-            )}
-          </p>
+          <div className="mt-3 flex items-start gap-2 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
+            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500" />
+            <p className="text-[11px] leading-5 text-zinc-500">
+              {t(
+                "AI-generated responses can contain errors. Always verify important HR and legal decisions with a qualified professional before acting.",
+                "Les réponses générées par IA peuvent contenir des erreurs. Vérifiez toujours les décisions RH et juridiques importantes avec un professionnel qualifié avant d'agir."
+              )}
+            </p>
+          </div>
         </SectionCard>
 
         {/* Right: Calculator + history + actions */}

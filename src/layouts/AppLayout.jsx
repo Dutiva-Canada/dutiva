@@ -146,22 +146,22 @@ function Sidebar() {
             </Link>
           </div>
 
-          {/* Policy links footer */}
+          {/* Policy links footer — using Link to avoid full page reloads */}
           <div className="mt-5 flex flex-wrap gap-x-3 gap-y-1.5">
             {[
-              { href: "/terms",         label: t("Terms", "Conditions") },
-              { href: "/privacy",       label: t("Privacy", "Confidentialité") },
-              { href: "/cookies",       label: t("Cookies", "Témoins") },
-              { href: "/accessibility", label: t("Accessibility", "Accessibilité") },
-              { href: "/disclaimer",    label: t("Disclaimer", "Avertissement") },
-            ].map(({ href, label }) => (
-              <a
-                key={href}
-                href={href}
+              { to: "/terms",         label: t("Terms", "Conditions") },
+              { to: "/privacy",       label: t("Privacy", "Confidentialité") },
+              { to: "/cookies",       label: t("Cookies", "Témoins") },
+              { to: "/accessibility", label: t("Accessibility", "Accessibilité") },
+              { to: "/disclaimer",    label: t("Disclaimer", "Avertissement") },
+            ].map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
                 className="text-[11px] text-zinc-500 transition hover:text-zinc-300"
               >
                 {label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -279,6 +279,44 @@ function TopBar() {
   );
 }
 
+/** Mobile bottom navigation bar — visible on screens smaller than xl */
+function MobileBottomNav() {
+  const navItems = useNavItems();
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 block border-t xl:hidden"
+      style={{ background: "var(--sidebar-bg)", borderColor: "var(--border)" }}
+    >
+      <div className="flex items-center justify-around">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                [
+                  "flex flex-col items-center gap-1 px-3 py-3 text-xs transition-colors",
+                  isActive ? "text-amber-400" : "text-zinc-500 hover:text-zinc-200",
+                ].join(" ")
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon className={`h-5 w-5 ${isActive ? "text-amber-400" : "text-zinc-500"}`} />
+                  <span className="text-[10px] font-medium">{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 export default function AppLayout() {
   return (
     <div className="app-shell min-h-screen text-zinc-100">
@@ -286,13 +324,16 @@ export default function AppLayout() {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar />
-          <main className="flex-1 px-4 py-6 md:px-6 xl:px-8">
+          {/* pb-16 on mobile/tablet leaves room above the fixed bottom nav bar */}
+          <main className="flex-1 px-4 py-6 pb-16 md:px-6 xl:px-8 xl:pb-6">
             <div className="mx-auto max-w-7xl">
               <Outlet />
             </div>
           </main>
         </div>
       </div>
+      {/* Mobile bottom navigation — hidden on xl+ where sidebar is visible */}
+      <MobileBottomNav />
     </div>
   );
 }

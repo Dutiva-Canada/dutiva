@@ -16,6 +16,12 @@ const GeneratorPage     = lazy(() => import("./pages/GeneratorPage.jsx"));
 const AuthPage          = lazy(() => import("./pages/AuthPage.jsx"));
 const ESignPage         = lazy(() => import("./pages/ESignPage.jsx"));
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage.jsx"));
+const PrivacyPage       = lazy(() => import("./pages/PrivacyPage.jsx"));
+const TermsPage         = lazy(() => import("./pages/TermsPage.jsx"));
+const DisclaimerPage    = lazy(() => import("./pages/DisclaimerPage.jsx"));
+const AccessibilityPage = lazy(() => import("./pages/AccessibilityPage.jsx"));
+const AITechPage        = lazy(() => import("./pages/AITechPage.jsx"));
+const CookiesPage       = lazy(() => import("./pages/CookiesPage.jsx"));
 
 function RouteLoader() {
   return (
@@ -47,6 +53,14 @@ export default function App() {
 
             <Route path="/auth" element={withSuspense(<AuthPage />)} />
             <Route path="/sign/:token" element={withSuspense(<ESignPage />)} />
+
+            {/* Policy pages — standalone, no auth required */}
+            <Route path="/privacy"       element={withSuspense(<PrivacyPage />)} />
+            <Route path="/terms"         element={withSuspense(<TermsPage />)} />
+            <Route path="/disclaimer"    element={withSuspense(<DisclaimerPage />)} />
+            <Route path="/accessibility" element={withSuspense(<AccessibilityPage />)} />
+            <Route path="/ai-tech"       element={withSuspense(<AITechPage />)} />
+            <Route path="/cookies"       element={withSuspense(<CookiesPage />)} />
 
             <Route element={<ProtectedRoute />}>
               <Route path="/app" element={withSuspense(<AppLayout />)}>
