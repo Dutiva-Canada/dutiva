@@ -2,379 +2,711 @@ import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   ArrowUpRight,
+  BookOpen,
   CheckCircle2,
   ChevronRight,
   Clock3,
   FileText,
+  MapPin,
+  MessageSquare,
+  PenLine,
   ShieldCheck,
   Sparkles,
+  UserX,
+  Wand2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { supabase } from "../lib/supabase";
 import { getStoredSettings } from "../utils/workspaceSettings";
 
+// ── ESA notice period lookup (statutory minimums by province) ──────────────
+const ESA_NOTICE = {
+  Ontario: [
+    { years: "Under 1 year", notice: "1 week" },
+    { years: "1–3 years", notice: "2 weeks" },
+    { years: "3–4 years", notice: "3 weeks" },
+    { years: "4–5 years", notice: "4 weeks" },
+    { years: "5–6 years", notice: "5 weeks" },
+    { years: "6–7 years", notice: "6 weeks" },
+    { years: "7–8 years", notice: "7 weeks" },
+    { years: "8+ years", notice: "8 weeks" },
+  ],
+  "British Columbia": [
+    { years: "Under 3 months", notice: "None" },
+    { years: "3 months–1 year", notice: "1 week" },
+    { years: "1–3 years", notice: "2 weeks" },
+    { years: "3–4 years", notice: "3 weeks" },
+    { years: "4–5 years", notice: "4 weeks" },
+    { years: "5–6 years", notice: "5 weeks" },
+    { years: "6–7 years", notice: "6 weeks" },
+    { years: "7–8 years", notice: "7 weeks" },
+    { years: "8+ years", notice: "8 weeks" },
+  ],
+  Alberta: [
+    { years: "Under 90 days", notice: "None" },
+    { years: "90 days–2 years", notice: "1 week" },
+    { years: "2–4 years", notice: "2 weeks" },
+    { years: "4–6 years", notice: "4 weeks" },
+    { years: "6–8 years", notice: "5 weeks" },
+    { years: "8–10 years", notice: "6 weeks" },
+    { years: "10+ years", notice: "8 weeks" },
+  ],
+  Quebec: [
+    { years: "Under 3 months", notice: "None" },
+    { years: "3 months–1 year", notice: "1 week" },
+    { years: "1–5 years", notice: "2 weeks" },
+    { years: "5–10 years", notice: "4 weeks" },
+    { years: "10+ years", notice: "8 weeks" },
+  ],
+  Manitoba: [
+    { years: "Under 30 days", notice: "None" },
+    { years: "30 days–1 year", notice: "1 week" },
+    { years: "1–3 years", notice: "2 weeks" },
+    { years: "3–5 years", notice: "4 weeks" },
+    { years: "5–10 years", notice: "6 weeks" },
+    { years: "10+ years", notice: "8 weeks" },
+  ],
+  Saskatchewan: [
+    { years: "Under 13 weeks", notice: "None" },
+    { years: "13 weeks–3 years", notice: "2 weeks" },
+    { years: "3–5 years", notice: "4 weeks" },
+    { years: "5–10 years", notice: "6 weeks" },
+    { years: "10+ years", notice: "8 weeks" },
+  ],
+  "Nova Scotia": [
+    { years: "Under 3 months", notice: "None" },
+    { years: "3 months–2 years", notice: "1 week" },
+    { years: "2–5 years", notice: "2 weeks" },
+    { years: "5–10 years", notice: "4 weeks" },
+    { years: "10+ years", notice: "8 weeks" },
+  ],
+  "New Brunswick": [
+    { years: "Under 6 months", notice: "None" },
+    { years: "6 months–5 years", notice: "2 weeks" },
+    { years: "5+ years", notice: "4 weeks" },
+  ],
+  Federal: [
+    { years: "Under 3 months", notice: "None" },
+    { years: "3 months–1 year", notice: "2 weeks" },
+    { years: "1+ years", notice: "2 weeks + 1 week/year of service (max)" },
+  ],
+};
+
+// ── Quick-launch document templates ───────────────────────────────────────
+const QUICK_TEMPLATES = [
+  {
+    label: "Offer Letter",
+    desc: "New hire",
+    icon: FileText,
+    to: "/app/generator?template=Offer%20Letter",
+  },
+  {
+    label: "Termination Notice",
+    desc: "ESA-compliant",
+    icon: UserX,
+    to: "/app/generator?template=Termination%20Letter",
+  },
+  {
+    label: "PIP",
+    desc: "Performance plan",
+    icon: PenLine,
+    to: "/app/generator?template=Performance%20Improvement%20Plan",
+  },
+  {
+    label: "Employment Agreement",
+    desc: "Full contract",
+    icon: BookOpen,
+    to: "/app/generator?template=Employment%20Agreement",
+  },
+];
+
+// ── Helper: document type badge colour ────────────────────────────────────
+function docBadgeClass(title = "") {
+  const t = title.toLowerCase();
+  if (t.includes("termination") || t.includes("dismissal")) return "text-red-300 border-red-400/15 bg-red-400/8";
+  if (t.includes("offer") || t.includes("onboarding")) return "text-emerald-300 border-emerald-400/15 bg-emerald-400/8";
+  if (t.includes("pip") || t.includes("performance") || t.includes("warning")) return "text-yellow-300 border-yellow-400/15 bg-yellow-400/8";
+  return "text-zinc-300 border-white/8 bg-white/[0.03]";
+}
+
+function formatRelative(value) {
+  if (!value) return "Recently";
+  try {
+    const diff = Date.now() - new Date(value).getTime();
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    if (mins < 2) return "Just now";
+    if (mins < 60) return `${mins}m ago`;
+    if (hrs < 24) return `${hrs}h ago`;
+    if (days === 1) return "Yesterday";
+    if (days < 7) return `${days} days ago`;
+    return new Date(value).toLocaleDateString("en-CA", { month: "short", day: "numeric" });
+  } catch {
+    return "Recently";
+  }
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────
+
 function StatCard({ title, value, sub, icon, tone = "default", to }) {
   const toneClass =
-    tone === "gold"
-      ? "text-amber-300"
-      : tone === "warning"
-      ? "text-yellow-300"
-      : "text-zinc-100";
+    tone === "gold" ? "text-amber-300" :
+    tone === "warning" ? "text-yellow-300" :
+    tone === "green" ? "text-emerald-300" :
+    "text-zinc-100";
 
   const content = (
-    <div className="premium-card-soft p-5">
+    <div className="premium-card-soft p-5 transition hover:border-white/12">
       <div className="flex items-center justify-between">
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
-          {title}
-        </div>
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">{title}</div>
         <div className="text-zinc-500">{icon}</div>
       </div>
-      <div className={`metric-value mt-4 text-3xl font-semibold tracking-tight ${toneClass}`}>
-        {value}
-      </div>
+      <div className={`metric-value mt-4 text-3xl font-semibold tracking-tight ${toneClass}`}>{value}</div>
       <div className="mt-1 text-sm text-zinc-400">{sub}</div>
     </div>
   );
 
-  return to ? (
-    <Link to={to} className="block transition hover:opacity-95">
-      {content}
-    </Link>
-  ) : (
-    content
-  );
+  return to ? <Link to={to} className="block">{content}</Link> : content;
 }
 
-function SectionCard({ title, action, children }) {
+function SectionCard({ title, subtitle, action, children }) {
   return (
     <section className="premium-card p-6">
-      <div className="mb-5 flex items-center justify-between gap-4">
+      <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-100">{title}</h2>
+          <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
+          {subtitle && <p className="mt-1 text-sm text-zinc-500">{subtitle}</p>}
         </div>
-        {action ? <div>{action}</div> : null}
+        {action && <div className="shrink-0">{action}</div>}
       </div>
       {children}
     </section>
   );
 }
 
-function ActivityRow({ title, meta, badge, to }) {
-  const content = (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-white/10 hover:bg-white/[0.03]">
-      <div className="min-w-0">
-        <div className="truncate text-sm font-medium text-zinc-100">{title}</div>
-        <div className="mt-1 text-sm text-zinc-400">{meta}</div>
+function DocRow({ title, meta, province, to }) {
+  return (
+    <Link to={to}>
+      <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3.5 transition hover:border-white/10 hover:bg-white/[0.03]">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-400/8 text-amber-300">
+            <FileText className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium text-zinc-100">{title}</div>
+            <div className="mt-0.5 text-xs text-zinc-500">{meta}</div>
+          </div>
+        </div>
+        {province && (
+          <div className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${docBadgeClass(title)}`}>
+            {province}
+          </div>
+        )}
       </div>
-      <div className="shrink-0 rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">
-        {badge}
-      </div>
-    </div>
+    </Link>
   );
-
-  return to ? <Link to={to}>{content}</Link> : content;
 }
 
-function ActionRow({ title, desc, to }) {
-  const content = (
-    <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]">
-      <div>
-        <div className="text-sm font-medium text-zinc-100">{title}</div>
-        <div className="mt-1 text-sm text-zinc-400">{desc}</div>
+function QuickLaunchCard({ label, desc, icon: Icon, to }) {
+  return (
+    <Link to={to}>
+      <div className="flex flex-col gap-2 rounded-[20px] border border-white/6 bg-white/[0.02] p-4 transition hover:border-amber-400/20 hover:bg-white/[0.03]">
+        <div className="grid h-9 w-9 place-items-center rounded-xl bg-amber-400/8 text-amber-300">
+          <Icon className="h-4 w-4" />
+        </div>
+        <div className="text-sm font-semibold text-zinc-100">{label}</div>
+        <div className="text-xs text-zinc-500">{desc}</div>
       </div>
-      <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
-    </div>
+    </Link>
   );
-
-  return to ? <Link to={to}>{content}</Link> : content;
 }
 
-function RegionRow({ region, status, note, to }) {
-  const statusMap = {
-    compliant: {
-      label: "Compliant",
-      className: "text-emerald-300 border-emerald-400/15 bg-emerald-400/8",
-    },
-    review: {
-      label: "Needs review",
-      className: "text-yellow-300 border-yellow-400/15 bg-yellow-400/8",
-    },
-  };
+function OnboardingCard({ companyName, province }) {
+  const steps = [
+    { done: !!companyName && companyName !== "Your workspace", label: "Company name set", sub: companyName || "Add in Settings" },
+    { done: !!province, label: "Primary province set", sub: province || "Add in Settings" },
+    { done: false, label: "First document generated", sub: "Try an Offer Letter or Termination Notice" },
+  ];
+  const completed = steps.filter((s) => s.done).length;
 
-  const item = statusMap[status];
-
-  const content = (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-      <div>
-        <div className="text-sm font-medium text-zinc-100">{region}</div>
-        <div className="mt-1 text-sm text-zinc-400">{note}</div>
+  return (
+    <section className="premium-card p-6">
+      <div className="mb-1 flex items-center gap-2">
+        <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
+          <Sparkles className="h-4 w-4" />
+        </div>
+        <h2 className="text-base font-semibold text-zinc-100">Get started</h2>
+        <span className="ml-auto rounded-full bg-amber-400/10 px-2.5 py-0.5 text-xs font-semibold text-amber-300">
+          {completed}/3
+        </span>
       </div>
-      <div className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium ${item.className}`}>
-        {item.label}
+      <p className="mb-5 text-sm text-zinc-500">Complete these steps to get the most out of Dutiva.</p>
+      <div className="space-y-3">
+        {steps.map((step) => (
+          <div
+            key={step.label}
+            className={`flex items-start gap-3 rounded-2xl border px-4 py-3.5 ${
+              step.done
+                ? "border-emerald-400/15 bg-emerald-400/6"
+                : "border-white/6 bg-white/[0.02]"
+            }`}
+          >
+            {step.done ? (
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+            ) : (
+              <div className="mt-0.5 h-4 w-4 shrink-0 rounded-full border border-white/20" />
+            )}
+            <div>
+              <div className={`text-sm font-medium ${step.done ? "text-zinc-300" : "text-zinc-100"}`}>
+                {step.label}
+              </div>
+              <div className="mt-0.5 text-xs text-zinc-500">{step.sub}</div>
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
+      <Link
+        to="/app/generator?template=Offer%20Letter"
+        className="gold-button mt-5 block w-full px-4 py-3 text-center text-sm"
+      >
+        Generate your first document
+      </Link>
+    </section>
   );
-
-  return to ? <Link to={to}>{content}</Link> : content;
 }
 
-function formatDateTime(value) {
-  if (!value) return "Recently";
-  try {
-    return new Date(value).toLocaleString();
-  } catch {
-    return "Recently";
+function ESACard({ province }) {
+  const rows = ESA_NOTICE[province] || ESA_NOTICE["Ontario"];
+  const displayProvince = ESA_NOTICE[province] ? province : "Ontario";
+
+  return (
+    <section className="premium-card p-6">
+      <div className="mb-1 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
+            <ShieldCheck className="h-4 w-4" />
+          </div>
+          <h2 className="text-base font-semibold text-zinc-100">ESA notice periods</h2>
+        </div>
+        <Link
+          to="/app/advisor"
+          className="flex items-center gap-1 text-xs text-zinc-400 transition hover:text-zinc-200"
+        >
+          Full calculator
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+      <p className="mb-4 text-xs text-zinc-500">{displayProvince} · Statutory minimums only</p>
+
+      <div className="space-y-1.5">
+        {rows.map((row) => (
+          <div
+            key={row.years}
+            className="flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.02] px-3 py-2.5"
+          >
+            <span className="text-xs text-zinc-400">{row.years}</span>
+            <span className="text-xs font-semibold text-amber-300">{row.notice}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 rounded-xl border border-white/6 bg-white/[0.02] px-3 py-2.5 text-xs text-zinc-500">
+        Statutory notice only. Common law and severance pay may apply.{" "}
+        <Link to="/app/advisor" className="text-amber-300 transition hover:text-amber-200">
+          Ask the Advisor →
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function ComplianceByProvinceCard({ documents, defaultProvince }) {
+  // Build province activity map from real documents
+  const provinceActivity = {};
+  documents.forEach((doc) => {
+    const p = doc.province || doc.jurisdiction || defaultProvince || "Ontario";
+    if (!provinceActivity[p]) {
+      provinceActivity[p] = { count: 0, latest: null };
+    }
+    provinceActivity[p].count += 1;
+    if (!provinceActivity[p].latest || doc.created_at > provinceActivity[p].latest) {
+      provinceActivity[p].latest = doc.created_at;
+    }
+  });
+
+  // Always include the default province
+  const defaultP = defaultProvince || "Ontario";
+  if (!provinceActivity[defaultP]) {
+    provinceActivity[defaultP] = { count: 0, latest: null };
   }
+
+  const entries = Object.entries(provinceActivity).sort(
+    ([, a], [, b]) => (b.count || 0) - (a.count || 0)
+  );
+
+  return (
+    <section className="premium-card p-6">
+      <div className="mb-1 flex items-center gap-2">
+        <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
+          <MapPin className="h-4 w-4" />
+        </div>
+        <h2 className="text-base font-semibold text-zinc-100">Province activity</h2>
+      </div>
+      <p className="mb-4 text-sm text-zinc-500">Jurisdictions with document activity</p>
+
+      <div className="space-y-2">
+        {entries.map(([province, data]) => (
+          <div
+            key={province}
+            className="flex items-center justify-between gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3.5"
+          >
+            <div>
+              <div className="text-sm font-medium text-zinc-100">{province}</div>
+              <div className="mt-0.5 text-xs text-zinc-500">
+                {data.count > 0
+                  ? `${data.count} document${data.count > 1 ? "s" : ""} · Last ${formatRelative(data.latest)}`
+                  : "No documents yet"}
+              </div>
+            </div>
+            <div
+              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                data.count > 0
+                  ? "border-emerald-400/15 bg-emerald-400/8 text-emerald-300"
+                  : "border-white/8 bg-white/[0.03] text-zinc-400"
+              }`}
+            >
+              {data.count > 0 ? "Active" : "Not started"}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Link
+        to="/app/generator"
+        className="ghost-button mt-4 block w-full px-4 py-3 text-center text-sm"
+      >
+        Generate for another province
+      </Link>
+    </section>
+  );
 }
 
+// ── Main Dashboard ─────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuth();
   const savedSettings = getStoredSettings();
-  const companyName = savedSettings.companyName || "Your workspace";
+  const companyName = savedSettings.companyName || null;
+  const province = savedSettings.province || null;
+  const displayName = companyName || user?.email?.split("@")[0] || "your workspace";
 
   const [documents, setDocuments] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [pendingSignatures, setPendingSignatures] = useState(0);
 
   useEffect(() => {
-    async function loadDocuments() {
-      if (!user || !supabase) {
-        setLoadingDocs(false);
-        return;
-      }
-
+    async function load() {
+      if (!user || !supabase) { setLoadingDocs(false); return; }
       try {
-        const { data, error } = await supabase
+        const { data: docs } = await supabase
           .from("documents")
           .select("*")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setDocuments(data || []);
+        setDocuments(docs || []);
 
         const { data: sigs } = await supabase
           .from("signatures")
           .select("status")
           .eq("user_id", user.id);
-        const pending = (sigs || []).filter((s) => s.status === "pending").length;
-        setPendingSignatures(pending);
-      } catch (error) {
-        console.error("Failed to load dashboard documents:", error);
+        setPendingSignatures((sigs || []).filter((s) => s.status === "pending").length);
+      } catch (e) {
+        console.error("Dashboard load error:", e);
       } finally {
         setLoadingDocs(false);
       }
     }
-
-    loadDocuments();
+    load();
   }, [user]);
 
   const documentCount = documents.length;
-  const latestDocument = documents[0];
-  const lastUpdated = latestDocument?.created_at
-    ? new Date(latestDocument.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    : "-";
+  const hasDocuments = documentCount > 0;
+  const recentDocs = documents.slice(0, 5);
 
-  const recentActivity =
-    documents.length > 0
-      ? documents.slice(0, 3).map((doc) => ({
-          id: doc.id,
-          title: doc.title || "Untitled document",
-          meta: formatDateTime(doc.created_at),
-          badge: "Saved",
-          to: "/app/generator",
-        }))
-      : [
-          {
-            id: "placeholder-1",
-            title: "No saved documents yet",
-            meta: "Start by creating your first document",
-            badge: "New",
-            to: "/app/generator",
-          },
-        ];
+  // Unique provinces from actual documents
+  const activeProvinces = [...new Set(
+    documents.map((d) => d.province || d.jurisdiction || province || "Ontario").filter(Boolean)
+  )].length;
+
+  const today = new Date().toLocaleDateString("en-CA", {
+    weekday: "long", month: "long", day: "numeric",
+  });
 
   return (
     <div className="space-y-8">
+
+      {/* ── Header ── */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-            Dashboard
-          </div>
+          <div className="mb-2 text-sm text-zinc-500">{today}</div>
           <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
-            {companyName}
+            {greeting()}{companyName ? `, ${companyName}` : "."}
           </h1>
-          <p className="mt-3 max-w-2xl text-base text-zinc-400">
-            A clearer operational view of compliance, document activity, and what needs attention next.
+          <p className="mt-2 text-base text-zinc-400">
+            {hasDocuments
+              ? `${documentCount} document${documentCount > 1 ? "s" : ""} in your workspace. ${pendingSignatures > 0 ? `${pendingSignatures} pending signature${pendingSignatures > 1 ? "s" : ""}.` : "All signatures up to date."}`
+              : "Your HR compliance workspace is ready. Generate your first document below."}
           </p>
         </div>
-
         <div className="flex flex-wrap gap-3">
-          <Link to="/app/advisor" className="ghost-button px-4 py-3 text-sm">
-            View activity
+          <Link to="/app/advisor" className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm">
+            <MessageSquare className="h-4 w-4" />
+            Ask advisor
           </Link>
-          <Link to="/app/generator" className="gold-button px-5 py-3 text-sm">
+          <Link to="/app/generator" className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm">
+            <Wand2 className="h-4 w-4" />
             Generate document
           </Link>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          title="Compliance"
-          value="Compliant"
-          sub="Workspace defaults configured"
-          tone="gold"
-          icon={<ShieldCheck className="h-4 w-4" />}
-          to="/app/settings"
-        />
+      {/* ── Stat cards ── */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Documents"
-          value={loadingDocs ? "..." : String(documentCount)}
-          sub={`Active for ${companyName}`}
+          value={loadingDocs ? "—" : String(documentCount)}
+          sub={hasDocuments ? `Last: ${formatRelative(documents[0]?.created_at)}` : "None yet — start below"}
+          tone={hasDocuments ? "gold" : "default"}
           icon={<FileText className="h-4 w-4" />}
           to="/app/generator"
         />
         <StatCard
-          title="Reviews"
-          value={loadingDocs ? "..." : String(pendingSignatures)}
-          sub={pendingSignatures > 0 ? "Awaiting signatures" : "No pending signatures"}
-          tone="warning"
+          title="Provinces active"
+          value={loadingDocs ? "—" : String(Math.max(activeProvinces, province ? 1 : 0))}
+          sub={province ? `Primary: ${province}` : "Set province in Settings"}
+          tone={province ? "green" : "default"}
+          icon={<MapPin className="h-4 w-4" />}
+          to="/app/settings"
+        />
+        <StatCard
+          title="Pending signatures"
+          value={loadingDocs ? "—" : String(pendingSignatures)}
+          sub={pendingSignatures > 0 ? "Awaiting review" : "All signed or none pending"}
+          tone={pendingSignatures > 0 ? "warning" : "default"}
           icon={<AlertTriangle className="h-4 w-4" />}
           to="/app/generator"
         />
         <StatCard
-          title="Last update"
-          value={loadingDocs ? "..." : lastUpdated}
-          sub={latestDocument ? "Most recent saved doc" : "No documents yet"}
-          icon={<Clock3 className="h-4 w-4" />}
-          to="/app/generator"
+          title="Workspace"
+          value={companyName ? "Ready" : "Setup"}
+          sub={companyName ? `${province || "Province not set"} · ${user?.email || ""}` : "Complete setup in Settings"}
+          tone={companyName && province ? "green" : "warning"}
+          icon={<ShieldCheck className="h-4 w-4" />}
+          to="/app/settings"
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+      {/* ── Quick launch ── */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-zinc-400">
+            Quick document launch
+          </h2>
+          <Link
+            to="/app/templates"
+            className="flex items-center gap-1 text-xs text-zinc-400 transition hover:text-zinc-200"
+          >
+            All 16 templates
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {QUICK_TEMPLATES.map((t) => (
+            <QuickLaunchCard key={t.label} {...t} />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Main grid ── */}
+      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+
+        {/* Left column */}
         <div className="space-y-6">
+
+          {/* Recent documents */}
           <SectionCard
-            title="Recent activity"
+            title="Recent documents"
+            subtitle={hasDocuments ? `${documentCount} document${documentCount > 1 ? "s" : ""} in your workspace` : "No documents yet"}
             action={
-              <Link to="/app/generator" className="flex items-center gap-2 text-sm text-zinc-400 transition hover:text-zinc-200">
-                Open generator
+              <Link
+                to="/app/generator"
+                className="flex items-center gap-1.5 text-sm text-amber-300 transition hover:text-amber-200"
+              >
+                New document
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
             }
           >
-            <div className="space-y-3">
-              {recentActivity.map((item) => (
-                <ActivityRow
-                  key={item.id}
-                  title={item.title}
-                  meta={item.meta}
-                  badge={item.badge}
-                  to={item.to}
-                />
-              ))}
-            </div>
+            {loadingDocs ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-[60px] animate-pulse rounded-2xl border border-white/6 bg-white/[0.02]" />
+                ))}
+              </div>
+            ) : hasDocuments ? (
+              <div className="space-y-2">
+                {recentDocs.map((doc) => (
+                  <DocRow
+                    key={doc.id}
+                    title={doc.title || "Untitled document"}
+                    meta={formatRelative(doc.created_at)}
+                    province={doc.province || doc.jurisdiction || province || "Ontario"}
+                    to="/app/generator"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[20px] border border-white/6 bg-white/[0.02] px-5 py-8 text-center">
+                <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-amber-400/8 text-amber-300">
+                  <FileText className="h-6 w-6" />
+                </div>
+                <div className="text-sm font-medium text-zinc-100">No documents yet</div>
+                <div className="mt-1 text-sm text-zinc-500">
+                  Generate your first document — it takes under 5 minutes.
+                </div>
+                <Link
+                  to="/app/generator?template=Offer%20Letter"
+                  className="gold-button mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-sm"
+                >
+                  Start with an Offer Letter
+                </Link>
+              </div>
+            )}
           </SectionCard>
 
-          <SectionCard title="Next actions">
-            <div className="space-y-3">
-              <ActionRow
-                title="Create or update a document"
-                desc={`Continue building documents for ${companyName}.`}
-                to="/app/generator"
-              />
-              <ActionRow
-                title="Review guidance in Advisor"
-                desc="Turn saved work into a guided compliance workflow."
-                to="/app/advisor"
-              />
-              <ActionRow
-                title="Update workspace defaults"
-                desc="Keep your company profile and jurisdiction accurate."
-                to="/app/settings"
-              />
+          {/* What to do next */}
+          <SectionCard
+            title="Suggested next steps"
+            subtitle="Based on your workspace activity"
+          >
+            <div className="space-y-2">
+              {pendingSignatures > 0 && (
+                <Link to="/app/generator">
+                  <div className="flex items-center gap-3 rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-4 transition hover:border-yellow-400/25">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-yellow-300" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-zinc-100">
+                        {pendingSignatures} document{pendingSignatures > 1 ? "s" : ""} pending signature
+                      </div>
+                      <div className="mt-0.5 text-xs text-zinc-400">Review and collect signatures</div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
+                  </div>
+                </Link>
+              )}
+
+              {!province && (
+                <Link to="/app/settings">
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
+                    <MapPin className="h-4 w-4 shrink-0 text-amber-300" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-zinc-100">Set your primary province</div>
+                      <div className="mt-0.5 text-xs text-zinc-400">Required for accurate ESA calculations</div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
+                  </div>
+                </Link>
+              )}
+
+              <Link to="/app/generator?template=Termination%20Letter">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
+                  <UserX className="h-4 w-4 shrink-0 text-amber-300" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-zinc-100">Generate a termination notice</div>
+                    <div className="mt-0.5 text-xs text-zinc-400">
+                      ESA-compliant for {province || "your province"} — notice periods auto-calculated
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
+                </div>
+              </Link>
+
+              <Link to="/app/advisor">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
+                  <MessageSquare className="h-4 w-4 shrink-0 text-amber-300" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-zinc-100">Ask the Advisor a compliance question</div>
+                    <div className="mt-0.5 text-xs text-zinc-400">
+                      Legislation-cited answers for {province || "any province"}
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
+                </div>
+              </Link>
+
+              <Link to="/app/templates">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
+                  <BookOpen className="h-4 w-4 shrink-0 text-amber-300" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-zinc-100">Browse all 16 templates</div>
+                    <div className="mt-0.5 text-xs text-zinc-400">
+                      Offer letters, PIPs, NDAs, policies, and more — all bilingual
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
+                </div>
+              </Link>
             </div>
           </SectionCard>
         </div>
 
+        {/* Right column */}
         <div className="space-y-6">
-          <SectionCard title="Compliance by region">
-            <div className="space-y-3">
-              <RegionRow
-                region={savedSettings.province || "Ontario"}
-                status="compliant"
-                note="Default workspace region"
-                to="/app/settings"
-              />
-              <RegionRow
-                region="Federal"
-                status="compliant"
-                note="Core workflow available"
-                to="/app/settings"
-              />
-              <RegionRow
-                region="Custom"
-                status={documentCount > 0 ? "review" : "compliant"}
-                note={documentCount > 0 ? "Review your saved documents" : "No outstanding issues"}
-                to="/app/advisor"
-              />
-            </div>
-          </SectionCard>
 
-          <SectionCard title="Workspace status">
-            <div className="rounded-[24px] border border-amber-400/10 bg-amber-400/6 p-5">
+          {/* Onboarding card (only if no documents yet) */}
+          {!hasDocuments && (
+            <OnboardingCard companyName={companyName} province={province} />
+          )}
+
+          {/* Province activity */}
+          <ComplianceByProvinceCard
+            documents={documents}
+            defaultProvince={province || "Ontario"}
+          />
+
+          {/* ESA quick reference */}
+          <ESACard province={province || "Ontario"} />
+
+          {/* Advisor promo (only if has documents, replace onboarding) */}
+          {hasDocuments && (
+            <section className="premium-card p-6">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-10 w-10 place-items-center rounded-2xl bg-amber-400/12 text-amber-300">
+                <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-zinc-100">{companyName} workspace active</div>
-                  <p className="mt-2 text-sm leading-6 text-zinc-300">
-                    Auth, saved settings, and saved documents are now connected into one product flow.
+                  <div className="text-sm font-semibold text-zinc-100">Have a compliance question?</div>
+                  <p className="mt-1.5 text-sm leading-6 text-zinc-400">
+                    The Advisor cites the exact ESA section, province, and effective date — not
+                    generic HR advice.
                   </p>
                 </div>
               </div>
-            </div>
-
-            <div className="grid gap-3">
-              <Link to="/app/generator" className="gold-button w-full px-4 py-3 text-center text-sm">
-                Generate document
+              <Link
+                to="/app/advisor"
+                className="gold-button mt-5 block w-full px-4 py-3 text-center text-sm"
+              >
+                Open Advisor
               </Link>
-              <Link to="/app/advisor" className="ghost-button w-full px-4 py-3 text-center text-sm">
-                Ask advisor
-              </Link>
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Health checks">
-            <div className="space-y-3">
-              <Link to="/app/generator" className="block">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-                  <div>
-                    <div className="text-sm font-medium text-zinc-100">Document storage available</div>
-                    <div className="text-sm text-zinc-400">
-                      {!user
-                        ? "Local draft storage is available in preview mode"
-                        : documentCount > 0
-                        ? `${documentCount} saved document(s)`
-                        : "No saved documents yet"}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-              <Link to="/app/settings" className="block">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-                  <div>
-                    <div className="text-sm font-medium text-zinc-100">Workspace profile active</div>
-                    <div className="text-sm text-zinc-400">Settings are available for your signed-in account</div>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          </SectionCard>
+            </section>
+          )}
         </div>
       </div>
     </div>

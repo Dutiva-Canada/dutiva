@@ -78,18 +78,19 @@ function Sidebar() {
           <BrandLockup />
         </div>
 
+        {/* Province / compliance context card */}
         <div className="mb-8 rounded-[24px] border border-white/6 bg-[linear-gradient(180deg,rgba(25,30,40,0.98)_0%,rgba(20,24,33,0.98)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_10px_40px_rgba(0,0,0,0.35)]">
           <div className="mb-3 flex items-center gap-2">
             <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/12 text-amber-300">
               <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
-              <div className="text-sm font-semibold text-zinc-100">Compliance workspace</div>
-              <div className="text-xs text-zinc-400">Canada-ready operations</div>
+              <div className="text-sm font-semibold text-zinc-100">HR compliance workspace</div>
+              <div className="text-xs text-zinc-400">14 Canadian jurisdictions</div>
             </div>
           </div>
           <div className="rounded-2xl border border-amber-400/10 bg-amber-400/6 px-3 py-3 text-sm text-zinc-300">
-            Centralize documents, guidance, and next actions in one premium workspace.
+            Province-specific documents, ESA calculations, and legislation-cited guidance — in one place.
           </div>
         </div>
 
@@ -99,6 +100,7 @@ function Sidebar() {
           ))}
         </nav>
 
+        {/* Bottom CTA */}
         <div className="mt-auto pt-8">
           <div className="rounded-[24px] border border-white/6 bg-[linear-gradient(180deg,rgba(18,22,30,0.98)_0%,rgba(14,17,24,0.98)_100%)] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.32)]">
             <div className="mb-3 flex items-center gap-2">
@@ -106,8 +108,8 @@ function Sidebar() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-zinc-100">Start faster</div>
-                <div className="text-xs text-zinc-400">Jump into document generation</div>
+                <div className="text-sm font-semibold text-zinc-100">New document</div>
+                <div className="text-xs text-zinc-400">16 bilingual templates</div>
               </div>
             </div>
             <Link
@@ -129,43 +131,39 @@ function TopBar() {
   const getPageMeta = () => {
     if (location.pathname.startsWith("/app/generator")) {
       return {
-        badge: "Generator flow",
-        title: "Document workflow active",
-        ctaLabel: "Open templates",
+        badge: "Generator",
+        title: "Document generation workflow",
+        ctaLabel: "Browse templates",
         ctaTo: "/app/templates",
       };
     }
-
     if (location.pathname.startsWith("/app/advisor")) {
       return {
         badge: "Advisor",
-        title: "Guidance workspace",
-        ctaLabel: "Start from guidance",
-        ctaTo: "/app/generator?template=Employment%20Agreement",
+        title: "Legislation-cited HR guidance",
+        ctaLabel: "Generate document",
+        ctaTo: "/app/generator?template=Offer%20Letter",
       };
     }
-
     if (location.pathname.startsWith("/app/templates")) {
       return {
         badge: "Templates",
-        title: "Template library",
-        ctaLabel: "New generation",
+        title: "16 bilingual HR templates",
+        ctaLabel: "New document",
         ctaTo: "/app/generator?template=Offer%20Letter",
       };
     }
-
     if (location.pathname.startsWith("/app/settings")) {
       return {
         badge: "Settings",
-        title: "Workspace configuration",
-        ctaLabel: "Open generator",
+        title: "Workspace & jurisdiction settings",
+        ctaLabel: "Generate document",
         ctaTo: "/app/generator?template=Offer%20Letter",
       };
     }
-
     return {
-      badge: "Premium app preview",
-      title: "Operational workspace",
+      badge: "Dashboard",
+      title: "HR compliance workspace",
       ctaLabel: "Generate document",
       ctaTo: "/app/generator?template=Offer%20Letter",
     };
@@ -188,11 +186,11 @@ function TopBar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link to="/app/settings#workspace-defaults" className="ghost-button px-4 py-2 text-sm">
-            Language
+          <Link to="/app/advisor" className="ghost-button px-4 py-2 text-sm">
+            Advisor
           </Link>
-          <Link to="/app/settings#workspace-defaults" className="ghost-button px-4 py-2 text-sm">
-            Theme
+          <Link to="/app/settings" className="ghost-button px-4 py-2 text-sm">
+            Settings
           </Link>
           <Link
             to={pageMeta.ctaTo}
