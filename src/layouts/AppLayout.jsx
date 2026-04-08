@@ -9,8 +9,12 @@ import {
   ChevronRight,
   Wand2,
   Plus,
+  Sun,
+  Moon,
+  Globe,
 } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
+import { useTheme } from "../context/ThemeContext.jsx";
 
 /** Returns translated nav items — must be called inside a component. */
 function useNavItems() {
@@ -119,7 +123,7 @@ function Sidebar() {
         </nav>
 
         {/* Bottom CTA */}
-        <div className="mt-auto pt-8">
+        <div className="mt-auto pt-6">
           <div className="glass-panel rounded-[24px] p-4">
             <div className="mb-3 flex items-center gap-2">
               <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
@@ -141,9 +145,64 @@ function Sidebar() {
               {t("Generate document", "Générer un document")}
             </Link>
           </div>
+
+          {/* Policy links footer */}
+          <div className="mt-5 flex flex-wrap gap-x-3 gap-y-1.5">
+            {[
+              { href: "/terms",         label: t("Terms", "Conditions") },
+              { href: "/privacy",       label: t("Privacy", "Confidentialité") },
+              { href: "/cookies",       label: t("Cookies", "Témoins") },
+              { href: "/accessibility", label: t("Accessibility", "Accessibilité") },
+              { href: "/disclaimer",    label: t("Disclaimer", "Avertissement") },
+            ].map(({ href, label }) => (
+              <a
+                key={href}
+                href={href}
+                className="text-[11px] text-zinc-500 transition hover:text-zinc-300"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </aside>
+  );
+}
+
+function ThemeLangToggles() {
+  const { resolved, setTheme } = useTheme();
+  const { lang, setLanguage, t } = useLang();
+
+  const toggleTheme = () => setTheme(resolved === "Light" ? "Dark" : "Light");
+  const toggleLang  = () => setLanguage(lang === "en" ? "French" : "English");
+
+  return (
+    <div className="flex items-center gap-1">
+      {/* Language toggle */}
+      <button
+        onClick={toggleLang}
+        title={lang === "en" ? "Passer en français" : "Switch to English"}
+        className="ghost-button inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold tracking-wide"
+        style={{ minHeight: "36px" }}
+      >
+        <Globe className="h-3.5 w-3.5" />
+        {lang === "en" ? "FR" : "EN"}
+      </button>
+
+      {/* Theme toggle */}
+      <button
+        onClick={toggleTheme}
+        title={resolved === "Light" ? t("Switch to dark mode", "Passer en mode sombre") : t("Switch to light mode", "Passer en mode clair")}
+        className="ghost-button inline-flex items-center justify-center px-3 py-2"
+        style={{ minHeight: "36px" }}
+      >
+        {resolved === "Light"
+          ? <Moon className="h-4 w-4" />
+          : <Sun  className="h-4 w-4" />
+        }
+      </button>
+    </div>
   );
 }
 
@@ -201,16 +260,18 @@ function TopBar() {
           </div>
           <div className="truncate text-sm text-zinc-400">{pageMeta.title}</div>
         </div>
-        <div className="flex items-center gap-3">
-          <Link to="/app/advisor" className="ghost-button px-4 py-2 text-sm">
+        <div className="flex items-center gap-2">
+          <ThemeLangToggles />
+          <div className="mx-1 h-5 w-px" style={{ backgroundColor: "var(--border)" }} />
+          <Link to="/app/advisor" className="ghost-button px-4 py-2 text-sm hidden sm:inline-flex">
             {t("Advisor", "Conseiller")}
           </Link>
-          <Link to="/app/settings" className="ghost-button px-4 py-2 text-sm">
+          <Link to="/app/settings" className="ghost-button px-4 py-2 text-sm hidden sm:inline-flex">
             {t("Settings", "Paramètres")}
           </Link>
           <Link to={pageMeta.ctaTo} className="gold-button inline-flex items-center gap-2 px-4 py-2 text-sm">
             <Plus className="h-4 w-4" />
-            {pageMeta.ctaLabel}
+            <span className="hidden sm:inline">{pageMeta.ctaLabel}</span>
           </Link>
         </div>
       </div>
