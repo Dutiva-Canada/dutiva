@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useLang } from "../context/LanguageContext.jsx";
 import { getStoredSettings } from "../utils/workspaceSettings";
 
 // ─── ESA data ─────────────────────────────────────────────────────────────────
@@ -414,6 +415,7 @@ function ActionLink({ to, title, desc }) {
 // ─── Main Advisor page ────────────────────────────────────────────────────────
 export default function Advisor() {
   const { user } = useAuth();
+  const { t } = useLang();
   const settings = getStoredSettings();
   const [messages, setMessages] = useState(createInitialMessages);
   const [input, setInput] = useState("");
@@ -735,6 +737,14 @@ export default function Advisor() {
               </button>
             </div>
           </div>
+
+          {/* AI disclosure */}
+          <p className="mt-2 text-center text-[11px] leading-5 text-zinc-500">
+            {t(
+              "Dutiva Advisor is AI-powered and can make mistakes. Always verify important HR and legal decisions with a qualified professional.",
+              "Dutiva Conseiller est alimenté par l'IA et peut faire des erreurs. Vérifiez toujours les décisions RH et juridiques importantes avec un professionnel qualifié."
+            )}
+          </p>
         </SectionCard>
 
         {/* Right: Calculator + history + actions */}
