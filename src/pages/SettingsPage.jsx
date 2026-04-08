@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { saveToStorage, removeFromStorage } from "../utils/storage";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useTheme } from "../context/ThemeContext.jsx";
+import { useLang } from "../context/LanguageContext.jsx";
 import { supabase } from "../lib/supabase";
 import {
   defaultSettings,
@@ -48,23 +50,18 @@ function Field({ label, icon, children }) {
 
 function SaveBanner({ visible, text = "Settings saved successfully.", tone = "success" }) {
   if (!visible) return null;
-
   const toneClass =
     tone === "warning"
       ? "border-yellow-400/15 bg-yellow-400/8 text-yellow-200"
       : "border-emerald-400/15 bg-emerald-400/8 text-emerald-300";
-
   return (
-    <div className={`rounded-2xl border px-4 py-3 text-sm ${toneClass}`}>
-      {text}
-    </div>
+    <div className={`rounded-2xl border px-4 py-3 text-sm ${toneClass}`}>{text}</div>
   );
 }
 
 function SummaryItem({ icon, title, desc, tone = "default" }) {
   const iconTone =
     tone === "gold" ? "text-amber-300" : tone === "success" ? "text-emerald-300" : "text-zinc-300";
-
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
       <div className={`mt-0.5 ${iconTone}`}>{icon}</div>
@@ -78,40 +75,41 @@ function SummaryItem({ icon, title, desc, tone = "default" }) {
 
 function toDbPayload(form) {
   return {
-    primary_email: form.email,
-    company_name: form.companyName,
-    legal_name: form.legalName,
-    website: form.website,
-    province: form.province,
-    city: form.city,
+    primary_email:   form.email,
+    company_name:    form.companyName,
+    legal_name:      form.legalName,
+    website:         form.website,
+    province:        form.province,
+    city:            form.city,
     primary_contact: form.primaryContact,
-    company_size: form.companySize,
+    company_size:    form.companySize,
     language_default: form.languageDefault,
-    theme_default: form.themeDefault,
+    theme_default:   form.themeDefault,
     compliance_mode: form.complianceMode,
   };
 }
 
 function fromDbRow(row) {
   if (!row) return defaultSettings;
-
   return normalizeSettings({
-    companyName: row.company_name ?? defaultSettings.companyName,
-    legalName: row.legal_name ?? defaultSettings.legalName,
-    email: row.primary_email ?? row.email ?? defaultSettings.email,
-    website: row.website ?? defaultSettings.website,
-    province: row.province ?? defaultSettings.province,
-    city: row.city ?? defaultSettings.city,
-    primaryContact: row.primary_contact ?? defaultSettings.primaryContact,
-    companySize: row.company_size ?? defaultSettings.companySize,
+    companyName:     row.company_name    ?? defaultSettings.companyName,
+    legalName:       row.legal_name      ?? defaultSettings.legalName,
+    email:           row.primary_email   ?? row.email ?? defaultSettings.email,
+    website:         row.website         ?? defaultSettings.website,
+    province:        row.province        ?? defaultSettings.province,
+    city:            row.city            ?? defaultSettings.city,
+    primaryContact:  row.primary_contact ?? defaultSettings.primaryContact,
+    companySize:     row.company_size    ?? defaultSettings.companySize,
     languageDefault: row.language_default ?? defaultSettings.languageDefault,
-    themeDefault: row.theme_default ?? defaultSettings.themeDefault,
-    complianceMode: row.compliance_mode ?? defaultSettings.complianceMode,
+    themeDefault:    row.theme_default   ?? defaultSettings.themeDefault,
+    complianceMode:  row.compliance_mode ?? defaultSettings.complianceMode,
   });
 }
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { setTheme } = useTheme();
+  const { setLanguage, t } = useLang();
   const [saved, setSaved] = useState(false);
   const [bannerText, setBannerText] = useState("Settings saved successfully.");
   const [bannerTone, setBannerTone] = useState("success");
@@ -124,20 +122,11 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function loadProfile() {
-      if (!user || !supabase) {
-        setLoadingProfile(false);
-        return;
-      }
-
+      if (!user || !supabase) { setLoadingProfile(false); return; }
       try {
         const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
-
+          .from("profiles").select("*").eq("id", user.id).maybeSingle();
         if (error) throw error;
-
         if (data) {
           const nextForm = fromDbRow(data);
           setForm(nextForm);
@@ -149,7 +138,6 @@ export default function SettingsPage() {
         setLoadingProfile(false);
       }
     }
-
     loadProfile();
   }, [user]);
 
@@ -157,25 +145,18 @@ export default function SettingsPage() {
     try {
       const normalizedForm = normalizeSettings(form);
       saveToStorage(SETTINGS_STORAGE_KEY, normalizedForm);
-
       if (user && supabase) {
-        const payload = {
-          id: user.id,
-          ...toDbPayload(normalizedForm),
-        };
-
-        const { error } = await supabase.from("profiles").upsert(payload);
+        const { error } = await supabase.from("profiles").upsert({ id: user.id, ...toDbPayload(normalizedForm) });
         if (error) throw error;
       }
-
       setBannerTone("success");
-      setBannerText("Settings saved successfully.");
+      setBannerText(t("Settings saved successfully.", "Paramètres enregistrés avec succès."));
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (error) {
       console.error("Save failed:", error);
       setBannerTone("warning");
-      setBannerText("Could not save to Supabase yet. Local settings were kept.");
+      setBannerText(t("Could not save to Supabase yet. Local settings were kept.", "Impossible de sauvegarder sur Supabase. Les paramètres locaux ont été conservés."));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     }
@@ -185,25 +166,20 @@ export default function SettingsPage() {
     try {
       removeFromStorage(SETTINGS_STORAGE_KEY);
       setForm(defaultSettings);
-
+      setTheme(defaultSettings.themeDefault);
+      setLanguage(defaultSettings.languageDefault);
       if (user && supabase) {
-        const payload = {
-          id: user.id,
-          ...toDbPayload(defaultSettings),
-        };
-
-        const { error } = await supabase.from("profiles").upsert(payload);
+        const { error } = await supabase.from("profiles").upsert({ id: user.id, ...toDbPayload(defaultSettings) });
         if (error) throw error;
       }
-
       setBannerTone("success");
-      setBannerText("Settings reset to defaults.");
+      setBannerText(t("Settings reset to defaults.", "Paramètres réinitialisés."));
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (error) {
       console.error("Reset failed:", error);
       setBannerTone("warning");
-      setBannerText("Defaults restored locally, but Supabase update failed.");
+      setBannerText(t("Defaults restored locally, but Supabase update failed.", "Valeurs par défaut restaurées localement, mais la mise à jour Supabase a échoué."));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     }
@@ -214,44 +190,37 @@ export default function SettingsPage() {
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-            Settings
+            {t("Settings", "Paramètres")}
           </div>
           <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
-            Company profile
+            {t("Company profile", "Profil d'entreprise")}
           </h1>
           <p className="mt-3 max-w-2xl text-base text-zinc-400">
-            Configure your business profile, workspace preferences, and default compliance context.
+            {t(
+              "Configure your business profile, workspace preferences, and default compliance context.",
+              "Configurez votre profil d'entreprise, vos préférences d'espace de travail et votre contexte de conformité par défaut."
+            )}
           </p>
         </div>
-
         <div className="flex flex-wrap gap-3">
-          <button
-            onClick={handleSave}
-            className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
-          >
+          <button onClick={handleSave} className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm">
             <Save className="h-4 w-4" />
-            Save settings
+            {t("Save settings", "Enregistrer")}
           </button>
-
-          <button
-            onClick={handleReset}
-            className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
-          >
+          <button onClick={handleReset} className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm">
             <RotateCcw className="h-4 w-4" />
-            Reset
+            {t("Reset", "Réinitialiser")}
           </button>
         </div>
       </div>
 
-      <SaveBanner
-        visible={saved}
-        text={bannerText}
-        tone={bannerTone}
-      />
+      <SaveBanner visible={saved} text={bannerText} tone={bannerTone} />
 
       {loadingProfile ? (
         <div className="premium-card p-6">
-          <div className="text-sm text-zinc-300">Loading your workspace profile...</div>
+          <div className="text-sm text-zinc-300">
+            {t("Loading your workspace profile...", "Chargement de votre profil...")}
+          </div>
         </div>
       ) : null}
 
@@ -259,76 +228,45 @@ export default function SettingsPage() {
         <div className="space-y-6">
           <SectionCard
             id="business-details"
-            title="Business details"
+            title={t("Business details", "Détails de l'entreprise")}
             action={
               <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
-                Core profile
+                {t("Core profile", "Profil principal")}
               </div>
             }
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Company name" icon={<Building2 className="h-4 w-4" />}>
-                <input
-                  value={form.companyName}
-                  onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                />
+              <Field label={t("Company name", "Nom de l'entreprise")} icon={<Building2 className="h-4 w-4" />}>
+                <input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
-
-              <Field label="Legal name" icon={<Building2 className="h-4 w-4" />}>
-                <input
-                  value={form.legalName}
-                  onChange={(e) => setForm({ ...form, legalName: e.target.value })}
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                />
+              <Field label={t("Legal name", "Dénomination légale")} icon={<Building2 className="h-4 w-4" />}>
+                <input value={form.legalName} onChange={(e) => setForm({ ...form, legalName: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
-
-              <Field label="Primary email" icon={<Mail className="h-4 w-4" />}>
-                <input
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                />
+              <Field label={t("Primary email", "Courriel principal")} icon={<Mail className="h-4 w-4" />}>
+                <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
-
-              <Field label="Website" icon={<Globe className="h-4 w-4" />}>
-                <input
-                  value={form.website}
-                  onChange={(e) => setForm({ ...form, website: e.target.value })}
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                />
+              <Field label={t("Website", "Site web")} icon={<Globe className="h-4 w-4" />}>
+                <input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
-
-              <Field label="Province" icon={<MapPin className="h-4 w-4" />}>
-                <input
-                  value={form.province}
-                  onChange={(e) => setForm({ ...form, province: e.target.value })}
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                />
+              <Field label={t("Province", "Province")} icon={<MapPin className="h-4 w-4" />}>
+                <input value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
-
-              <Field label="City" icon={<MapPin className="h-4 w-4" />}>
-                <input
-                  value={form.city}
-                  onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                />
+              <Field label={t("City", "Ville")} icon={<MapPin className="h-4 w-4" />}>
+                <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
-
-              <Field label="Primary contact" icon={<User2 className="h-4 w-4" />}>
-                <input
-                  value={form.primaryContact}
-                  onChange={(e) => setForm({ ...form, primaryContact: e.target.value })}
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                />
+              <Field label={t("Primary contact", "Contact principal")} icon={<User2 className="h-4 w-4" />}>
+                <input value={form.primaryContact} onChange={(e) => setForm({ ...form, primaryContact: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
-
-              <Field label="Company size" icon={<Building2 className="h-4 w-4" />}>
-                <select
-                  value={form.companySize}
-                  onChange={(e) => setForm({ ...form, companySize: e.target.value })}
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
-                >
+              <Field label={t("Company size", "Taille de l'entreprise")} icon={<Building2 className="h-4 w-4" />}>
+                <select value={form.companySize} onChange={(e) => setForm({ ...form, companySize: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none">
                   <option className="bg-[#0E1218]">1-10</option>
                   <option className="bg-[#0E1218]">11-50</option>
                   <option className="bg-[#0E1218]">51-200</option>
@@ -338,12 +276,15 @@ export default function SettingsPage() {
             </div>
           </SectionCard>
 
-          <SectionCard id="workspace-defaults" title="Workspace defaults">
+          <SectionCard id="workspace-defaults" title={t("Workspace defaults", "Préférences de l'espace de travail")}>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Default language" icon={<Globe className="h-4 w-4" />}>
+              <Field label={t("Default language", "Langue par défaut")} icon={<Globe className="h-4 w-4" />}>
                 <select
                   value={form.languageDefault}
-                  onChange={(e) => setForm({ ...form, languageDefault: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, languageDefault: e.target.value });
+                    setLanguage(e.target.value); // instant apply
+                  }}
                   className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                 >
                   <option className="bg-[#0E1218]">English</option>
@@ -352,10 +293,13 @@ export default function SettingsPage() {
                 </select>
               </Field>
 
-              <Field label="Default theme" icon={<SlidersHorizontal className="h-4 w-4" />}>
+              <Field label={t("Default theme", "Thème par défaut")} icon={<SlidersHorizontal className="h-4 w-4" />}>
                 <select
                   value={form.themeDefault}
-                  onChange={(e) => setForm({ ...form, themeDefault: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, themeDefault: e.target.value });
+                    setTheme(e.target.value); // instant apply
+                  }}
                   className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
                 >
                   <option className="bg-[#0E1218]">Dark</option>
@@ -364,7 +308,7 @@ export default function SettingsPage() {
                 </select>
               </Field>
 
-              <Field label="Compliance mode" icon={<ShieldCheck className="h-4 w-4" />}>
+              <Field label={t("Compliance mode", "Mode de conformité")} icon={<ShieldCheck className="h-4 w-4" />}>
                 <select
                   value={form.complianceMode}
                   onChange={(e) => setForm({ ...form, complianceMode: e.target.value })}
@@ -381,10 +325,10 @@ export default function SettingsPage() {
 
         <div className="space-y-6">
           <SectionCard
-            title="Workspace summary"
+            title={t("Workspace summary", "Résumé de l'espace de travail")}
             action={
               <div className="rounded-full border border-emerald-400/12 bg-emerald-400/8 px-3 py-1 text-xs font-medium text-emerald-300">
-                Active
+                {t("Active", "Actif")}
               </div>
             }
           >
@@ -392,34 +336,52 @@ export default function SettingsPage() {
               <SummaryItem
                 icon={<CheckCircle2 className="h-5 w-5" />}
                 tone="success"
-                title="Business profile configured"
-                desc="Your generator, advisor, and dashboard can all use this as shared workspace context."
+                title={t("Business profile configured", "Profil d'entreprise configuré")}
+                desc={t(
+                  "Your generator, advisor, and dashboard can all use this as shared workspace context.",
+                  "Votre générateur, conseiller et tableau de bord utilisent ce contexte partagé."
+                )}
               />
               <SummaryItem
                 icon={<ShieldCheck className="h-5 w-5" />}
                 tone="gold"
-                title="Supabase-ready profile"
-                desc="Settings now save locally and attempt to sync to your authenticated user profile."
+                title={t("Supabase-ready profile", "Profil prêt pour Supabase")}
+                desc={t(
+                  "Settings now save locally and attempt to sync to your authenticated user profile.",
+                  "Les paramètres sont sauvegardés localement et synchronisés avec votre profil authentifié."
+                )}
               />
               <SummaryItem
                 icon={<Sparkles className="h-5 w-5" />}
                 tone="gold"
-                title="Premium workspace direction"
-                desc="This now behaves more like a real SaaS settings screen instead of a static demo page."
+                title={t("Theme & language active", "Thème et langue actifs")}
+                desc={t(
+                  "Switch theme and language instantly from the dropdowns above — no save required.",
+                  "Changez de thème et de langue instantanément via les menus ci-dessus — sans sauvegarde."
+                )}
               />
             </div>
           </SectionCard>
 
-          <SectionCard title="Why this matters">
+          <SectionCard title={t("Why this matters", "Pourquoi c'est important")}>
             <div className="space-y-3 text-sm text-zinc-300">
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                Your profile can now be tied to the authenticated user instead of only the browser.
+                {t(
+                  "Your profile can now be tied to the authenticated user instead of only the browser.",
+                  "Votre profil peut maintenant être lié à l'utilisateur authentifié plutôt qu'au seul navigateur."
+                )}
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                This creates the foundation for true multi-device persistence later.
+                {t(
+                  "This creates the foundation for true multi-device persistence later.",
+                  "Ceci crée les bases d'une persistance multi-appareils future."
+                )}
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                It also prepares the dashboard and generator to read real workspace data from Supabase.
+                {t(
+                  "It also prepares the dashboard and generator to read real workspace data from Supabase.",
+                  "Cela prépare également le tableau de bord et le générateur à lire les données réelles depuis Supabase."
+                )}
               </div>
             </div>
           </SectionCard>

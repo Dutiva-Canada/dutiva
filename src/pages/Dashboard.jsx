@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { supabase } from "../lib/supabase";
 import { getStoredSettings } from "../utils/workspaceSettings";
+import { useLang } from "../context/LanguageContext.jsx";
 
 // ── ESA notice period lookup (statutory minimums by province) ──────────────
 const ESA_NOTICE = {
@@ -151,8 +152,13 @@ function formatRelative(value) {
   }
 }
 
-function greeting() {
+function greeting(lang = "en") {
   const h = new Date().getHours();
+  if (lang === "fr") {
+    if (h < 12) return "Bonjour";
+    if (h < 17) return "Bon après-midi";
+    return "Bonsoir";
+  }
   if (h < 12) return "Good morning";
   if (h < 17) return "Good afternoon";
   return "Good evening";
@@ -478,6 +484,7 @@ function LawUpdatesCard({ updates }) {
 // ── Main Dashboard ─────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t, lang } = useLang();
   const savedSettings = getStoredSettings();
   const companyName = savedSettings.companyName || null;
   const province = savedSettings.province || null;
@@ -544,22 +551,22 @@ export default function Dashboard() {
         <div>
           <div className="mb-2 text-sm text-zinc-500">{today}</div>
           <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
-            {greeting()}{companyName ? `, ${companyName}` : "."}
+            {greeting(lang)}{companyName ? `, ${companyName}` : "."}
           </h1>
           <p className="mt-2 text-base text-zinc-400">
             {hasDocuments
-              ? `${documentCount} document${documentCount > 1 ? "s" : ""} in your workspace. ${pendingSignatures > 0 ? `${pendingSignatures} pending signature${pendingSignatures > 1 ? "s" : ""}.` : "All signatures up to date."}`
-              : "Your HR compliance workspace is ready. Generate your first document below."}
+              ? `${documentCount} ${t("document", "document")}${documentCount > 1 ? "s" : ""} ${t("in your workspace.", "dans votre espace de travail.")} ${pendingSignatures > 0 ? `${pendingSignatures} ${t("pending signature", "signature en attente")}${pendingSignatures > 1 ? "s" : ""}.` : t("All signatures up to date.", "Toutes les signatures sont à jour.")}`
+              : t("Your HR compliance workspace is ready. Generate your first document below.", "Votre espace de conformité RH est prêt. Générez votre premier document ci-dessous.")}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link to="/app/advisor" className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm">
             <MessageSquare className="h-4 w-4" />
-            Ask advisor
+            {t("Ask advisor", "Consulter le conseiller")}
           </Link>
           <Link to="/app/generator" className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm">
             <Wand2 className="h-4 w-4" />
-            Generate document
+            {t("Generate document", "Générer un document")}
           </Link>
         </div>
       </div>
@@ -567,33 +574,33 @@ export default function Dashboard() {
       {/* ── Stat cards ── */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Documents"
+          title={t("Documents", "Documents")}
           value={loadingDocs ? "—" : String(documentCount)}
-          sub={hasDocuments ? `Last: ${formatRelative(documents[0]?.created_at)}` : "None yet — start below"}
+          sub={hasDocuments ? `${t("Last", "Dernier")} : ${formatRelative(documents[0]?.created_at)}` : t("None yet — start below", "Aucun encore — commencez ci-dessous")}
           tone={hasDocuments ? "gold" : "default"}
           icon={<FileText className="h-4 w-4" />}
           to="/app/generator"
         />
         <StatCard
-          title="Provinces active"
+          title={t("Provinces active", "Provinces actives")}
           value={loadingDocs ? "—" : String(Math.max(activeProvinces, province ? 1 : 0))}
-          sub={province ? `Primary: ${province}` : "Set province in Settings"}
+          sub={province ? `${t("Primary", "Principale")} : ${province}` : t("Set province in Settings", "Définir la province dans Paramètres")}
           tone={province ? "green" : "default"}
           icon={<MapPin className="h-4 w-4" />}
           to="/app/settings"
         />
         <StatCard
-          title="Pending signatures"
+          title={t("Pending signatures", "Signatures en attente")}
           value={loadingDocs ? "—" : String(pendingSignatures)}
-          sub={pendingSignatures > 0 ? "Awaiting review" : "All signed or none pending"}
+          sub={pendingSignatures > 0 ? t("Awaiting review", "En attente de révision") : t("All signed or none pending", "Tout signé ou aucun en attente")}
           tone={pendingSignatures > 0 ? "warning" : "default"}
           icon={<AlertTriangle className="h-4 w-4" />}
           to="/app/generator"
         />
         <StatCard
-          title="Law updates"
+          title={t("Law updates", "Mises à jour législatives")}
           value={loadingDocs ? "—" : String(lawUpdates.length)}
-          sub={lawUpdates.length > 0 ? "Recent legislation changes detected" : "No changes detected in 30 days"}
+          sub={lawUpdates.length > 0 ? t("Recent legislation changes detected", "Changements législatifs récents détectés") : t("No changes detected in 30 days", "Aucun changement détecté en 30 jours")}
           tone={lawUpdates.length > 0 ? "warning" : "green"}
           icon={<Bell className="h-4 w-4" />}
         />
@@ -603,19 +610,19 @@ export default function Dashboard() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-zinc-400">
-            Quick document launch
+            {t("Quick document launch", "Lancement rapide de documents")}
           </h2>
           <Link
             to="/app/templates"
             className="flex items-center gap-1 text-xs text-zinc-400 transition hover:text-zinc-200"
           >
-            All 16 templates
+            {t("All 16 templates", "16 modèles")}
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {QUICK_TEMPLATES.map((t) => (
-            <QuickLaunchCard key={t.label} {...t} />
+          {QUICK_TEMPLATES.map((tpl) => (
+            <QuickLaunchCard key={tpl.label} {...tpl} />
           ))}
         </div>
       </div>

@@ -1,18 +1,20 @@
 import { Suspense, lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
+import { LanguageProvider } from "./context/LanguageContext.jsx";
 
-const MarketingLayout = lazy(() => import("./layouts/MarketingLayout.jsx"));
-const AppLayout = lazy(() => import("./layouts/AppLayout.jsx"));
-const LandingPage = lazy(() => import("./pages/LandingPage.jsx"));
-const PricingPage = lazy(() => import("./pages/PricingPage.jsx"));
-const Dashboard = lazy(() => import("./pages/Dashboard.jsx"));
-const Templates = lazy(() => import("./pages/Templates.jsx"));
-const Advisor = lazy(() => import("./pages/Advisor.jsx"));
-const SettingsPage = lazy(() => import("./pages/SettingsPage.jsx"));
-const GeneratorPage = lazy(() => import("./pages/GeneratorPage.jsx"));
-const AuthPage = lazy(() => import("./pages/AuthPage.jsx"));
-const ESignPage = lazy(() => import("./pages/ESignPage.jsx"));
+const MarketingLayout   = lazy(() => import("./layouts/MarketingLayout.jsx"));
+const AppLayout         = lazy(() => import("./layouts/AppLayout.jsx"));
+const LandingPage       = lazy(() => import("./pages/LandingPage.jsx"));
+const PricingPage       = lazy(() => import("./pages/PricingPage.jsx"));
+const Dashboard         = lazy(() => import("./pages/Dashboard.jsx"));
+const Templates         = lazy(() => import("./pages/Templates.jsx"));
+const Advisor           = lazy(() => import("./pages/Advisor.jsx"));
+const SettingsPage      = lazy(() => import("./pages/SettingsPage.jsx"));
+const GeneratorPage     = lazy(() => import("./pages/GeneratorPage.jsx"));
+const AuthPage          = lazy(() => import("./pages/AuthPage.jsx"));
+const ESignPage         = lazy(() => import("./pages/ESignPage.jsx"));
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage.jsx"));
 
 function RouteLoader() {
@@ -20,9 +22,7 @@ function RouteLoader() {
     <div className="app-shell min-h-screen flex items-center justify-center px-4">
       <div className="premium-card w-full max-w-md p-6 text-center">
         <div className="text-lg font-semibold text-zinc-100">Loading workspace...</div>
-        <div className="mt-2 text-sm text-zinc-400">
-          Preparing the next screen.
-        </div>
+        <div className="mt-2 text-sm text-zinc-400">Preparing the next screen.</div>
       </div>
     </div>
   );
@@ -34,31 +34,35 @@ function withSuspense(element) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={withSuspense(<LandingPage />)} />
+    <ThemeProvider>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={withSuspense(<LandingPage />)} />
 
-        <Route element={withSuspense(<MarketingLayout />)}>
-          <Route path="/pricing" element={withSuspense(<PricingPage />)} />
-          <Route path="/payment-success" element={withSuspense(<PaymentSuccessPage />)} />
-        </Route>
+            <Route element={withSuspense(<MarketingLayout />)}>
+              <Route path="/pricing" element={withSuspense(<PricingPage />)} />
+              <Route path="/payment-success" element={withSuspense(<PaymentSuccessPage />)} />
+            </Route>
 
-        <Route path="/auth" element={withSuspense(<AuthPage />)} />
-        <Route path="/sign/:token" element={withSuspense(<ESignPage />)} />
+            <Route path="/auth" element={withSuspense(<AuthPage />)} />
+            <Route path="/sign/:token" element={withSuspense(<ESignPage />)} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/app" element={withSuspense(<AppLayout />)}>
-            <Route index element={withSuspense(<Dashboard />)} />
-            <Route path="templates" element={withSuspense(<Templates />)} />
-            <Route path="advisor" element={withSuspense(<Advisor />)} />
-            <Route path="settings" element={withSuspense(<SettingsPage />)} />
-            <Route path="generator" element={withSuspense(<GeneratorPage />)} />
-            <Route path="*" element={<Navigate to="/app" replace />} />
-          </Route>
-        </Route>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/app" element={withSuspense(<AppLayout />)}>
+                <Route index element={withSuspense(<Dashboard />)} />
+                <Route path="templates" element={withSuspense(<Templates />)} />
+                <Route path="advisor" element={withSuspense(<Advisor />)} />
+                <Route path="settings" element={withSuspense(<SettingsPage />)} />
+                <Route path="generator" element={withSuspense(<GeneratorPage />)} />
+                <Route path="*" element={<Navigate to="/app" replace />} />
+              </Route>
+            </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
