@@ -36,8 +36,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={withSuspense(<LandingPage />)} />
+
         <Route element={withSuspense(<MarketingLayout />)}>
-          <Route path="/" element={withSuspense(<LandingPage />)} />
           <Route path="/pricing" element={withSuspense(<PricingPage />)} />
           <Route path="/payment-success" element={withSuspense(<PaymentSuccessPage />)} />
         </Route>

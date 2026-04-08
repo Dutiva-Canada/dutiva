@@ -38,7 +38,7 @@ function PriceCard({
       {featured ? (
         <div className="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1 text-xs font-medium text-amber-300">
           <Sparkles className="h-3.5 w-3.5" />
-          Most practical
+          Most popular
         </div>
       ) : null}
 
@@ -124,6 +124,10 @@ export default function PricingPage() {
     }
   };
 
+  const handleContactSales = () => {
+    window.location.href = "mailto:hello@dutiva.ca?subject=Advanced%20Plan%20Inquiry&body=Hi%2C%20I%27m%20interested%20in%20the%20Advanced%20plan%20for%20Dutiva.%20Here%27s%20a%20bit%20about%20my%20team%3A%20";
+  };
+
   return (
     <div className="marketing-shell min-h-screen">
       <Section className="py-14 md:py-20">
@@ -137,8 +141,8 @@ export default function PricingPage() {
           </h1>
 
           <p className="mt-4 text-lg leading-8 text-zinc-400">
-            Built to feel premium and credible from the first impression. Simple enough for early
-            adoption, structured enough to support a serious SaaS workflow.
+            No contracts, no lock-in. Start free and upgrade when you need more.
+            Cancel anytime.
           </p>
         </div>
 
@@ -146,11 +150,11 @@ export default function PricingPage() {
           <PriceCard
             title="Starter"
             price="Free"
-            desc="For early exploration, validation, and lightweight document generation."
+            desc="Try the product, generate real documents, and validate Dutiva for your team."
             features={[
-              "Core template access",
-              "App preview access",
-              "Basic generator workflow",
+              "3 document generations per month",
+              "Access to all 16 template types",
+              "AI-assisted form filling",
             ]}
             cta="Start free"
             to="/app/generator?template=Offer%20Letter"
@@ -159,13 +163,13 @@ export default function PricingPage() {
           <PriceCard
             title="Growth"
             price="$39"
-            suffix="/mo"
+            suffix="/mo CAD"
             featured
-            desc="For SMBs and growing teams that need a cleaner compliance workflow."
+            desc="For SMBs and growing teams that need compliant HR documents on a regular basis."
             features={[
-              "Expanded template access",
-              "Premium dashboard + advisor experience",
-              "Better fit for real customer workflows",
+              "Unlimited document generation",
+              "AI Advisor with legislation citations",
+              "ESA auto-calculator + e-signatures",
             ]}
             cta="Choose Growth"
             onCheckout={() => handleCheckout("growth")}
@@ -175,15 +179,15 @@ export default function PricingPage() {
           <PriceCard
             title="Advanced"
             price="Custom"
-            desc="For mature teams that want more flexibility and tailored rollout options."
+            desc="For organizations that need multi-user access, dedicated setup, or custom templates."
             features={[
-              "Custom implementation path",
-              "More operational flexibility",
-              "Room for future expansion",
+              "Everything in Growth",
+              "Multi-user team workspace",
+              "Priority support and custom templates",
             ]}
-            cta="Talk to sales"
-            onCheckout={() => handleCheckout("advanced")}
-            loading={checkingOut === "advanced"}
+            cta="Talk to us"
+            onCheckout={handleContactSales}
+            loading={false}
           />
         </div>
 
@@ -193,12 +197,54 @@ export default function PricingPage() {
           </div>
         )}
 
-        <div className="mt-10 rounded-[28px] border border-white/6 bg-white/[0.02] p-6 text-center">
-          <div className="text-sm font-medium text-zinc-100">
-            The strongest proof is now the product flow itself.
+        {/* FAQ / reassurance row */}
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <div className="rounded-[20px] border border-white/6 bg-white/[0.02] p-5">
+            <div className="text-sm font-semibold text-zinc-100">Is this legal advice?</div>
+            <div className="mt-2 text-sm text-zinc-400">
+              No. Dutiva provides general HR compliance guidance and document templates. For
+              specific legal situations, consult an employment lawyer.
+            </div>
+          </div>
+          <div className="rounded-[20px] border border-white/6 bg-white/[0.02] p-5">
+            <div className="text-sm font-semibold text-zinc-100">Which provinces are covered?</div>
+            <div className="mt-2 text-sm text-zinc-400">
+              All 10 provinces, 3 territories, and federal — 14 jurisdictions total, each with
+              current Employment Standards Act references.
+            </div>
+          </div>
+          <div className="rounded-[20px] border border-white/6 bg-white/[0.02] p-5">
+            <div className="text-sm font-semibold text-zinc-100">Is my data stored in Canada?</div>
+            <div className="mt-2 text-sm text-zinc-400">
+              Sensitive employee data is processed in your browser and never stored on our
+              servers. Dutiva is PIPEDA-compliant by design.
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-6 rounded-[28px] border border-white/6 bg-white/[0.02] p-8 text-center">
+          <div className="text-lg font-semibold text-zinc-100">
+            Not sure which plan fits?
           </div>
           <div className="mt-2 text-sm text-zinc-400">
-            Pricing should lead naturally into the generator, advisor, and workspace experience you've built.
+            Start free — no credit card required. Generate a real document and see the quality
+            before you decide. You can upgrade, downgrade, or cancel anytime.
+          </div>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Link
+              to="/app/generator?template=Offer%20Letter"
+              className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+            >
+              Start free
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href="mailto:hello@dutiva.ca"
+              className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+            >
+              Contact us
+            </a>
           </div>
         </div>
       </Section>

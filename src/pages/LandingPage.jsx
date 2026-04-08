@@ -1,12 +1,6 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  CheckCircle2,
-  FileText,
-  MessageSquare,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles } from "lucide-react";
 
 function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-7xl px-4 md:px-6 ${className}`}>{children}</section>;
@@ -37,17 +31,18 @@ function FeatureCard({ icon, title, desc, to }) {
 export default function LandingPage() {
   return (
     <div className="marketing-shell min-h-screen">
+      {/* ── HERO ── */}
       <Section className="grid gap-10 py-14 md:py-20 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
         <div className="space-y-6">
-          <Pill>HR compliance made simple for Canadian businesses</Pill>
+          <Pill>Built for Canadian employers who don't have an HR team</Pill>
 
           <div className="space-y-4">
             <h1 className="metric-value max-w-4xl text-5xl font-semibold tracking-tight text-zinc-50 md:text-7xl">
-              Build compliant HR foundations without hiring a full HR team.
+              HR compliance your employment lawyer would approve — at a fraction of the cost.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-zinc-400">
-              Generate bilingual, Canada-ready HR documents, get operational guidance, and manage
-              compliance workflows from one premium workspace.
+              Generate bilingual, province-specific HR documents, get legislation-cited guidance,
+              and manage your compliance workflow — without hiring an HR department.
             </p>
           </div>
 
@@ -64,11 +59,27 @@ export default function LandingPage() {
               to="/app"
               className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm"
             >
-              Open app preview
+              Explore the app
             </Link>
           </div>
 
-          <div className="flex flex-wrap gap-3 pt-2">
+          {/* Stats bar */}
+          <div className="flex flex-wrap gap-6 pt-1">
+            <div className="text-center">
+              <div className="font-serif text-2xl text-amber-400">16</div>
+              <div className="text-xs uppercase tracking-widest text-zinc-500">Templates</div>
+            </div>
+            <div className="text-center">
+              <div className="font-serif text-2xl text-amber-400">14</div>
+              <div className="text-xs uppercase tracking-widest text-zinc-500">Jurisdictions</div>
+            </div>
+            <div className="text-center">
+              <div className="font-serif text-2xl text-amber-400">EN/FR</div>
+              <div className="text-xs uppercase tracking-widest text-zinc-500">Bilingual</div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3 pt-1">
             <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300">
               Province-specific support
             </div>
@@ -80,22 +91,23 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="grid gap-3 pt-2 text-sm text-zinc-400">
+          <div className="grid gap-3 pt-1 text-sm text-zinc-400">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-amber-300" />
-              Generate HR documents in minutes
+              Generate province-specific documents in under 5 minutes
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-amber-300" />
-              Reduce setup time with a cleaner workflow
+              ESA notice periods and severance calculated automatically
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-amber-300" />
-              Strengthen trust with a more structured compliance system
+              Every document available in English and French
             </div>
           </div>
         </div>
 
+        {/* Advisor preview widget */}
         <div className="premium-card overflow-hidden rounded-[32px] p-0">
           <div className="grid gap-5 bg-[linear-gradient(180deg,rgba(18,22,30,0.98)_0%,rgba(14,17,24,0.98)_100%)] p-6">
             <div className="flex items-center justify-between border-b border-white/6 pb-4">
@@ -110,7 +122,7 @@ export default function LandingPage() {
               </div>
 
               <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
-                Premium preview
+                Live
               </div>
             </div>
 
@@ -176,15 +188,16 @@ export default function LandingPage() {
         </div>
       </Section>
 
+      {/* ── FEATURES ── */}
       <Section className="py-6 md:py-10">
         <div className="mb-8 max-w-3xl">
-          <Pill>What makes Dutiva valuable</Pill>
+          <Pill>What makes Dutiva work</Pill>
           <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
-            A more structured system for HR compliance work.
+            Everything you need to stay compliant.
           </h2>
           <p className="mt-3 text-base leading-7 text-zinc-400">
-            This version is designed to feel less like scattered templates and more like an
-            operational platform for Canadian businesses.
+            Templates, calculations, guidance, and e-signatures — built around Canadian employment
+            law, not adapted from generic software.
           </p>
         </div>
 
@@ -192,41 +205,63 @@ export default function LandingPage() {
           <FeatureCard
             to="/app/generator?template=Employment%20Agreement"
             icon={<FileText className="h-5 w-5" />}
-            title="Tailored HR documents"
-            desc="Generate cleaner, more professional HR documents with stronger workflow structure."
+            title="16 bilingual templates"
+            desc="Offer letters, terminations, PIPs, NDAs — filled in minutes from a guided conversation, not a blank page."
           />
           <FeatureCard
             to="/app/settings"
             icon={<ShieldCheck className="h-5 w-5" />}
-            title="Canada-first design"
-            desc="Built around Canadian business realities instead of feeling retrofitted from generic software."
+            title="14 jurisdictions covered"
+            desc="All 10 provinces, 3 territories, and federal. Every Employment Standards Act — current legislation, not outdated references."
           />
           <FeatureCard
             to="/app/generator?template=Offer%20Letter"
             icon={<Sparkles className="h-5 w-5" />}
-            title="Guided generation"
-            desc="Move from static templates toward a more guided drafting and review experience."
+            title="AI-guided generation"
+            desc="Answer a few questions about the situation — Dutiva fills every field and flags what to double-check before you sign."
           />
           <FeatureCard
             to="/app/advisor"
             icon={<MessageSquare className="h-5 w-5" />}
-            title="Advisor support"
-            desc="Get a more premium advisory experience that feels integrated with your document workflow."
+            title="Legislation-cited advisor"
+            desc="Ask a compliance question in plain English. Get an answer with the exact ESA section, province, and effective date."
           />
         </div>
       </Section>
 
+      {/* ── FOUNDER CREDIBILITY ── */}
+      <Section className="py-8 md:py-12">
+        <div className="rounded-[28px] border border-white/6 bg-white/[0.02] p-8 md:p-10">
+          <div className="mx-auto max-w-2xl text-center">
+            <Pill>Why Dutiva exists</Pill>
+            <h3 className="metric-value mt-4 text-2xl font-semibold tracking-tight text-zinc-50 md:text-3xl">
+              Built by someone who has actually done this work.
+            </h3>
+            <p className="mt-3 text-base leading-7 text-zinc-400">
+              Dutiva was built by a Canadian HR and payroll professional with hands-on experience at
+              federal agencies and growing organizations — someone who has processed payroll,
+              filed ROEs, drafted termination letters, and navigated provincial employment standards.
+              Not a team that Googled it.
+            </p>
+            <p className="mt-3 text-sm text-zinc-500">
+              Built in Ottawa, Canada · PIPEDA-compliant · General HR guidance only, not legal advice
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      {/* ── BOTTOM CTA ── */}
       <Section className="py-12 md:py-16">
         <div className="premium-card overflow-hidden rounded-[32px] p-8 md:p-10">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
               <Pill>Start free</Pill>
               <h3 className="metric-value mt-4 text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">
-                Open the app preview and see the product direction live.
+                Generate your first compliant document in under 5 minutes.
               </h3>
               <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-400">
-                The app preview now follows the same premium direction as the new landing page -
-                stronger hierarchy, better contrast, and a more credible SaaS feel.
+                No credit card. No setup. Pick a template, answer a few questions, and get a
+                province-specific document ready to review and sign.
               </p>
             </div>
 
@@ -238,8 +273,8 @@ export default function LandingPage() {
                 Generate a document
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link to="/app" className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm">
-                Open app preview
+              <Link to="/pricing" className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm">
+                See pricing
               </Link>
             </div>
           </div>
