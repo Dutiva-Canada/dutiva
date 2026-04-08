@@ -15,7 +15,7 @@ export const config = { maxDuration: 60 }; // Vercel serverless: up to 60 s on H
 // Qwen2.5-7B: extremely popular → usually warm on HF Serverless API,
 // fast first-token (~2-4 s when warm), great instruction following.
 const HF_MODEL = "Qwen/Qwen2.5-7B-Instruct";
-const HF_API   = "https://api-inference.huggingface.co/v1/chat/completions";
+const HF_API   = "https://router.huggingface.co/v1/chat/completions"; // api-inference.huggingface.co deprecated → 410
 
 const PROVINCE_ACTS = {
   Ontario:                   "ESA, 2000 (S.O. 2000, c. 41)",
