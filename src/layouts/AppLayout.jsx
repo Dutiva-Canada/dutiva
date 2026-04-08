@@ -293,40 +293,32 @@ function MobileBottomNav() {
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      <div className="flex h-16 items-center justify-around">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                [
-                  "flex flex-col items-center gap-1 px-3 py-3 transition-colors",
-                  isActive ? "text-amber-400" : "text-zinc-500 hover:text-zinc-200",
-                ].join(" ")
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon
-                    className={`h-5 w-5 transition-colors ${
-                      isActive ? "text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]" : "text-zinc-500"
-                    }`}
-                  />
-                  <span
-                    className={`text-[10px] mt-0.5 leading-none transition-colors ${
-                      isActive ? "text-amber-400" : "text-zinc-500"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                </>
-              )}
-            </NavLink>
-          );
-        })}
+      <div className="flex items-center justify-around" style={{ height: '64px' }}>
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-0.5 py-2 px-3 min-w-0 transition-colors ${
+                isActive ? 'text-amber-400' : 'text-zinc-500'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <item.icon
+                  className={`w-5 h-5 shrink-0 transition-colors ${
+                    isActive ? 'text-amber-400' : 'text-zinc-500'
+                  }`}
+                />
+                <span style={{ fontSize: '10px', lineHeight: 1, marginTop: '2px' }}>
+                  {item.label}
+                </span>
+              </>
+            )}
+          </NavLink>
+        ))}
       </div>
     </nav>
   );

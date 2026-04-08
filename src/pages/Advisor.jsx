@@ -464,7 +464,7 @@ export default function Advisor() {
   const hasLawUpdates = lawUpdates.length > 0;
 
   return (
-    <div className="space-y-8 pb-[120px] xl:pb-6">
+    <div className="space-y-8 xl:pb-6" style={{ paddingBottom: '140px' }}>
       {/* Header */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -687,10 +687,9 @@ export default function Advisor() {
 
       {/* Mobile fixed chat input — sits above the 64px bottom nav */}
       <MobileChatInputBar
-        input={input}
-        setInput={setInput}
-        loading={loading}
-        sendMessage={sendMessage}
+        value={input}
+        onChange={setInput}
+        onSend={sendMessage}
       />
     </div>
   );
@@ -701,33 +700,55 @@ function trimmedInput(val) {
 }
 
 // Exported so Advisor can render this outside its scroll context on mobile
-export function MobileChatInputBar({ input, setInput, loading, sendMessage }) {
+export function MobileChatInputBar({ value, onChange, onSend }) {
   return (
     <div
-      className="xl:hidden fixed left-0 right-0 z-40 px-4 py-3 border-t"
+      className="xl:hidden fixed left-0 right-0 z-50"
       style={{
-        bottom: 64,
-        background: 'rgba(10,12,18,0.95)',
-        borderColor: 'rgba(255,255,255,0.08)',
-        backdropFilter: 'blur(12px)',
+        bottom: '64px',
+        background: 'rgba(10,12,18,0.97)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        padding: '12px 16px',
+        paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
       }}
     >
-      <div className="flex items-center gap-2">
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <input
           type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && value.trim()) onSend(); }}
           placeholder="Ask a question…"
-          className="flex-1 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.08] transition-all"
+          style={{
+            flex: 1,
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: '12px',
+            padding: '10px 16px',
+            fontSize: '14px',
+            color: 'white',
+            outline: 'none',
+          }}
         />
         <button
-          type="button"
-          onClick={sendMessage}
-          disabled={loading || !trimmedInput(input)}
-          className="gold-button shrink-0 px-4 py-3 disabled:opacity-40 transition-opacity"
+          onClick={() => { if (value.trim()) onSend(); }}
+          style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '12px',
+            background: '#f59e0b',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
         >
-          <Send className="h-4 w-4" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
         </button>
       </div>
     </div>
