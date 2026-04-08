@@ -427,7 +427,7 @@ export default function Advisor() {
   const [attachments, setAttachments] = useState([]);
   const [lawUpdates, setLawUpdates] = useState([]);
   const fileInputRef = useRef(null);
-  const bottomRef = useRef(null);
+  const chatScrollRef = useRef(null);  // the overflow-auto chat container
   const prevMsgCountRef = useRef(0);
 
   // Load province from profile and recent law updates
@@ -449,15 +449,15 @@ export default function Advisor() {
     load();
   }, [user]);
 
-  // Smart scroll: only jump when a NEW message bubble is added.
-  // Streaming token updates change content but not count, so the viewport
-  // stays put while the user reads — no more constant jerking to the bottom.
+  // Smart scroll: only jump to bottom when a NEW bubble is added (not on
+  // every streaming token). Scrolls the chat container directly via scrollTo
+  // so the outer page is never affected.
   useEffect(() => {
     if (messages.length > prevMsgCountRef.current) {
       prevMsgCountRef.current = messages.length;
-      // Small delay so the bubble is painted before we measure
       requestAnimationFrame(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        const el = chatScrollRef.current;
+        if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
       });
     }
   }, [messages]);
@@ -628,7 +628,7 @@ export default function Advisor() {
             {advisorReady === false ? "Config required" : `${province} · Live`}
           </div>}>
 
-          <div className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
+          <div ref={chatScrollRef} className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
             {messages.map((msg) => (
               <div key={msg.id} className="space-y-1.5">
                 <MessageBubble role={msg.role} text={msg.text} />
@@ -648,7 +648,7 @@ export default function Advisor() {
                 </div>
               </div>
             )}
-            <div ref={bottomRef} />
+
           </div>
 
           {advisorError && (

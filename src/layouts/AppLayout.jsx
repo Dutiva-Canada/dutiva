@@ -48,15 +48,15 @@ function SidebarLink({ to, icon, label, end = false }) {
         [
           "group flex items-center justify-between rounded-2xl px-4 py-3 transition-all duration-150",
           isActive
-            ? "bg-amber-400 text-black shadow-[0_10px_24px_rgba(214,168,79,0.18)]"
-            : "text-zinc-200 hover:bg-white/5 hover:text-white",
+            ? "border border-amber-400/20 bg-amber-400/10 text-amber-200"
+            : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100",
         ].join(" ")
       }
     >
       {({ isActive }) => (
         <>
           <div className="flex items-center gap-3">
-            <Icon className={`h-4 w-4 ${isActive ? "text-black" : "text-amber-300"}`} />
+            <Icon className={`h-4 w-4 ${isActive ? "text-amber-400" : "text-amber-300/60"}`} />
             <span className="text-sm font-medium">{label}</span>
           </div>
           <ChevronRight
