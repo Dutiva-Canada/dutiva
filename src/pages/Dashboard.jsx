@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   ArrowUpRight,
+  Bell,
   BookOpen,
   CheckCircle2,
   ChevronRight,
   Clock3,
+  ExternalLink,
   FileText,
+  Globe,
   MapPin,
   MessageSquare,
   PenLine,
@@ -399,6 +402,79 @@ function ComplianceByProvinceCard({ documents, defaultProvince }) {
   );
 }
 
+function LawUpdatesCard({ updates }) {
+  if (!updates || updates.length === 0) {
+    return (
+      <section className="premium-card p-6">
+        <div className="mb-3 flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-400/10 text-emerald-300">
+            <Globe className="h-4 w-4" />
+          </div>
+          <h2 className="text-base font-semibold text-zinc-100">Law monitoring</h2>
+        </div>
+        <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3 text-sm text-zinc-500">
+          All monitored legislation pages are up to date. Checks run daily.
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="premium-card p-6">
+      <div className="mb-1 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
+            <Bell className="h-4 w-4" />
+          </div>
+          <h2 className="text-base font-semibold text-zinc-100">Law updates</h2>
+        </div>
+        <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-0.5 text-xs font-semibold text-amber-300">
+          {updates.length} new
+        </span>
+      </div>
+      <p className="mb-4 text-xs text-zinc-500">
+        Detected changes in Canadian employment legislation · last 30 days
+      </p>
+      <div className="space-y-2">
+        {updates.slice(0, 5).map((u) => (
+          <div key={u.id}
+            className="rounded-2xl border border-amber-400/12 bg-amber-400/5 px-4 py-3.5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-semibold text-amber-300">{u.jurisdiction}</span>
+                  {u.is_new && (
+                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                      First detected
+                    </span>
+                  )}
+                </div>
+                <div className="mt-0.5 text-sm font-medium text-zinc-100">{u.law_name}</div>
+                {u.change_summary && (
+                  <p className="mt-1.5 text-xs leading-5 text-zinc-400 line-clamp-3">
+                    {u.change_summary}
+                  </p>
+                )}
+              </div>
+              {u.url && (
+                <a href={u.url} target="_blank" rel="noopener noreferrer"
+                  className="mt-0.5 shrink-0 text-zinc-500 transition hover:text-amber-300">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+            </div>
+            <div className="mt-2 text-[10px] text-zinc-600">{formatRelative(u.detected_at)}</div>
+          </div>
+        ))}
+      </div>
+      <Link to="/app/advisor"
+        className="ghost-button mt-4 block w-full px-4 py-3 text-center text-sm">
+        Discuss changes with Advisor →
+      </Link>
+    </section>
+  );
+}
+
 // ── Main Dashboard ─────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuth();
@@ -410,6 +486,7 @@ export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [pendingSignatures, setPendingSignatures] = useState(0);
+  const [lawUpdates, setLawUpdates] = useState([]);
 
   useEffect(() => {
     async function load() {
@@ -427,6 +504,16 @@ export default function Dashboard() {
           .select("status")
           .eq("user_id", user.id);
         setPendingSignatures((sigs || []).filter((s) => s.status === "pending").length);
+
+        // Law updates — fetch most recent 10 from last 30 days
+        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: updates } = await supabase
+          .from("law_updates")
+          .select("id, jurisdiction, law_name, change_summary, detected_at, url, is_new")
+          .gte("detected_at", since)
+          .order("detected_at", { ascending: false })
+          .limit(10);
+        setLawUpdates(updates || []);
       } catch (e) {
         console.error("Dashboard load error:", e);
       } finally {
@@ -504,12 +591,11 @@ export default function Dashboard() {
           to="/app/generator"
         />
         <StatCard
-          title="Workspace"
-          value={companyName ? "Ready" : "Setup"}
-          sub={companyName ? `${province || "Province not set"} · ${user?.email || ""}` : "Complete setup in Settings"}
-          tone={companyName && province ? "green" : "warning"}
-          icon={<ShieldCheck className="h-4 w-4" />}
-          to="/app/settings"
+          title="Law updates"
+          value={loadingDocs ? "—" : String(lawUpdates.length)}
+          sub={lawUpdates.length > 0 ? "Recent legislation changes detected" : "No changes detected in 30 days"}
+          tone={lawUpdates.length > 0 ? "warning" : "green"}
+          icon={<Bell className="h-4 w-4" />}
         />
       </div>
 
@@ -612,6 +698,23 @@ export default function Dashboard() {
                 </Link>
               )}
 
+              {lawUpdates.length > 0 && (
+                <Link to="/app/advisor">
+                  <div className="flex items-center gap-3 rounded-2xl border border-amber-400/15 bg-amber-400/6 px-4 py-4 transition hover:border-amber-400/25">
+                    <Bell className="h-4 w-4 shrink-0 text-amber-300" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-zinc-100">
+                        {lawUpdates.length} legislation change{lawUpdates.length > 1 ? "s" : ""} detected
+                      </div>
+                      <div className="mt-0.5 text-xs text-zinc-400">
+                        {lawUpdates[0]?.jurisdiction} · {lawUpdates[0]?.law_name} — ask the Advisor what it means for you
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
+                  </div>
+                </Link>
+              )}
+
               {!province && (
                 <Link to="/app/settings">
                   <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
@@ -674,6 +777,9 @@ export default function Dashboard() {
           {!hasDocuments && (
             <OnboardingCard companyName={companyName} province={province} />
           )}
+
+          {/* Law updates */}
+          <LawUpdatesCard updates={lawUpdates} />
 
           {/* Province activity */}
           <ComplianceByProvinceCard
