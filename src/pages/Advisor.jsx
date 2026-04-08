@@ -582,16 +582,16 @@ export default function Advisor() {
           )}
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <SuggestionButton onClick={() => setInput("What is the minimum notice period for a 4-year employee in Ontario?")}>
-              Ontario notice — 4 years
+            <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
+              {province} notice — 4 years
             </SuggestionButton>
-            <SuggestionButton onClick={() => setInput("What are the probation clause requirements in BC?")}>
-              BC probation clause
+            <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
+              Probation clause
             </SuggestionButton>
             <SuggestionButton onClick={() => setInput("When is severance pay required vs. notice pay?")}>
               Severance vs. notice pay
             </SuggestionButton>
-            <SuggestionButton onClick={() => setInput("What should an offer letter include to be ESA-compliant?")}>
+            <SuggestionButton onClick={() => setInput(`What should an employment offer letter include to be compliant in ${province}?`)}>
               Offer letter checklist
             </SuggestionButton>
           </div>
