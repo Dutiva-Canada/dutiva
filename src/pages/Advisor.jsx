@@ -74,51 +74,25 @@ function formatMessageTime(value) {
   } catch { return "Just now"; }
 }
 
-// ─── HF Inference API ────────────────────────────────────────────────────────
-async function callHFAdvisor(messagesForModel, province, lawUpdates = []) {
-  const token = import.meta.env.VITE_HF_TOKEN;
-  if (!token) throw new Error("VITE_HF_TOKEN not set");
-
-  const lawContext = lawUpdates.length > 0
-    ? `\n\nRECENT LEGISLATIVE CHANGES (always factor these in):\n${lawUpdates
-        .map((u) => `• [${u.jurisdiction}] ${u.law_name}: ${u.change_description} (detected ${new Date(u.detected_at).toLocaleDateString("en-CA")})`)
-        .join("\n")}`
-    : "";
-
-  const systemPrompt = `You are a Canadian HR compliance advisor built into Dutiva (dutiva.ca). You specialize in employment standards, HR best practices, and labour law across all 14 Canadian jurisdictions. The user's primary province is ${province}.
-
-INSTRUCTIONS:
-- Cite exact legislation sections (e.g. "ESA, 2000, s. 57(1)", "Canada Labour Code, s. 230")
-- Be concise and practical — answer the question, then cite the authority
-- Note province-specific variations when they materially differ
-- Always remind users that this is general guidance, not legal advice
-- Keep responses under 300 words${lawContext}`;
-
-  const response = await fetch("https://api-inference.huggingface.co/v1/chat/completions", {
+// ─── Advisor API (Vercel serverless → HF Inference, token stays private) ─────
+async function callAdvisorAPI(messagesForModel, province, lawUpdates = []) {
+  const response = await fetch("/api/advisor-chat", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "mistralai/Mistral-7B-Instruct-v0.3",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messagesForModel.map((m) => ({ role: m.role, content: m.text })),
-      ],
-      max_tokens: 512,
-      temperature: 0.3,
-      stream: false,
+      messages: messagesForModel,
+      province,
+      lawUpdates,
     }),
   });
 
+  const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
-    const errText = await response.text().catch(() => String(response.status));
-    throw new Error(`HF API ${response.status}: ${errText}`);
+    throw new Error(data.error || `Advisor API error (${response.status})`);
   }
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content?.trim() ?? "Unable to generate a response.";
+  return data.reply ?? "Unable to generate a response.";
 }
 
 // ─── ESA Calculator component ────────────────────────────────────────────────
@@ -350,6 +324,7 @@ export default function Advisor() {
   const [province, setProvince] = useState(settings.province || "Ontario");
   const [loading, setLoading] = useState(false);
   const [advisorError, setAdvisorError] = useState(null);
+  const [advisorReady, setAdvisorReady] = useState(null); // null=unknown, true=ok, false=error
   const [attachments, setAttachments] = useState([]);
   const [lawUpdates, setLawUpdates] = useState([]);
   const fileInputRef = useRef(null);
@@ -407,21 +382,8 @@ export default function Advisor() {
     setAdvisorError(null);
 
     try {
-      const hfToken = import.meta.env.VITE_HF_TOKEN;
-      let reply;
-
-      if (hfToken) {
-        reply = await callHFAdvisor(modelHistory, province, lawUpdates);
-      } else if (supabase) {
-        const { data, error } = await supabase.functions.invoke("advisor-chat", {
-          body: { messages: modelHistory, province },
-        });
-        if (error) throw error;
-        reply = data?.reply ?? "I'm unable to respond right now. Please try again.";
-      } else {
-        throw new Error("Advisor service not configured. Set VITE_HF_TOKEN in Vercel environment settings.");
-      }
-
+      const reply = await callAdvisorAPI(modelHistory, province, lawUpdates);
+      setAdvisorReady(true);
       setMessages((prev) => [...prev, {
         id: createId("assistant"),
         role: "assistant",
@@ -430,9 +392,11 @@ export default function Advisor() {
       }]);
     } catch (err) {
       console.error("Advisor error:", err);
-      const msg = err.message?.includes("VITE_HF_TOKEN")
-        ? "Advisor requires a Hugging Face API token. Set VITE_HF_TOKEN in your Vercel project settings."
-        : "Could not reach the advisor. Please check your connection and try again.";
+      setAdvisorReady(false);
+      const isConfig = err.message?.includes("HF_TOKEN not configured");
+      const msg = isConfig
+        ? "The AI advisor isn't configured yet — add HF_TOKEN to your Vercel project environment variables."
+        : err.message || "Could not reach the advisor. Please check your connection and try again.";
       setAdvisorError(msg);
       setMessages((prev) => [...prev, {
         id: createId("assistant"),
@@ -445,7 +409,6 @@ export default function Advisor() {
     }
   }, [attachments, input, loading, messages, province, lawUpdates]);
 
-  const hfConfigured = !!import.meta.env.VITE_HF_TOKEN;
   const hasLawUpdates = lawUpdates.length > 0;
 
   return (
@@ -481,11 +444,11 @@ export default function Advisor() {
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">AI engine</div>
             <Sparkles className="h-4 w-4 text-amber-300" />
           </div>
-          <div className={`metric-value mt-3 text-3xl font-semibold tracking-tight ${hfConfigured ? "text-amber-300" : "text-zinc-400"}`}>
-            {hfConfigured ? "Mistral-7B" : "Not wired"}
+          <div className={`metric-value mt-3 text-3xl font-semibold tracking-tight ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-400"}`}>
+            {advisorReady === false ? "Error" : advisorReady ? "Mistral-7B" : "Ready"}
           </div>
           <div className="mt-1 text-sm text-zinc-400">
-            {hfConfigured ? "HF Inference API — live" : "Set VITE_HF_TOKEN in Vercel"}
+            {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API — live" : "Vercel edge function wired"}
           </div>
         </div>
 
@@ -530,8 +493,8 @@ export default function Advisor() {
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         {/* Left: Chat */}
         <SectionCard title="Conversation"
-          action={<div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
-            {hfConfigured ? "Mistral-7B · Live" : "Config required"}
+          action={<div className={`rounded-full border px-3 py-1 text-xs font-medium ${advisorReady === false ? "border-red-400/20 bg-red-400/8 text-red-300" : "border-amber-400/12 bg-amber-400/6 text-amber-300"}`}>
+            {advisorReady === false ? "Config required" : "Mistral-7B · Live"}
           </div>}>
 
           <div className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
@@ -559,9 +522,9 @@ export default function Advisor() {
             </div>
           )}
 
-          {!hfConfigured && (
+          {advisorReady === false && (
             <div className="mt-4 rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-3 text-sm text-yellow-200">
-              <strong>Setup required:</strong> Add <code className="bg-black/30 px-1 rounded">VITE_HF_TOKEN</code> to your Vercel environment variables to activate the AI advisor.
+              <strong>Setup required:</strong> Add <code className="bg-black/30 px-1 rounded">HF_TOKEN</code> to your Vercel project environment variables, then redeploy.
             </div>
           )}
 
