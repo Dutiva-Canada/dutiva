@@ -45,8 +45,8 @@
   --text-3:       #6b7280;
   --muted:        #5a6278;
   --muted-2:      #7d8596;
-  --gold:         #8a5e22;
-  --gold-strong:  #a07030;
+  --gold:         #b45309; /* amber-700 — warm amber, readable on white */
+  --gold-strong:  #d97706; /* amber-600 — golden, not brown */
   --success:      #16a34a;
   --warning:      #ca8a04;
   --danger:       #dc2626;
@@ -127,33 +127,34 @@
 
 /* ── Light theme: amber/gold text overrides ───────────────────────────────── */
 /* Tailwind's amber-200/300/400 are pale yellows — unreadable on white.       */
-/* Remap to the dark gold tokens defined in :root for light mode.             */
+/* Remap to amber-600/700 which reads as warm gold, not brown.                */
 [data-theme="light"] .text-amber-200,
 [data-theme="light"] .text-amber-300 {
-  color: var(--gold-strong) !important; /* #a07030 */
+  color: #d97706 !important; /* amber-600 — warm golden */
 }
 [data-theme="light"] .text-amber-400 {
-  color: var(--gold) !important; /* #8a5e22 */
+  color: #b45309 !important; /* amber-700 — richer amber */
 }
 
 /* ── Light theme: amber background/border — boost opacity so they're visible ─ */
+/* Base color: amber-600 #d97706 = rgb(217,119,6)                             */
 [data-theme="light"] .bg-amber-400\/6,
 [data-theme="light"] .bg-amber-400\/8 {
-  background-color: rgba(138, 94, 34, 0.08) !important;
+  background-color: rgba(217, 119, 6, 0.08) !important;
 }
 [data-theme="light"] .bg-amber-400\/10,
 [data-theme="light"] .bg-amber-400\/12 {
-  background-color: rgba(138, 94, 34, 0.12) !important;
+  background-color: rgba(217, 119, 6, 0.12) !important;
 }
 [data-theme="light"] .border-amber-400\/10,
 [data-theme="light"] .border-amber-400\/12 {
-  border-color: rgba(138, 94, 34, 0.20) !important;
+  border-color: rgba(180, 83, 9, 0.20) !important;
 }
 [data-theme="light"] .border-amber-400\/15 {
-  border-color: rgba(138, 94, 34, 0.25) !important;
+  border-color: rgba(180, 83, 9, 0.28) !important;
 }
 [data-theme="light"] .border-amber-400\/20 {
-  border-color: rgba(138, 94, 34, 0.30) !important;
+  border-color: rgba(180, 83, 9, 0.35) !important;
 }
 
 /* ── Light theme: border overrides ────────────────────────────────────────── */
