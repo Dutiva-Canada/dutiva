@@ -11,9 +11,29 @@ const BORDER = "rgba(255,255,255,0.08)";
 const CARD = "#191919";
 const LAST_UPDATED = "April 8, 2026";
 
+function setMeta(name, content) {
+  let el = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+  if (!el) { el = document.createElement("meta"); document.head.appendChild(el); }
+  el.name ? (el.content = content) : el.setAttribute("content", content);
+}
+function setOgMeta(property, content) {
+  let el = document.querySelector(`meta[property="${property}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute("property", property); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+}
+
 export default function AccessibilityPage() {
   useEffect(() => {
-    document.title = "Accessibility Statement | Dutiva Canada";
+    const title = "Accessibility Statement | Dutiva Canada";
+    const desc = "Dutiva Canada's accessibility statement. Our commitment to WCAG 2.1 Level AA, AODA compliance, and inclusive design for all users.";
+    const url = "https://dutiva.ca/accessibility";
+    document.title = title;
+    setMeta("description", desc);
+    setOgMeta("og:title", title);
+    setOgMeta("og:description", desc);
+    setOgMeta("og:url", url);
+    setOgMeta("og:type", "website");
+    setOgMeta("og:site_name", "Dutiva Canada");
     window.scrollTo(0, 0);
   }, []);
 

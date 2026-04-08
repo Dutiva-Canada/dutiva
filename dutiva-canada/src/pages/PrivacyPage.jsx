@@ -12,9 +12,29 @@ const CARD = "#191919";
 
 const LAST_UPDATED = "April 8, 2026";
 
+function setMeta(name, content) {
+  let el = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+  if (!el) { el = document.createElement("meta"); document.head.appendChild(el); }
+  el.name ? (el.content = content) : el.setAttribute("content", content);
+}
+function setOgMeta(property, content) {
+  let el = document.querySelector(`meta[property="${property}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute("property", property); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+}
+
 export default function PrivacyPage() {
   useEffect(() => {
-    document.title = "Privacy Policy | Dutiva Canada";
+    const title = "Privacy Policy | Dutiva Canada";
+    const desc = "Dutiva Canada's Privacy Policy. Compliant with PIPEDA and Quebec Law 25. Learn how we collect, use, and protect your data.";
+    const url = "https://dutiva.ca/privacy";
+    document.title = title;
+    setMeta("description", desc);
+    setOgMeta("og:title", title);
+    setOgMeta("og:description", desc);
+    setOgMeta("og:url", url);
+    setOgMeta("og:type", "website");
+    setOgMeta("og:site_name", "Dutiva Canada");
     window.scrollTo(0, 0);
   }, []);
 

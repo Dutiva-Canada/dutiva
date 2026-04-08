@@ -12,9 +12,29 @@ const CARD = "#191919";
 const AMBER_DIM = "rgba(196,154,69,0.08)";
 const LAST_UPDATED = "April 8, 2026";
 
+function setMeta(name, content) {
+  let el = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+  if (!el) { el = document.createElement("meta"); document.head.appendChild(el); }
+  el.name ? (el.content = content) : el.setAttribute("content", content);
+}
+function setOgMeta(property, content) {
+  let el = document.querySelector(`meta[property="${property}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute("property", property); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+}
+
 export default function DisclaimerPage() {
   useEffect(() => {
-    document.title = "Legal Disclaimer | Dutiva Canada";
+    const title = "Legal Disclaimer | Dutiva Canada";
+    const desc = "Important legal disclaimer for Dutiva Canada. AI responses are not legal advice. No solicitor-client relationship is formed. Consult a qualified lawyer for your situation.";
+    const url = "https://dutiva.ca/disclaimer";
+    document.title = title;
+    setMeta("description", desc);
+    setOgMeta("og:title", title);
+    setOgMeta("og:description", desc);
+    setOgMeta("og:url", url);
+    setOgMeta("og:type", "website");
+    setOgMeta("og:site_name", "Dutiva Canada");
     window.scrollTo(0, 0);
   }, []);
 

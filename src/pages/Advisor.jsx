@@ -423,9 +423,11 @@ export default function Advisor() {
   const [advisorReady, setAdvisorReady] = useState(null); // null=unknown, true=ok, false=error
   const [attachments, setAttachments] = useState([]);
   const [lawUpdates, setLawUpdates] = useState([]);
+  const [rateLimitWarning, setRateLimitWarning] = useState(null); // client-side rate limit msg
   const fileInputRef = useRef(null);
   const chatScrollRef = useRef(null);  // the overflow-auto chat container
   const prevMsgCountRef = useRef(0);
+  const msgTimestampsRef = useRef([]); // tracks user message timestamps for client-side rate limiting
 
   // Load province from profile and recent law updates
   useEffect(() => {
@@ -469,6 +471,26 @@ export default function Advisor() {
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
+
+    // ── Client-side rate limiting: max 10 user messages per minute ────────────
+    const now = Date.now();
+    const windowMs = 60_000;
+    const maxMsgs = 10;
+    // Prune timestamps older than 1 minute
+    msgTimestampsRef.current = msgTimestampsRef.current.filter(
+      (t) => now - t < windowMs
+    );
+    if (msgTimestampsRef.current.length >= maxMsgs) {
+      const oldest = msgTimestampsRef.current[0];
+      const secsLeft = Math.ceil((windowMs - (now - oldest)) / 1000);
+      setRateLimitWarning(
+        `You've sent ${maxMsgs} messages in the last minute. Please wait ${secsLeft}s before sending again.`
+      );
+      return;
+    }
+    msgTimestampsRef.current.push(now);
+    setRateLimitWarning(null);
+    // ─────────────────────────────────────────────────────────────────────────
 
     const attachmentSummary = attachments.length > 0
       ? `\n\nAttachments: ${attachments.map((a) => a.name).join(", ")}`
@@ -535,7 +557,7 @@ export default function Advisor() {
     } finally {
       setLoading(false);
     }
-  }, [attachments, input, loading, messages, province, lawUpdates]);
+  }, [attachments, input, loading, messages, province, lawUpdates, setRateLimitWarning]);
 
   const hasLawUpdates = lawUpdates.length > 0;
 
@@ -651,6 +673,12 @@ export default function Advisor() {
           {advisorError && (
             <div className="mt-4 rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
               {advisorError}
+            </div>
+          )}
+
+          {rateLimitWarning && (
+            <div className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-400/8 px-4 py-3 text-sm text-amber-300">
+              {rateLimitWarning}
             </div>
           )}
 
