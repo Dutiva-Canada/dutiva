@@ -125,6 +125,37 @@
   color: #6b7280 !important;
 }
 
+/* ── Light theme: amber/gold text overrides ───────────────────────────────── */
+/* Tailwind's amber-200/300/400 are pale yellows — unreadable on white.       */
+/* Remap to the dark gold tokens defined in :root for light mode.             */
+[data-theme="light"] .text-amber-200,
+[data-theme="light"] .text-amber-300 {
+  color: var(--gold-strong) !important; /* #a07030 */
+}
+[data-theme="light"] .text-amber-400 {
+  color: var(--gold) !important; /* #8a5e22 */
+}
+
+/* ── Light theme: amber background/border — boost opacity so they're visible ─ */
+[data-theme="light"] .bg-amber-400\/6,
+[data-theme="light"] .bg-amber-400\/8 {
+  background-color: rgba(138, 94, 34, 0.08) !important;
+}
+[data-theme="light"] .bg-amber-400\/10,
+[data-theme="light"] .bg-amber-400\/12 {
+  background-color: rgba(138, 94, 34, 0.12) !important;
+}
+[data-theme="light"] .border-amber-400\/10,
+[data-theme="light"] .border-amber-400\/12 {
+  border-color: rgba(138, 94, 34, 0.20) !important;
+}
+[data-theme="light"] .border-amber-400\/15 {
+  border-color: rgba(138, 94, 34, 0.25) !important;
+}
+[data-theme="light"] .border-amber-400\/20 {
+  border-color: rgba(138, 94, 34, 0.30) !important;
+}
+
 /* ── Light theme: border overrides ────────────────────────────────────────── */
 [data-theme="light"] .border-white\/6,
 [data-theme="light"] .border-white\/8,
@@ -167,6 +198,19 @@ option {
 
 [data-theme="light"] .scroll-area::-webkit-scrollbar-thumb:hover {
   background: rgba(0,0,0,0.22);
+}
+
+/* ── Light theme: emerald text (badges like "Active") ─────────────────────── */
+[data-theme="light"] .text-emerald-300 {
+  color: #065f46 !important; /* emerald-900 — readable on white */
+}
+[data-theme="light"] .bg-emerald-400\/6,
+[data-theme="light"] .bg-emerald-400\/8 {
+  background-color: rgba(6, 95, 70, 0.07) !important;
+}
+[data-theme="light"] .border-emerald-400\/12,
+[data-theme="light"] .border-emerald-400\/15 {
+  border-color: rgba(6, 95, 70, 0.20) !important;
 }
 
 /* ── Light theme: selection ────────────────────────────────────────────────── */
