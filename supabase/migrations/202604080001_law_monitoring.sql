@@ -18,9 +18,11 @@ CREATE INDEX IF NOT EXISTS law_updates_detected_at_idx ON law_updates (detected_
 
 ALTER TABLE law_updates ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Authenticated users can read law updates" ON law_updates;
 CREATE POLICY "Authenticated users can read law updates"
   ON law_updates FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Service role can insert law updates" ON law_updates;
 CREATE POLICY "Service role can insert law updates"
   ON law_updates FOR INSERT TO service_role WITH CHECK (true);
 
@@ -35,6 +37,7 @@ CREATE TABLE IF NOT EXISTS law_page_hashes (
 
 ALTER TABLE law_page_hashes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Service role manages hashes" ON law_page_hashes;
 CREATE POLICY "Service role manages hashes"
   ON law_page_hashes FOR ALL TO service_role USING (true) WITH CHECK (true);
 
