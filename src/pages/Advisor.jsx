@@ -313,13 +313,13 @@ export default function Advisor() {
 
       {/* Status cards \u2014 horizontal scroll on mobile, 3-col grid on md+ */}
       {/* Outer div bleeds to screen edges; inner div carries pl-4 so first card is never clipped by overflow */}
-      <div className="">
+      <div className="-mx-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:overflow-x-visible">
         <div
-          className="grid gap-3 md:grid-cols-3"
+          className="flex gap-3 px-4 pb-1 md:grid md:grid-cols-3 md:px-0 md:pb-0"
         >
           {/* AI ENGINE card */}
           <div
-            className="premium-card-soft p-4"
+            className="premium-card-soft min-w-[240px] shrink-0 p-4 md:min-w-0"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>AI Engine</div>
@@ -343,7 +343,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft p-4"
+            className="premium-card-soft min-w-[240px] shrink-0 p-4 md:min-w-0"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Jurisdiction</div>
@@ -359,7 +359,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft p-4"
+            className="premium-card-soft min-w-[240px] shrink-0 p-4 md:min-w-0"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Law Updates</div>
