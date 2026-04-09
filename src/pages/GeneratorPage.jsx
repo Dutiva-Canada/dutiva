@@ -12,8 +12,6 @@ import {
   Plus,
   RotateCcw,
   Save,
-  ShieldCheck,
-  Sparkles,
   Trash2,
   Wand2,
   X,
@@ -1363,30 +1361,6 @@ export default function GeneratorPage() {
                 <pre className="whitespace-pre-wrap text-sm leading-7 text-zinc-300">
                   {preview}
                 </pre>
-              </div>
-            </SectionCard>
-
-            <SectionCard title="Why this is the product core">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 text-emerald-300" />
-                  <div>
-                    <div className="text-sm font-medium text-zinc-100">Real editing workflow</div>
-                    <div className="mt-1 text-sm text-zinc-400">
-                      Saved documents can now be reopened and updated instead of creating duplicates.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                  <Sparkles className="mt-0.5 h-5 w-5 text-amber-300" />
-                  <div>
-                    <div className="text-sm font-medium text-zinc-100">Workspace continuity</div>
-                    <div className="mt-1 text-sm text-zinc-400">
-                      Generator, dashboard, and storage now behave more like a real SaaS document system.
-                    </div>
-                  </div>
-                </div>
               </div>
             </SectionCard>
           </div>
