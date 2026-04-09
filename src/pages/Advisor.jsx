@@ -319,11 +319,11 @@ export default function Advisor() {
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">AI engine</div>
             <Sparkles className="h-4 w-4 text-amber-300" />
           </div>
-          <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight md:mt-3 md:text-3xl ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-400"}`}>
-            {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
+          <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-100"}`}>
+            {advisorReady === false ? "Error" : advisorReady ? "Ready" : "Ready"}
           </div>
-          <div className="mt-1 text-xs text-zinc-400">
-            {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
+          <div className="mt-1 text-xs text-zinc-400 truncate">
+            {advisorReady === false ? "Check HF_TOKEN" : "AI advisor ready"}
           </div>
         </div>
 
@@ -475,8 +475,8 @@ export default function Advisor() {
           </div>
         </SectionCard>
 
-        {/* Right: history */}
-        <div className="space-y-6">
+        {/* Right: history — desktop only, redundant on mobile where full chat is visible */}
+        <div className="hidden xl:block space-y-6">
           <SectionCard title="Guidance history"
             action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">{messages.length} messages</div>}>
             <div className="space-y-3">

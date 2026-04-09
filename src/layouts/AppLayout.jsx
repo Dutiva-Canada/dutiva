@@ -293,33 +293,30 @@ function MobileBottomNav() {
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      <div className="flex items-center justify-around" style={{ height: '64px' }}>
-        {navItems.map(item => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            style={({ isActive }) => ({
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flex: 1,
-              padding: '6px 4px',
-              color: isActive ? '#fbbf24' : '#71717a',
-              textDecoration: 'none',
-              gap: '3px',
-            })}
-          >
-            {({ isActive }) => (
-              <>
-                <item.icon style={{ width: 22, height: 22, flexShrink: 0 }} />
-                <span style={{ fontSize: 10, lineHeight: 1, fontWeight: isActive ? 600 : 400 }}>
-                  {item.label}
-                </span>
-              </>
-            )}
-          </NavLink>
-        ))}
+      <div style={{ display: 'flex', height: '64px', alignItems: 'stretch' }}>
+        {navItems.map(item => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              style={({ isActive }) => ({
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flex: 1,
+                gap: '3px',
+                color: isActive ? '#fbbf24' : '#71717a',
+                textDecoration: 'none',
+              })}
+            >
+              <Icon style={{ width: 21, height: 21, flexShrink: 0 }} />
+              <span style={{ fontSize: 10, lineHeight: 1 }}>{item.label}</span>
+            </NavLink>
+          );
+        })}
       </div>
     </nav>
   );
