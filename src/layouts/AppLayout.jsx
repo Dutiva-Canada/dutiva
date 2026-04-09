@@ -85,10 +85,10 @@ function Sidebar() {
 
   return (
     <aside
-      className="hidden w-[280px] shrink-0 border-r xl:block"
+      className="hidden w-[280px] shrink-0 border-r xl:block sticky top-0 h-screen overflow-y-auto"
       style={{ background: "var(--sidebar-bg)", borderColor: "var(--border)" }}
     >
-      <div className="flex h-full flex-col px-6 py-6">
+      <div className="flex min-h-full flex-col px-6 py-6">
         <div className="mb-8">
           <BrandLockup />
         </div>
@@ -123,7 +123,7 @@ function Sidebar() {
         </nav>
 
         {/* Bottom CTA */}
-        <div className="mt-auto pt-6">
+        <div className="mt-auto pt-6 pb-4">
           <div className="glass-panel rounded-[24px] p-4">
             <div className="mb-3 flex items-center gap-2">
               <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
