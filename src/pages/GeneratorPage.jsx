@@ -656,7 +656,7 @@ function ESACalculator({ defaultProvince }) {
             {CANADIAN_JURISDICTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
           </select>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-300">Years of service</label>
             <input type="number" min="0" step="0.5" placeholder="e.g. 3.5" value={years}
