@@ -362,29 +362,6 @@ export default function SettingsPage() {
               />
             </div>
           </SectionCard>
-
-          <SectionCard title={t("Why this matters", "Pourquoi c'est important")}>
-            <div className="space-y-3 text-sm text-zinc-300">
-              <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                {t(
-                  "Your profile can now be tied to the authenticated user instead of only the browser.",
-                  "Votre profil peut maintenant être lié à l'utilisateur authentifié plutôt qu'au seul navigateur."
-                )}
-              </div>
-              <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                {t(
-                  "This creates the foundation for true multi-device persistence later.",
-                  "Ceci crée les bases d'une persistance multi-appareils future."
-                )}
-              </div>
-              <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                {t(
-                  "It also prepares the dashboard and generator to read real workspace data from Supabase.",
-                  "Cela prépare également le tableau de bord et le générateur à lire les données réelles depuis Supabase."
-                )}
-              </div>
-            </div>
-          </SectionCard>
         </div>
       </div>
     </div>
