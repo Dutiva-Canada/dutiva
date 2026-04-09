@@ -87,7 +87,7 @@ async function callAdvisorAPI(messagesForModel, province, lawUpdates = [], onTok
   return fullText.trim() || "Unable to generate a response.";
 }
 
-// \u2500\u2500 Sub-components \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Sub-components ────────────────────────────────────────────────────────────
 function SectionCard({ title, children, action }) {
   return (
     <section className="premium-card p-6">
@@ -109,7 +109,7 @@ function MessageBubble({ role, text }) {
         isUser
           ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
           : "border border-white/6 bg-white/[0.03] text-zinc-200",
-      ].join(" ")} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+      ].join(" ")} style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
         {isUser ? (
           text.split("\n").map((line, i, arr) => (
             <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
@@ -180,7 +180,7 @@ function SuggestionButton({ children, onClick }) {
   );
 }
 
-// \u2500\u2500 Main Advisor page \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Main Advisor page ─────────────────────────────────────────────────────────
 export default function Advisor() {
   const { user } = useAuth();
   const { t } = useLang();
@@ -286,100 +286,79 @@ export default function Advisor() {
   const hasLawUpdates = lawUpdates.length > 0;
 
   return (
-    <div className="space-y-8 xl:pb-6" style={{ paddingBottom: '120px' }}>
-      {/* Header */}
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-            Advisor
+    <div className="space-y-6" style={{ paddingBottom: "120px" }}>
+
+      {/* Header — contained in a card */}
+      <div className="premium-card p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+              Advisor
+            </div>
+            <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+              Compliance copilot
+            </h1>
+            <p className="mt-3 max-w-2xl text-base text-zinc-400 hidden xl:block">
+              Ask any Canadian HR compliance question. Province-aware and always current with the latest legislative changes.
+            </p>
           </div>
-          <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
-            Compliance copilot
-          </h1>
-          <p className="mt-3 max-w-2xl text-base text-zinc-400 hidden xl:block">
-            Ask any Canadian HR compliance question. Province-aware and always current with the latest legislative changes.
-          </p>
-        </div>
-        <div className="hidden xl:flex flex-wrap gap-3">
-          <Link to="/app/generator?template=Employment%20Agreement" className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm">
-            Open generator
-          </Link>
-          <Link to="/app/generator?template=Employment%20Agreement" className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm">
-            <Wand2 className="h-4 w-4" />
-            Start from guidance
-          </Link>
+          <div className="hidden xl:flex flex-wrap gap-3">
+            <Link to="/app/generator?template=Employment%20Agreement" className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm">
+              Open generator
+            </Link>
+            <Link to="/app/generator?template=Employment%20Agreement" className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm">
+              <Wand2 className="h-4 w-4" />
+              Start from guidance
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Status cards \u2014 horizontal scroll on mobile, 3-col grid on md+ */}
-      {/* Outer div bleeds to screen edges; inner div carries pl-4 so first card is never clipped by overflow */}
-      <div className="">
-        <div
-          className="grid gap-3 md:grid-cols-3"
-        >
-          {/* AI ENGINE card */}
-          <div
-            className="premium-card-soft p-4"
-          >
-            <div className="flex items-center justify-between">
-              <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>AI Engine</div>
-              <Sparkles className="h-4 w-4 text-amber-300" />
-            </div>
-            <div
-              className="metric-value"
-              style={{
-                marginTop: '8px',
-                fontSize: '17px',
-                fontWeight: 700,
-                letterSpacing: '-0.02em',
-                color: advisorReady === false ? 'rgb(248 113 113)' : advisorReady ? 'rgb(252 211 77)' : 'rgb(250 250 250)',
-              }}
-            >
-              {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
-            </div>
-            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>
-              {advisorReady === false ? "Check HF_TOKEN in Vercel" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
-            </div>
+      {/* Status cards — 1-col on mobile, 3-col on md+ */}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        {/* AI Engine */}
+        <div className="premium-card-soft p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">AI Engine</div>
+            <Sparkles className="h-4 w-4 text-amber-300" />
           </div>
-
           <div
-            className="premium-card-soft p-4"
+            className="metric-value mt-2 text-[17px] font-bold tracking-tight"
+            style={{ color: advisorReady === false ? "rgb(248 113 113)" : advisorReady ? "rgb(252 211 77)" : "rgb(250 250 250)" }}
           >
-            <div className="flex items-center justify-between">
-              <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Jurisdiction</div>
-              <ShieldCheck className="h-4 w-4 text-emerald-300" />
-            </div>
-            <div
-              className="metric-value"
-              style={{ marginTop: '8px', fontSize: '17px', fontWeight: 700, letterSpacing: '-0.02em', color: 'rgb(250 250 250)' }}
-            >
-              {province}
-            </div>
-            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>14 Canadian jurisdictions</div>
+            {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
           </div>
+          <div className="mt-1 text-[11px] text-zinc-500">
+            {advisorReady === false ? "Check HF_TOKEN in Vercel" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
+          </div>
+        </div>
 
+        {/* Jurisdiction */}
+        <div className="premium-card-soft p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
+            <ShieldCheck className="h-4 w-4 text-emerald-300" />
+          </div>
+          <div className="metric-value mt-2 text-[17px] font-bold tracking-tight text-zinc-50">
+            {province}
+          </div>
+          <div className="mt-1 text-[11px] text-zinc-500">14 Canadian jurisdictions</div>
+        </div>
+
+        {/* Compliance Sync */}
+        <div className="premium-card-soft p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Law Updates</div>
+            <FileText className="h-4 w-4 text-zinc-300" />
+          </div>
           <div
-            className="premium-card-soft p-4"
+            className="metric-value mt-2 text-[17px] font-bold tracking-tight"
+            style={{ color: hasLawUpdates ? "rgb(110 231 183)" : "rgb(113 113 122)" }}
           >
-            <div className="flex items-center justify-between">
-              <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Law Updates</div>
-              <FileText className="h-4 w-4 text-zinc-300" />
-            </div>
-            <div
-              className="metric-value"
-              style={{
-                marginTop: '8px',
-                fontSize: '17px',
-                fontWeight: 700,
-                letterSpacing: '-0.02em',
-                color: hasLawUpdates ? 'rgb(110 231 183)' : 'rgb(113 113 122)',
-              }}
-            >
-              {hasLawUpdates ? `${lawUpdates.length} new` : "Monitoring"}
-            </div>
-            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>
-              {hasLawUpdates ? "Legislative changes detected" : "Govt websites watched daily"}
-            </div>
+            {hasLawUpdates ? `${lawUpdates.length} new` : "Monitoring"}
+          </div>
+          <div className="mt-1 text-[11px] text-zinc-500">
+            {hasLawUpdates ? "Legislative changes detected" : "Govt websites watched daily"}
           </div>
         </div>
       </div>
@@ -399,16 +378,25 @@ export default function Advisor() {
         </div>
       )}
 
+      {/* Main content grid */}
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        {/* Left: Chat */}
-        <SectionCard title="Conversation"
-          action={<div className={`rounded-full border px-3 py-1 text-xs font-medium ${advisorReady === false ? "border-red-400/20 bg-red-400/8 text-red-300" : "border-amber-400/12 bg-amber-400/6 text-amber-300"}`}>
-            {advisorReady === false ? "Config required" : `${province} \u00b7 Live`}
-          </div>}>
 
-          <div ref={chatScrollRef} className="scroll-area max-h-[560px] space-y-4 overflow-auto overflow-x-hidden rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
+        {/* Left: Chat */}
+        <SectionCard
+          title="Conversation"
+          action={
+            <div className={`rounded-full border px-3 py-1 text-xs font-medium ${advisorReady === false ? "border-red-400/20 bg-red-400/8 text-red-300" : "border-amber-400/12 bg-amber-400/6 text-amber-300"}`}>
+              {advisorReady === false ? "Config required" : `${province} \u00b7 Live`}
+            </div>
+          }
+        >
+          {/* Message list */}
+          <div
+            ref={chatScrollRef}
+            className="scroll-area max-h-[560px] space-y-4 overflow-y-auto overflow-x-hidden rounded-[24px] border border-white/6 bg-white/[0.02] p-4"
+          >
             {messages.length === 0 && (
-              <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: '32px 0', fontSize: '14px' }}>
+              <div className="py-8 text-center text-sm text-white/30">
                 Ask a question to get started
               </div>
             )}
@@ -424,34 +412,33 @@ export default function Advisor() {
               <div className="flex justify-start">
                 <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-500">
                   <span className="inline-flex gap-1">
-                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>\u00b7</span>
-                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>\u00b7</span>
-                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>\u00b7</span>
+                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>&middot;</span>
+                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>&middot;</span>
+                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>&middot;</span>
                   </span>
                 </div>
               </div>
             )}
           </div>
 
+          {/* Error / warning banners */}
           {advisorError && (
             <div className="mt-4 rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
               {advisorError}
             </div>
           )}
-
           {rateLimitWarning && (
             <div className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-400/8 px-4 py-3 text-sm text-amber-300">
               {rateLimitWarning}
             </div>
           )}
-
           {advisorReady === false && (
             <div className="mt-4 rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-3 text-sm text-yellow-200">
-              <strong>Setup required:</strong> Add <code className="bg-black/30 px-1 rounded">HF_TOKEN</code> to your Vercel project environment variables, then redeploy.
+              <strong>Setup required:</strong> Add <code className="rounded bg-black/30 px-1">HF_TOKEN</code> to your Vercel project environment variables, then redeploy.
             </div>
           )}
 
-          {/* Suggestion chips \u2014 horizontally scrollable on mobile to avoid overflow */}
+          {/* Suggestion chips — horizontally scrollable on mobile */}
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
               {province} notice · 4yr
@@ -467,7 +454,7 @@ export default function Advisor() {
             </SuggestionButton>
           </div>
 
-          {/* Input + disclosure \u2014 hidden on mobile (uses fixed bar below); shown xl+ */}
+          {/* Desktop input — hidden on mobile (uses fixed bar below) */}
           <div className="hidden xl:block">
             <div className="mt-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-3 shadow-sm">
               <input ref={fileInputRef} type="file" multiple onChange={handleAttachmentChange} className="hidden" />
@@ -493,9 +480,9 @@ export default function Advisor() {
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
                   placeholder="Ask a question…"
                   autoComplete="off"
-                  className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all"
+                  className="text-[16px] flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all"
                 />
-                <button type="button" onClick={sendMessage} disabled={loading || !trimmedInput(input)}
+                <button type="button" onClick={sendMessage} disabled={loading || !input.trim()}
                   className="gold-button shrink-0 px-4 py-3 disabled:opacity-40 transition-opacity">
                   <Send className="h-4 w-4" />
                 </button>
@@ -515,10 +502,12 @@ export default function Advisor() {
           </div>
         </SectionCard>
 
-        {/* Right: history — desktop only, redundant on mobile where full chat is visible */}
+        {/* Right: Guidance history — desktop only */}
         <div className="hidden xl:block space-y-6">
-          <SectionCard title="Guidance history"
-            action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">Recent</div>}>
+          <SectionCard
+            title="Guidance history"
+            action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">Recent</div>}
+          >
             <div className="space-y-3">
               {messages.slice(-5).map((msg) => (
                 <div key={`h-${msg.id}`} className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
@@ -534,7 +523,7 @@ export default function Advisor() {
         </div>
       </div>
 
-      {/* Mobile fixed chat input \u2014 sits above the 64px bottom nav */}
+      {/* Mobile fixed chat input — sits above the 64px bottom nav */}
       <MobileChatInputBar
         value={input}
         onChange={setInput}
@@ -554,49 +543,49 @@ export function MobileChatInputBar({ value, onChange, onSend }) {
     <div
       className="xl:hidden fixed left-0 right-0 z-50"
       style={{
-        bottom: '64px',
-        background: 'rgba(10,12,18,1)',
-        borderTop: '1px solid rgba(255,255,255,0.12)',
-        boxShadow: '0 -32px 32px rgba(10,12,18,1)',
-        padding: '10px 16px',
-        paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
+        bottom: "64px",
+        background: "rgba(10,12,18,1)",
+        borderTop: "1px solid rgba(255,255,255,0.12)",
+        boxShadow: "0 -32px 32px rgba(10,12,18,1)",
+        padding: "10px 16px",
+        paddingBottom: "calc(10px + env(safe-area-inset-bottom, 0px))",
       }}
     >
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <div className="flex items-center gap-2">
         <input
           type="text"
           value={value}
-          onChange={e => onChange(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && value.trim()) onSend(); }}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && value.trim()) onSend(); }}
           placeholder="Ask a question…"
           autoComplete="off"
+          className="text-[16px]"
           style={{
             flex: 1,
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: '12px',
-            padding: '10px 16px',
-            fontSize: '14px',
-            color: 'white',
-            outline: 'none',
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: "12px",
+            padding: "10px 16px",
+            color: "white",
+            outline: "none",
           }}
         />
         <button
           onClick={() => { if (value.trim()) onSend(); }}
           style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '12px',
-            background: '#f59e0b',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: "44px",
+            height: "44px",
+            borderRadius: "12px",
+            background: "#f59e0b",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             flexShrink: 0,
           }}
         >
-          <Send style={{ width: 18, height: 18, color: '#000' }} />
+          <Send style={{ width: 18, height: 18, color: "#000" }} />
         </button>
       </div>
     </div>
