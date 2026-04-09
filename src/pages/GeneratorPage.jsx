@@ -1008,7 +1008,7 @@ export default function GeneratorPage() {
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
@@ -1052,17 +1052,14 @@ export default function GeneratorPage() {
             <ActionLink to="/app/generator?template=Termination%20Letter" title="Generate termination letter" desc="Pre-filled with ESA notice calculations" />
             <ActionLink to="/app/settings" title="Verify province defaults" desc="Ensure jurisdiction context is correct" />
           </div>
+          <div className="flex flex-wrap gap-3">
+            <StepPill index={1} label="Template" done />
+            <StepPill index={2} label="Details" done />
+            <StepPill index={3} label="Preview" active />
+          </div>
         </SectionCard>
 
-        <div className="h-px bg-white/5" />
-
-        <div className="flex flex-wrap gap-3">
-          <StepPill index={1} label="Template" done />
-          <StepPill index={2} label="Details" done />
-          <StepPill index={3} label="Preview" active />
-        </div>
-
-        <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
             <SectionCard
               title="Builder"
