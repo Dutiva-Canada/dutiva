@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Calculator,
   ChevronRight,
   FileText,
   Paperclip,
@@ -16,39 +15,6 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useLang } from "../context/LanguageContext.jsx";
 import { getStoredSettings } from "../utils/workspaceSettings";
 
-// ─── ESA data ─────────────────────────────────────────────────────────────────
-const ESA_NOTICE = {
-  Ontario: [[0, 1, 0], [1, 3, 2], [3, 4, 3], [4, 5, 4], [5, 6, 5], [6, 7, 6], [7, 8, 7], [8, Infinity, 8]],
-  "British Columbia": [[0, 0.25, 0], [0.25, 1, 1], [1, 3, 2], [3, 4, 3], [4, 5, 4], [5, 6, 5], [6, 7, 6], [7, 8, 7], [8, Infinity, 8]],
-  Alberta: [[0, 0.25, 0], [0.25, 2, 1], [2, 4, 2], [4, 6, 4], [6, 8, 5], [8, 10, 6], [10, Infinity, 8]],
-  Quebec: [[0, 0.25, 0], [0.25, 1, 1], [1, 5, 2], [5, 10, 4], [10, Infinity, 8]],
-  Manitoba: [[0, 0.08, 0], [0.08, 1, 1], [1, 3, 2], [3, 5, 4], [5, 10, 6], [10, Infinity, 8]],
-  Saskatchewan: [[0, 0.25, 0], [0.25, 3, 2], [3, 5, 4], [5, 10, 6], [10, Infinity, 8]],
-  "Nova Scotia": [[0, 0.25, 0], [0.25, 2, 1], [2, 5, 2], [5, 10, 4], [10, Infinity, 8]],
-  "New Brunswick": [[0, 0.5, 0], [0.5, 5, 2], [5, Infinity, 4]],
-  Federal: [[0, 0.25, 0], [0.25, Infinity, 2]],
-  "Newfoundland and Labrador": [[0, 0.17, 0], [0.17, 2, 1], [2, 5, 2], [5, 15, 3], [15, Infinity, 4]],
-  "Prince Edward Island": [[0, 0.17, 0], [0.17, 6, 2], [6, Infinity, 4]],
-  "Northwest Territories": [[0, 0.17, 0], [0.17, 1, 1], [1, 3, 2], [3, 5, 3], [5, 10, 4], [10, Infinity, 6]],
-  Nunavut: [[0, 0.17, 0], [0.17, 1, 1], [1, 3, 2], [3, 5, 3], [5, 10, 4], [10, Infinity, 6]],
-  Yukon: [[0, 0.17, 0], [0.17, 1, 1], [1, 3, 2], [3, 5, 3], [5, 10, 4], [10, Infinity, 8]],
-};
-
-function getNoticeWeeks(province, years) {
-  const table = ESA_NOTICE[province] || ESA_NOTICE["Ontario"];
-  for (const [min, max, weeks] of table) {
-    if (years >= min && years < max) return weeks;
-  }
-  return table[table.length - 1][2];
-}
-
-const CANADIAN_JURISDICTIONS = [
-  "Ontario", "British Columbia", "Alberta", "Quebec", "Manitoba",
-  "Saskatchewan", "Nova Scotia", "New Brunswick", "Federal",
-  "Newfoundland and Labrador", "Prince Edward Island",
-  "Northwest Territories", "Nunavut", "Yukon",
-];
-
 function createInitialMessages() {
   const now = Date.now();
   return [
@@ -61,7 +27,7 @@ function createInitialMessages() {
     {
       id: "seed-assistant",
       role: "assistant",
-      text: "Yes — it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.",
+      text: "Yes \u2014 it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.",
       createdAt: new Date(now - 60_000).toISOString(),
     },
   ];
@@ -121,138 +87,7 @@ async function callAdvisorAPI(messagesForModel, province, lawUpdates = [], onTok
   return fullText.trim() || "Unable to generate a response.";
 }
 
-// ─── ESA Calculator component ────────────────────────────────────────────────
-function ESACalculator() {
-  const settings = getStoredSettings();
-  const [province, setProvince] = useState(settings.province || "Ontario");
-  const [years, setYears] = useState("");
-  const [annualSalary, setAnnualSalary] = useState("");
-  const [largePay, setLargePay] = useState(false);
-  const [result, setResult] = useState(null);
-
-  const calculate = () => {
-    const y = parseFloat(years);
-    const s = parseFloat(String(annualSalary).replace(/[,$]/g, ""));
-    if (!y || y < 0 || !s || s <= 0) return;
-
-    const weeklyWage = s / 52;
-    const noticeWeeks = getNoticeWeeks(province, y);
-    const payInLieu = noticeWeeks * weeklyWage;
-
-    let severanceWeeks = 0;
-    let severanceNote = "";
-    if (province === "Ontario") {
-      if (y >= 5 && largePay) {
-        severanceWeeks = Math.min(Math.floor(y), 26);
-        severanceNote = `ESA, 2000, s. 64–65 · Max 26 weeks`;
-      } else if (y >= 5) {
-        severanceNote = "May apply if payroll ≥ $2.5M — confirm above";
-      }
-    } else if (province === "Federal") {
-      if (y >= 1) {
-        severanceWeeks = Math.min(Math.floor(y) * 2, 0);
-        severanceNote = "Canada Labour Code, s. 235 — contact legal counsel";
-      }
-    }
-
-    const severancePay = severanceWeeks * weeklyWage;
-
-    const actMap = {
-      Ontario: "ESA, 2000, s. 57",
-      "British Columbia": "Employment Standards Act, s. 63",
-      Alberta: "Employment Standards Code, s. 56",
-      Quebec: "Act Respecting Labour Standards, s. 82",
-      Manitoba: "Employment Standards Code, s. 61",
-      Saskatchewan: "Saskatchewan Employment Act, s. 2-60",
-      "Nova Scotia": "Labour Standards Code, s. 72",
-      "New Brunswick": "Employment Standards Act, s. 30",
-      Federal: "Canada Labour Code, s. 230",
-    };
-
-    setResult({ noticeWeeks, payInLieu, weeklyWage, severanceWeeks, severancePay, severanceNote, actRef: actMap[province] || "applicable ESA" });
-  };
-
-  const fmt = (n) => n.toLocaleString("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 });
-
-  return (
-    <section className="premium-card p-6">
-      <div className="mb-1 flex items-center gap-2">
-        <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
-          <Calculator className="h-4 w-4" />
-        </div>
-        <h2 className="text-base font-semibold text-zinc-100">ESA Notice Calculator</h2>
-      </div>
-      <p className="mb-4 text-xs text-zinc-500">Statutory minimums only. Common-law notice may be higher.</p>
-
-      <div className="space-y-3">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-300">Province</label>
-          <select value={province} onChange={(e) => { setProvince(e.target.value); setResult(null); }}
-            className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none">
-            {CANADIAN_JURISDICTIONS.map((j) => (<option key={j} value={j}>{j}</option>))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-300">Years of service</label>
-            <input type="number" min="0" step="0.5" placeholder="e.g. 3.5" value={years}
-              onChange={(e) => { setYears(e.target.value); setResult(null); }}
-              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-300">Annual salary ($)</label>
-            <input type="number" min="0" step="1000" placeholder="e.g. 65000" value={annualSalary}
-              onChange={(e) => { setAnnualSalary(e.target.value); setResult(null); }}
-              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none" />
-          </div>
-        </div>
-
-        {province === "Ontario" && (
-          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/6 bg-white/[0.02] px-3 py-2.5">
-            <input type="checkbox" checked={largePay} onChange={(e) => { setLargePay(e.target.checked); setResult(null); }} className="h-4 w-4 accent-amber-400" />
-            <span className="text-xs text-zinc-300">Employer payroll ≥ $2.5M (enables severance)</span>
-          </label>
-        )}
-
-        <button type="button" onClick={calculate} className="gold-button w-full px-4 py-2.5 text-sm">
-          Calculate entitlements
-        </button>
-      </div>
-
-      {result && (
-        <div className="mt-4 space-y-2">
-          <div className="rounded-xl border border-amber-400/15 bg-amber-400/6 px-4 py-3">
-            <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Statutory notice</div>
-            <div className="mt-1 text-xl font-bold text-amber-300">{result.noticeWeeks} week{result.noticeWeeks !== 1 ? "s" : ""}</div>
-            <div className="mt-0.5 text-xs text-zinc-400">Pay in lieu: {fmt(result.payInLieu)} · Weekly wage: {fmt(result.weeklyWage)}</div>
-          </div>
-          {(result.severanceWeeks > 0 || result.severanceNote) && (
-            <div className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Severance pay</div>
-              {result.severanceWeeks > 0 ? (
-                <>
-                  <div className="mt-1 text-xl font-bold text-zinc-100">{result.severanceWeeks} weeks · {fmt(result.severancePay)}</div>
-                  <div className="mt-0.5 text-xs text-zinc-500">{result.severanceNote}</div>
-                </>
-              ) : (
-                <div className="mt-1 text-sm text-zinc-400">{result.severanceNote}</div>
-              )}
-            </div>
-          )}
-          <div className="rounded-xl border border-emerald-400/12 bg-emerald-400/6 px-4 py-3">
-            <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Total minimum exposure</div>
-            <div className="mt-1 text-xl font-bold text-emerald-300">{fmt(result.payInLieu + result.severancePay)}</div>
-            <div className="mt-0.5 text-xs text-zinc-500">{result.actRef} · statutory only</div>
-          </div>
-          <p className="text-xs text-zinc-500 pt-1">Common-law reasonable notice often exceeds statutory minimums. Consult legal counsel before terminating.</p>
-        </div>
-      )}
-    </section>
-  );
-}
-
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// \u2500\u2500 Sub-components \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function SectionCard({ title, children, action }) {
   return (
     <section className="premium-card p-6">
@@ -311,14 +146,14 @@ function MarkdownText({ text }) {
 
   function renderBlock(block, i) {
     const lines = block.split("\n");
-    const isList = lines.length > 0 && lines.every((l) => /^[-*•]\s/.test(l.trimStart()));
+    const isList = lines.length > 0 && lines.every((l) => /^[-*\u2022\u00b7]\s/.test(l.trimStart()));
     if (isList) {
       return (
         <ul key={i} className={`space-y-1.5 ${i > 0 ? "mt-2" : ""}`}>
           {lines.map((line, j) => (
             <li key={j} className="flex items-start gap-2.5">
               <span className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/50" />
-              <span>{parseInline(line.replace(/^[-*•]\s/, ""))}</span>
+              <span>{parseInline(line.replace(/^[-*\u2022\u00b7]\s/, ""))}</span>
             </li>
           ))}
         </ul>
@@ -345,20 +180,7 @@ function SuggestionButton({ children, onClick }) {
   );
 }
 
-function ActionLink({ to, title, desc }) {
-  return (
-    <Link to={to}
-      className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-left transition hover:border-amber-400/20 hover:bg-white/[0.03]">
-      <div>
-        <div className="text-sm font-medium text-zinc-100">{title}</div>
-        <div className="mt-1 text-sm text-zinc-400">{desc}</div>
-      </div>
-      <ChevronRight className="h-4 w-4 text-zinc-500" />
-    </Link>
-  );
-}
-
-// ─── Main Advisor page ────────────────────────────────────────────────────────
+// \u2500\u2500 Main Advisor page \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 export default function Advisor() {
   const { user } = useAuth();
   const { t } = useLang();
@@ -452,7 +274,7 @@ export default function Advisor() {
       const isConfig = err.message?.includes("HF_TOKEN not configured");
       if (isConfig) setAdvisorReady(false);
       const msg = isConfig
-        ? "The AI advisor isn't configured yet — add HF_TOKEN to your Vercel project environment variables."
+        ? "The AI advisor isn't configured yet \u2014 add HF_TOKEN to your Vercel project environment variables."
         : err.message || "Could not reach the advisor. Please check your connection and try again.";
       setAdvisorError(msg);
       setMessages((prev) => prev.map((m) => m.id === streamId ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false } : m));
@@ -489,8 +311,9 @@ export default function Advisor() {
         </div>
       </div>
 
-      {/* Status cards — horizontal scroll on mobile, 3-col grid on md+ */}
+      {/* Status cards \u2014 horizontal scroll on mobile, 3-col grid on md+ */}
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+        {/* AI ENGINE card \u2014 fixed layout: label top, model name bold, sub-label small muted */}
         <div className="premium-card-soft shrink-0 min-w-[180px] p-4 md:min-w-0 md:p-5">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">AI engine</div>
@@ -499,8 +322,8 @@ export default function Advisor() {
           <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight md:mt-3 md:text-3xl ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-400"}`}>
             {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
           </div>
-          <div className="mt-1 text-xs text-zinc-400 md:text-sm">
-            {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API — live" : "AI advisor ready"}
+          <div className="mt-1 text-xs text-zinc-400">
+            {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
           </div>
         </div>
 
@@ -533,9 +356,9 @@ export default function Advisor() {
           <div className="flex items-start gap-3">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
             <div>
-              <div className="text-sm font-semibold text-emerald-200">Legislative changes detected — advisor context updated</div>
+              <div className="text-sm font-semibold text-emerald-200">Legislative changes detected \u2014 advisor context updated</div>
               <div className="mt-1 text-xs text-emerald-300/70">
-                {lawUpdates.slice(0, 2).map((u) => u.change_description).join(" · ")}
+                {lawUpdates.slice(0, 2).map((u) => u.change_description).join(" \u00b7 ")}
               </div>
             </div>
           </div>
@@ -546,7 +369,7 @@ export default function Advisor() {
         {/* Left: Chat */}
         <SectionCard title="Conversation"
           action={<div className={`rounded-full border px-3 py-1 text-xs font-medium ${advisorReady === false ? "border-red-400/20 bg-red-400/8 text-red-300" : "border-amber-400/12 bg-amber-400/6 text-amber-300"}`}>
-            {advisorReady === false ? "Config required" : `${province} · Live`}
+            {advisorReady === false ? "Config required" : `${province} \u00b7 Live`}
           </div>}>
 
           <div ref={chatScrollRef} className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
@@ -562,9 +385,9 @@ export default function Advisor() {
               <div className="flex justify-start">
                 <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-500">
                   <span className="inline-flex gap-1">
-                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>·</span>
-                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>·</span>
-                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>·</span>
+                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>\u00b7</span>
+                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>\u00b7</span>
+                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>\u00b7</span>
                   </span>
                 </div>
               </div>
@@ -589,10 +412,10 @@ export default function Advisor() {
             </div>
           )}
 
-          {/* Suggestion chips — horizontally scrollable on mobile to avoid overflow */}
+          {/* Suggestion chips \u2014 horizontally scrollable on mobile to avoid overflow */}
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
-              {province} notice · 4yr
+              {province} notice \u00b7 4yr
             </SuggestionButton>
             <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
               Probation clause
@@ -605,7 +428,7 @@ export default function Advisor() {
             </SuggestionButton>
           </div>
 
-          {/* Input + disclosure — hidden on mobile (uses fixed bar below); shown xl+ */}
+          {/* Input + disclosure \u2014 hidden on mobile (uses fixed bar below); shown xl+ */}
           <div className="hidden xl:block">
             <div className="mt-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-3 shadow-sm">
               <input ref={fileInputRef} type="file" multiple onChange={handleAttachmentChange} className="hidden" />
@@ -629,7 +452,7 @@ export default function Advisor() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
-                  placeholder="Ask a question…"
+                  placeholder="Ask a question\u2026"
                   className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all"
                 />
                 <button type="button" onClick={sendMessage} disabled={loading || !trimmedInput(input)}
@@ -645,29 +468,15 @@ export default function Advisor() {
               <p className="text-[11px] leading-5 text-zinc-500">
                 {t(
                   "AI-generated responses can contain errors. Always verify important HR and legal decisions with a qualified professional before acting.",
-                  "Les réponses générées par IA peuvent contenir des erreurs. Vérifiez toujours les décisions RH et juridiques importantes avec un professionnel qualifié avant d'agir."
+                  "Les r\u00e9ponses g\u00e9n\u00e9r\u00e9es par IA peuvent contenir des erreurs. V\u00e9rifiez toujours les d\u00e9cisions RH et juridiques importantes avec un professionnel qualifi\u00e9 avant d'agir."
                 )}
               </p>
             </div>
           </div>
         </SectionCard>
 
-        {/* Right: Calculator + history + actions */}
+        {/* Right: history */}
         <div className="space-y-6">
-          <ESACalculator />
-
-          <div className="h-px bg-white/5" />
-
-          <SectionCard title="Next steps">
-            <div className="space-y-3">
-              <ActionLink to="/app/generator?template=Employment%20Agreement" title="Open document builder" desc="Turn guidance into a draft in one click" />
-              <ActionLink to="/app/generator?template=Termination%20Letter" title="Generate termination letter" desc="Pre-filled with ESA notice calculations" />
-              <ActionLink to="/app/settings" title="Verify province defaults" desc="Ensure jurisdiction context is correct" />
-            </div>
-          </SectionCard>
-
-          <div className="h-px bg-white/5" />
-
           <SectionCard title="Guidance history"
             action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">{messages.length} messages</div>}>
             <div className="space-y-3">
@@ -685,7 +494,7 @@ export default function Advisor() {
         </div>
       </div>
 
-      {/* Mobile fixed chat input — sits above the 64px bottom nav */}
+      {/* Mobile fixed chat input \u2014 sits above the 64px bottom nav */}
       <MobileChatInputBar
         value={input}
         onChange={setInput}
@@ -718,7 +527,7 @@ export function MobileChatInputBar({ value, onChange, onSend }) {
           value={value}
           onChange={e => onChange(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && value.trim()) onSend(); }}
-          placeholder="Ask a question…"
+          placeholder="Ask a question\u2026"
           style={{
             flex: 1,
             background: 'rgba(255,255,255,0.06)',
