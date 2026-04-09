@@ -37,6 +37,12 @@ export default function AuthPage() {
     navigate(nextPath, { replace: true });
   }, [authConfigured, loading, navigate, nextPath, user]);
 
+  useEffect(() => {
+    if (!status) return;
+    const timer = setTimeout(() => setStatus(""), 5000);
+    return () => clearTimeout(timer);
+  }, [status]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
@@ -125,7 +131,7 @@ export default function AuthPage() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => { setEmail(e.target.value); setStatus(""); }}
                     placeholder="you@company.com"
                     className="w-full bg-transparent text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
                   />
