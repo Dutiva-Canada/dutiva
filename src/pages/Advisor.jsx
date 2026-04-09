@@ -312,40 +312,78 @@ export default function Advisor() {
       </div>
 
       {/* Status cards \u2014 horizontal scroll on mobile, 3-col grid on md+ */}
-      <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
-        {/* AI ENGINE card */}
-        <div className="premium-card-soft shrink-0 p-4 md:min-w-0 md:p-5" style={{ minWidth: '140px' }}>
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">AI engine</div>
-            <Sparkles className="h-4 w-4 text-amber-300" />
+      {/* Outer div bleeds to screen edges; inner div carries pl-4 so first card is never clipped by overflow */}
+      <div className="-mx-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:overflow-visible">
+        <div
+          className="flex gap-3 pb-2 md:pb-0 md:grid md:grid-cols-3"
+          style={{ paddingLeft: '16px', paddingRight: '16px' }}
+        >
+          {/* AI ENGINE card */}
+          <div
+            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
+            style={{ minWidth: 'calc(50vw - 24px)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>AI Engine</div>
+              <Sparkles className="h-4 w-4 text-amber-300" />
+            </div>
+            <div
+              className="metric-value"
+              style={{
+                marginTop: '8px',
+                fontSize: '17px',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                color: advisorReady === false ? 'rgb(248 113 113)' : advisorReady ? 'rgb(252 211 77)' : 'rgb(250 250 250)',
+              }}
+            >
+              {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
+            </div>
+            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>
+              {advisorReady === false ? "Check HF_TOKEN in Vercel" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
+            </div>
           </div>
-          <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight md:mt-3 md:text-3xl ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-100"}`}>
-            {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
-          </div>
-          <div className="mt-1 text-xs text-zinc-400 md:text-sm">
-            {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
-          </div>
-        </div>
 
-        <div className="premium-card-soft shrink-0 p-4 md:min-w-0 md:p-5" style={{ minWidth: '140px' }}>
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
-            <ShieldCheck className="h-4 w-4 text-emerald-300" />
+          <div
+            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
+            style={{ minWidth: 'calc(50vw - 24px)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Jurisdiction</div>
+              <ShieldCheck className="h-4 w-4 text-emerald-300" />
+            </div>
+            <div
+              className="metric-value"
+              style={{ marginTop: '8px', fontSize: '17px', fontWeight: 700, letterSpacing: '-0.02em', color: 'rgb(250 250 250)' }}
+            >
+              {province}
+            </div>
+            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>14 Canadian jurisdictions</div>
           </div>
-          <div className="metric-value mt-2 text-2xl font-semibold tracking-tight text-zinc-100 md:mt-3 md:text-3xl">{province}</div>
-          <div className="mt-1 text-xs text-zinc-400 md:text-sm">14 Canadian jurisdictions supported</div>
-        </div>
 
-        <div className="premium-card-soft shrink-0 p-4 md:min-w-0 md:p-5" style={{ minWidth: '140px' }}>
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Law updates</div>
-            <FileText className="h-4 w-4 text-zinc-300" />
-          </div>
-          <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight md:mt-3 md:text-3xl ${hasLawUpdates ? "text-emerald-300" : "text-zinc-400"}`}>
-            {hasLawUpdates ? `${lawUpdates.length} new` : "Monitoring"}
-          </div>
-          <div className="mt-1 text-xs text-zinc-400 md:text-sm">
-            {hasLawUpdates ? "Recent legislative changes detected" : "Government websites watched daily"}
+          <div
+            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
+            style={{ minWidth: 'calc(50vw - 24px)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Law Updates</div>
+              <FileText className="h-4 w-4 text-zinc-300" />
+            </div>
+            <div
+              className="metric-value"
+              style={{
+                marginTop: '8px',
+                fontSize: '17px',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                color: hasLawUpdates ? 'rgb(110 231 183)' : 'rgb(113 113 122)',
+              }}
+            >
+              {hasLawUpdates ? `${lawUpdates.length} new` : "Monitoring"}
+            </div>
+            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>
+              {hasLawUpdates ? "Legislative changes detected" : "Govt websites watched daily"}
+            </div>
           </div>
         </div>
       </div>
