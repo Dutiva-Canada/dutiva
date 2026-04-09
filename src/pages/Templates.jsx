@@ -266,38 +266,62 @@ export default function Templates() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="premium-card-soft p-5">
-          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
-            Templates
-          </div>
-          <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">
-            16
-          </div>
-          <div className="mt-1 text-sm text-zinc-400">Bilingual document templates</div>
-        </div>
-
-        <div className="premium-card-soft p-5">
-          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
-            Coverage
-          </div>
-          <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">
-            14
-          </div>
-          <div className="mt-1 text-sm text-zinc-400">Canadian jurisdictions supported</div>
-        </div>
-
-        <div className="premium-card-soft p-5">
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
-              Workflow
+      {/* Status cards — horizontal scroll on mobile, 3-col grid on md+ */}
+      <div className="-mx-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:overflow-visible">
+        <div
+          className="flex gap-3 pb-2 md:pb-0 md:grid md:grid-cols-3"
+          style={{ paddingLeft: '16px', paddingRight: '16px' }}
+        >
+          <div
+            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
+            style={{ minWidth: 'calc(50vw - 24px)' }}
+          >
+            <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>
+              Templates
             </div>
-            <Sparkles className="h-4 w-4 text-amber-300" />
+            <div
+              className="metric-value"
+              style={{ marginTop: '8px', fontSize: '17px', fontWeight: 700, letterSpacing: '-0.02em', color: 'rgb(250 250 250)' }}
+            >
+              16
+            </div>
+            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>Bilingual document templates</div>
           </div>
-          <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-amber-300">
-            Guided
+
+          <div
+            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
+            style={{ minWidth: 'calc(50vw - 24px)' }}
+          >
+            <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>
+              Coverage
+            </div>
+            <div
+              className="metric-value"
+              style={{ marginTop: '8px', fontSize: '17px', fontWeight: 700, letterSpacing: '-0.02em', color: 'rgb(250 250 250)' }}
+            >
+              14
+            </div>
+            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>Canadian jurisdictions supported</div>
           </div>
-          <div className="mt-1 text-sm text-zinc-400">AI-assisted form filling</div>
+
+          <div
+            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
+            style={{ minWidth: 'calc(50vw - 24px)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>
+                Workflow
+              </div>
+              <Sparkles className="h-4 w-4 text-amber-300" />
+            </div>
+            <div
+              className="metric-value"
+              style={{ marginTop: '8px', fontSize: '17px', fontWeight: 700, letterSpacing: '-0.02em', color: 'rgb(252 211 77)' }}
+            >
+              Guided
+            </div>
+            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>AI-assisted form filling</div>
+          </div>
         </div>
       </div>
 

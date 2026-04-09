@@ -167,20 +167,28 @@ function greeting(lang = "en") {
 // ── Sub-components ────────────────────────────────────────────────────────
 
 function StatCard({ title, value, sub, icon, tone = "default", to }) {
-  const toneClass =
-    tone === "gold" ? "text-amber-300" :
-    tone === "warning" ? "text-yellow-300" :
-    tone === "green" ? "text-emerald-300" :
-    "text-zinc-100";
+  const valueColor =
+    tone === "gold"    ? "rgb(252 211 77)"  :
+    tone === "warning" ? "rgb(253 224 71)"  :
+    tone === "green"   ? "rgb(110 231 183)" :
+    "rgb(250 250 250)";
 
   const content = (
-    <div className="premium-card-soft p-5 transition hover:border-white/12">
+    <div
+      className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
+      style={{ minWidth: 'calc(50vw - 24px)' }}
+    >
       <div className="flex items-center justify-between">
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">{title}</div>
-        <div className="text-zinc-500">{icon}</div>
+        <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>{title}</div>
+        <div style={{ color: 'rgb(113 113 122)' }}>{icon}</div>
       </div>
-      <div className={`metric-value mt-4 text-3xl font-semibold tracking-tight ${toneClass}`}>{value}</div>
-      <div className="mt-1 text-sm text-zinc-400">{sub}</div>
+      <div
+        className="metric-value"
+        style={{ marginTop: '8px', fontSize: '17px', fontWeight: 700, letterSpacing: '-0.02em', color: valueColor }}
+      >
+        {value}
+      </div>
+      <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgb(113 113 122)' }}>{sub}</div>
     </div>
   );
 
@@ -571,39 +579,44 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Stat cards ── */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          title={t("Documents", "Documents")}
-          value={loadingDocs ? "—" : String(documentCount)}
-          sub={hasDocuments ? `${t("Last", "Dernier")} : ${formatRelative(documents[0]?.created_at)}` : t("None yet — start below", "Aucun encore — commencez ci-dessous")}
-          tone={hasDocuments ? "gold" : "default"}
-          icon={<FileText className="h-4 w-4" />}
-          to="/app/generator"
-        />
-        <StatCard
-          title={t("Provinces active", "Provinces actives")}
-          value={loadingDocs ? "—" : String(Math.max(activeProvinces, province ? 1 : 0))}
-          sub={province ? `${t("Primary", "Principale")} : ${province}` : t("Set province in Settings", "Définir la province dans Paramètres")}
-          tone={province ? "green" : "default"}
-          icon={<MapPin className="h-4 w-4" />}
-          to="/app/settings"
-        />
-        <StatCard
-          title={t("Pending signatures", "Signatures en attente")}
-          value={loadingDocs ? "—" : String(pendingSignatures)}
-          sub={pendingSignatures > 0 ? t("Awaiting review", "En attente de révision") : t("All signed or none pending", "Tout signé ou aucun en attente")}
-          tone={pendingSignatures > 0 ? "warning" : "default"}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          to="/app/generator"
-        />
-        <StatCard
-          title={t("Law updates", "Mises à jour législatives")}
-          value={loadingDocs ? "—" : String(lawUpdates.length)}
-          sub={lawUpdates.length > 0 ? t("Recent legislation changes detected", "Changements législatifs récents détectés") : t("No changes detected in 30 days", "Aucun changement détecté en 30 jours")}
-          tone={lawUpdates.length > 0 ? "warning" : "green"}
-          icon={<Bell className="h-4 w-4" />}
-        />
+      {/* ── Stat cards — horizontal scroll on mobile, 4-col grid on md+ ── */}
+      <div className="-mx-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:overflow-visible">
+        <div
+          className="flex gap-3 pb-2 md:pb-0 md:grid md:grid-cols-4"
+          style={{ paddingLeft: '16px', paddingRight: '16px' }}
+        >
+          <StatCard
+            title={t("Documents", "Documents")}
+            value={loadingDocs ? "—" : String(documentCount)}
+            sub={hasDocuments ? `${t("Last", "Dernier")} : ${formatRelative(documents[0]?.created_at)}` : t("None yet — start below", "Aucun encore — commencez ci-dessous")}
+            tone={hasDocuments ? "gold" : "default"}
+            icon={<FileText className="h-4 w-4" />}
+            to="/app/generator"
+          />
+          <StatCard
+            title={t("Provinces active", "Provinces actives")}
+            value={loadingDocs ? "—" : String(Math.max(activeProvinces, province ? 1 : 0))}
+            sub={province ? `${t("Primary", "Principale")} : ${province}` : t("Set province in Settings", "Définir la province dans Paramètres")}
+            tone={province ? "green" : "default"}
+            icon={<MapPin className="h-4 w-4" />}
+            to="/app/settings"
+          />
+          <StatCard
+            title={t("Pending signatures", "Signatures en attente")}
+            value={loadingDocs ? "—" : String(pendingSignatures)}
+            sub={pendingSignatures > 0 ? t("Awaiting review", "En attente de révision") : t("All signed or none pending", "Tout signé ou aucun en attente")}
+            tone={pendingSignatures > 0 ? "warning" : "default"}
+            icon={<AlertTriangle className="h-4 w-4" />}
+            to="/app/generator"
+          />
+          <StatCard
+            title={t("Law updates", "Mises à jour législatives")}
+            value={loadingDocs ? "—" : String(lawUpdates.length)}
+            sub={lawUpdates.length > 0 ? t("Recent legislation changes detected", "Changements législatifs récents détectés") : t("No changes detected in 30 days", "Aucun changement détecté en 30 jours")}
+            tone={lawUpdates.length > 0 ? "warning" : "green"}
+            icon={<Bell className="h-4 w-4" />}
+          />
+        </div>
       </div>
 
       {/* ── Quick launch ── */}
