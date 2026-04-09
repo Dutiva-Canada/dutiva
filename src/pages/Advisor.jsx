@@ -313,17 +313,17 @@ export default function Advisor() {
 
       {/* Status cards \u2014 horizontal scroll on mobile, 3-col grid on md+ */}
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
-        {/* AI ENGINE card \u2014 fixed layout: label top, model name bold, sub-label small muted */}
+        {/* AI ENGINE card */}
         <div className="premium-card-soft shrink-0 min-w-[180px] p-4 md:min-w-0 md:p-5">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">AI engine</div>
             <Sparkles className="h-4 w-4 text-amber-300" />
           </div>
-          <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-100"}`}>
-            {advisorReady === false ? "Error" : advisorReady ? "Ready" : "Ready"}
+          <div className={`metric-value mt-2 text-2xl font-semibold tracking-tight md:mt-3 md:text-3xl ${advisorReady === false ? "text-red-400" : advisorReady ? "text-amber-300" : "text-zinc-100"}`}>
+            {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
           </div>
-          <div className="mt-1 text-xs text-zinc-400 truncate">
-            {advisorReady === false ? "Check HF_TOKEN" : "AI advisor ready"}
+          <div className="mt-1 text-xs text-zinc-400 md:text-sm">
+            {advisorReady === false ? "Check HF_TOKEN in Vercel env vars" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
           </div>
         </div>
 
@@ -452,7 +452,8 @@ export default function Advisor() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
-                  placeholder="Ask a question\u2026"
+                  placeholder="Ask a question…"
+                  autoComplete="off"
                   className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all"
                 />
                 <button type="button" onClick={sendMessage} disabled={loading || !trimmedInput(input)}
@@ -478,7 +479,7 @@ export default function Advisor() {
         {/* Right: history — desktop only, redundant on mobile where full chat is visible */}
         <div className="hidden xl:block space-y-6">
           <SectionCard title="Guidance history"
-            action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">{messages.length} messages</div>}>
+            action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">Recent</div>}>
             <div className="space-y-3">
               {messages.slice(-5).map((msg) => (
                 <div key={`h-${msg.id}`} className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
@@ -527,7 +528,8 @@ export function MobileChatInputBar({ value, onChange, onSend }) {
           value={value}
           onChange={e => onChange(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && value.trim()) onSend(); }}
-          placeholder="Ask a question\u2026"
+          placeholder="Ask a question…"
+          autoComplete="off"
           style={{
             flex: 1,
             background: 'rgba(255,255,255,0.06)',
@@ -554,10 +556,7 @@ export function MobileChatInputBar({ value, onChange, onSend }) {
             flexShrink: 0,
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
+          <Send style={{ width: 18, height: 18, color: '#000' }} />
         </button>
       </div>
     </div>

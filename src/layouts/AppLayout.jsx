@@ -282,47 +282,51 @@ function TopBar() {
 }
 
 /** Mobile bottom navigation bar — visible on screens smaller than xl */
-function MobileBottomNav() {
-  const navItems = useNavItems();
+function MobileBottomNav({ navItems }) {
+  const location = useLocation();
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 block border-t border-white/10 backdrop-blur-md xl:hidden"
+      className="xl:hidden fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: "rgba(10, 12, 18, 0.92)",
-        paddingBottom: "env(safe-area-inset-bottom)",
+        background: 'rgba(10,12,18,0.97)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        height: '64px',
+        display: 'flex',
+        alignItems: 'stretch',
       }}
     >
-      <div style={{ display: 'flex', height: '64px', alignItems: 'stretch' }}>
-        {navItems.map(item => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              style={({ isActive }) => ({
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flex: 1,
-                gap: '3px',
-                color: isActive ? '#fbbf24' : '#71717a',
-                textDecoration: 'none',
-              })}
-            >
-              <Icon style={{ width: 21, height: 21, flexShrink: 0 }} />
-              <span style={{ fontSize: 10, lineHeight: 1 }}>{item.label}</span>
-            </NavLink>
-          );
-        })}
-      </div>
+      {navItems.map(item => {
+        const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+        return (
+          <Link
+            key={item.to}
+            to={item.to}
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '3px',
+              color: isActive ? '#fbbf24' : '#71717a',
+              textDecoration: 'none',
+              fontSize: '10px',
+              fontWeight: isActive ? 600 : 400,
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            }}
+          >
+            <item.icon style={{ width: 22, height: 22 }} />
+            <span>{item.label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }
 
 export default function AppLayout() {
+  const navItems = useNavItems();
   return (
     <div className="app-shell min-h-screen text-zinc-100">
       <div className="flex min-h-screen">
@@ -338,7 +342,7 @@ export default function AppLayout() {
         </div>
       </div>
       {/* Mobile bottom navigation — hidden on xl+ where sidebar is visible */}
-      <MobileBottomNav />
+      <MobileBottomNav navItems={navItems} />
     </div>
   );
 }
