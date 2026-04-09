@@ -293,7 +293,7 @@ export default function Advisor() {
           <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
             Advisor
           </div>
-          <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+          <h1 className="metric-value px-0 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
             Compliance copilot
           </h1>
           <p className="mt-3 max-w-2xl text-base text-zinc-400 hidden xl:block">
@@ -311,12 +311,8 @@ export default function Advisor() {
         </div>
       </div>
 
-      {/* Status cards \u2014 horizontal scroll on mobile, 3-col grid on md+ */}
-      {/* Outer div bleeds to screen edges; inner div carries pl-4 so first card is never clipped by overflow */}
-      <div className="">
-        <div
-          className="grid grid-cols-2 gap-2 md:grid-cols-3"
-        >
+      {/* Status cards — 1-col stacked on mobile, 3-col on md+ */}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {/* AI ENGINE card */}
           <div
             className="premium-card-soft p-4"
@@ -359,7 +355,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft p-4 col-span-2 md:col-span-1"
+            className="premium-card-soft p-4"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Law Updates</div>
@@ -381,7 +377,6 @@ export default function Advisor() {
               {hasLawUpdates ? "Legislative changes detected" : "Govt websites watched daily"}
             </div>
           </div>
-        </div>
       </div>
 
       {/* Law updates banner */}
