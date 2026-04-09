@@ -399,11 +399,11 @@ a[role="button"] {
   min-height: 44px;
 }
 
-/* Prevent iOS zoom on focus */
+/* Prevent iOS Safari auto-zoom on inputs */
 input,
 textarea,
 select {
-  font-size: 16px;
+  font-size: 16px !important;
 }
 
 /* Better pre blocks on small screens */
