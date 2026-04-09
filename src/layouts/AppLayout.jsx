@@ -287,12 +287,11 @@ function MobileBottomNav({ navItems }) {
 
   return (
     <nav
-      className="xl:hidden fixed bottom-0 left-0 right-0 z-50"
+      className="flex xl:hidden fixed bottom-0 left-0 right-0 z-50"
       style={{
         background: 'rgba(10,12,18,0.97)',
         borderTop: '1px solid rgba(255,255,255,0.08)',
         height: '64px',
-        display: 'flex',
         alignItems: 'stretch',
       }}
     >
