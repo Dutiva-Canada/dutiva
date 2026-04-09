@@ -297,7 +297,9 @@ function MobileBottomNav({ navItems }) {
       }}
     >
       {navItems.map(item => {
-        const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+        const isActive = item.end
+          ? location.pathname === item.to
+          : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
         return (
           <Link
             key={item.to}
