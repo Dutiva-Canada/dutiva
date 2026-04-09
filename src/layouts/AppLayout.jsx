@@ -292,7 +292,6 @@ function MobileBottomNav({ navItems }) {
         background: 'rgba(10,12,18,0.97)',
         borderTop: '1px solid rgba(255,255,255,0.08)',
         height: '64px',
-        display: 'flex',
         alignItems: 'stretch',
       }}
     >
