@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
-  Calculator,
   CheckCircle2,
   ChevronRight,
   Copy,
@@ -640,14 +639,7 @@ function ESACalculator({ defaultProvince }) {
   return (
     <section className="premium-card p-6">
       <h2 className="text-base font-semibold text-zinc-100">Entitlement calculator</h2>
-      <p className="mt-0.5 text-sm text-zinc-500">Calculate ESA notice entitlements before generating your document</p>
-      <div className="mt-4 mb-1 flex items-center gap-2">
-        <h2 className="text-base font-semibold text-zinc-100">ESA Notice Calculator</h2>
-        <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
-          <Calculator className="h-4 w-4" />
-        </div>
-      </div>
-      <p className="mb-4 text-xs text-zinc-500">Statutory minimums only. Common-law notice may be higher.</p>
+      <p className="mt-0.5 mb-4 text-sm text-zinc-500">Calculate ESA notice entitlements before generating your document. Statutory minimums only — common-law notice may be higher.</p>
       <div className="space-y-3">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-300">Province</label>
