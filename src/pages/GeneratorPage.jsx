@@ -475,7 +475,7 @@ function ESignModal({
             </div>
             <div className="flex gap-2">
               <input readOnly value={signLink}
-                className="flex-1 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
+                className="flex-1 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none" />
               <button type="button" onClick={handleCopy}
                 className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm">
                 <Copy className="h-4 w-4" />Copy link
@@ -496,7 +496,7 @@ function ESignModal({
                   </div>
                   <div className="flex gap-2">
                     <input readOnly value={employerLink}
-                      className="flex-1 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-zinc-100 outline-none" />
+                      className="flex-1 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-[16px] text-zinc-100 outline-none" />
                     <button type="button" onClick={handleCopyEmployer}
                       className="ghost-button inline-flex items-center gap-2 px-3 py-2 text-xs">
                       <Copy className="h-3.5 w-3.5" />Copy
@@ -507,10 +507,10 @@ function ESignModal({
                 <div className="space-y-2">
                   <input type="text" value={employerName} onChange={(e) => setEmployerName(e.target.value)}
                     placeholder="Employer name (e.g. David Park)"
-                    className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-500" />
+                    className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-[16px] text-zinc-100 outline-none placeholder:text-zinc-500" />
                   <input type="email" value={employerEmail} onChange={(e) => setEmployerEmail(e.target.value)}
                     placeholder="Employer email"
-                    className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-500" />
+                    className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-[16px] text-zinc-100 outline-none placeholder:text-zinc-500" />
                   {employerError && (
                     <div className="rounded-xl border border-red-400/15 bg-red-400/8 px-3 py-2 text-xs text-red-300">{employerError}</div>
                   )}
@@ -537,7 +537,7 @@ function ESignModal({
                 value={signerName}
                 onChange={(event) => setSignerName(event.target.value)}
                 placeholder="e.g. Sarah Chen"
-                className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
               />
             </div>
 
@@ -548,7 +548,7 @@ function ESignModal({
                 value={signerEmail}
                 onChange={(event) => setSignerEmail(event.target.value)}
                 placeholder="e.g. sarah@example.com"
-                className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
               />
             </div>
 
@@ -643,7 +643,7 @@ function ESACalculator({ defaultProvince }) {
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-300">Province</label>
           <select value={province} onChange={(e) => { setProvince(e.target.value); setResult(null); }}
-            className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none">
+            className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-[16px] text-zinc-100 outline-none">
             {CANADIAN_JURISDICTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
           </select>
         </div>
@@ -652,13 +652,13 @@ function ESACalculator({ defaultProvince }) {
             <label className="mb-1.5 block text-xs font-medium text-zinc-300">Years of service</label>
             <input type="number" min="0" step="0.5" placeholder="e.g. 3.5" value={years}
               onChange={(e) => { setYears(e.target.value); setResult(null); }}
-              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none" />
+              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-[16px] text-zinc-100 outline-none" />
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-300">Annual salary ($)</label>
             <input type="number" min="0" step="1000" placeholder="e.g. 65000" value={annualSalary}
               onChange={(e) => { setAnnualSalary(e.target.value); setResult(null); }}
-              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-100 outline-none" />
+              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-[16px] text-zinc-100 outline-none" />
           </div>
         </div>
         {province === "Ontario" && (
@@ -1009,6 +1009,7 @@ export default function GeneratorPage() {
   return (
     <>
       <div className="space-y-6">
+        {/* Page header */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
@@ -1044,22 +1045,25 @@ export default function GeneratorPage() {
 
         <StatusToast text={statusMessage} tone={statusTone} />
 
-        {/* \u2500\u2500 Entitlement calculator \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */}
+        {/* Entitlement calculator */}
         <ESACalculator defaultProvince={form.jurisdiction} />
+
+        {/* Next steps — step pills live inside this card */}
         <SectionCard title="Next steps">
           <div className="space-y-3">
             <ActionLink to="/app/advisor" title="Ask the AI advisor" desc="Get province-aware guidance before generating your document" />
             <ActionLink to="/app/generator?template=Termination%20Letter" title="Generate termination letter" desc="Pre-filled with ESA notice calculations" />
             <ActionLink to="/app/settings" title="Verify province defaults" desc="Ensure jurisdiction context is correct" />
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <StepPill index={1} label="Template" done />
             <StepPill index={2} label="Details" done />
             <StepPill index={3} label="Preview" active />
           </div>
         </SectionCard>
 
-        <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+        {/* Two-column layout: Builder + Saved docs (left) | Preview (right) */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
             <SectionCard
               title="Builder"
@@ -1075,7 +1079,7 @@ export default function GeneratorPage() {
                   <select
                     value={template}
                     onChange={(event) => setTemplate(event.target.value)}
-                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                   >
                     {templateOptions.map((item) => (
                       <option key={item} value={item}>
@@ -1090,7 +1094,7 @@ export default function GeneratorPage() {
                   <select
                     value={form.jurisdiction}
                     onChange={(event) => setForm({ ...form, jurisdiction: event.target.value })}
-                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                   >
                     {CANADIAN_JURISDICTIONS.map((jurisdiction) => (
                       <option key={jurisdiction} value={jurisdiction}>
@@ -1105,7 +1109,7 @@ export default function GeneratorPage() {
                   <input
                     value={form.companyName}
                     onChange={(event) => setForm({ ...form, companyName: event.target.value })}
-                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                   />
                 </div>
 
@@ -1114,7 +1118,7 @@ export default function GeneratorPage() {
                   <input
                     value={form.employeeName}
                     onChange={(event) => setForm({ ...form, employeeName: event.target.value })}
-                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                   />
                 </div>
 
@@ -1123,7 +1127,7 @@ export default function GeneratorPage() {
                   <input
                     value={form.jobTitle}
                     onChange={(event) => setForm({ ...form, jobTitle: event.target.value })}
-                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                   />
                 </div>
 
@@ -1132,7 +1136,7 @@ export default function GeneratorPage() {
                   <input
                     value={form.salary}
                     onChange={(event) => setForm({ ...form, salary: event.target.value })}
-                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                   />
                 </div>
 
@@ -1141,7 +1145,7 @@ export default function GeneratorPage() {
                   <input
                     value={form.startDate}
                     onChange={(event) => setForm({ ...form, startDate: event.target.value })}
-                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                   />
                 </div>
 
@@ -1150,7 +1154,7 @@ export default function GeneratorPage() {
                   <input
                     value={form.manager}
                     onChange={(event) => setForm({ ...form, manager: event.target.value })}
-                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                    className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                   />
                 </div>
               </div>
@@ -1160,7 +1164,7 @@ export default function GeneratorPage() {
                 <textarea
                   value={form.notes}
                   onChange={(event) => setForm({ ...form, notes: event.target.value })}
-                  className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                  className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                 />
               </div>
 
@@ -1171,7 +1175,7 @@ export default function GeneratorPage() {
                     <input
                       value={form.contractRate}
                       onChange={(event) => setForm({ ...form, contractRate: event.target.value })}
-                      className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                      className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                     />
                   </div>
 
@@ -1180,7 +1184,7 @@ export default function GeneratorPage() {
                     <textarea
                       value={form.scopeOfWork}
                       onChange={(event) => setForm({ ...form, scopeOfWork: event.target.value })}
-                      className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                      className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                     />
                   </div>
                 </>
@@ -1193,7 +1197,7 @@ export default function GeneratorPage() {
                     <textarea
                       value={form.performanceGoals}
                       onChange={(event) => setForm({ ...form, performanceGoals: event.target.value })}
-                      className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                      className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                     />
                   </div>
 
@@ -1202,7 +1206,7 @@ export default function GeneratorPage() {
                     <input
                       value={form.reviewDate}
                       onChange={(event) => setForm({ ...form, reviewDate: event.target.value })}
-                      className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none"
+                      className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
                     />
                   </div>
                 </>
