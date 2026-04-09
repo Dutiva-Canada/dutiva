@@ -103,13 +103,13 @@ function SectionCard({ title, children, action }) {
 function MessageBubble({ role, text }) {
   const isUser = role === "user";
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`} style={{ maxWidth: '100%' }}>
       <div className={[
-        "max-w-[88%] min-w-0 overflow-hidden break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
+        "min-w-0 overflow-hidden break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
         isUser
           ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
           : "border border-white/6 bg-white/[0.03] text-zinc-200",
-      ].join(" ")} style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+      ].join(" ")} style={{ wordBreak: "break-word", overflowWrap: "anywhere", maxWidth: '85%' }}>
         {isUser ? (
           text.split("\n").map((line, i, arr) => (
             <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
@@ -403,7 +403,8 @@ export default function Advisor() {
           {/* Message list */}
           <div
             ref={chatScrollRef}
-            className="scroll-area w-full min-w-0 max-h-[560px] space-y-4 overflow-y-auto overflow-x-hidden rounded-[24px] border border-white/6 bg-white/[0.02] p-4"
+            className="w-full min-w-0 max-h-[560px] space-y-4 overflow-y-auto overflow-x-hidden rounded-[24px] border border-white/6 bg-white/[0.02] p-4"
+            style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
           >
             {messages.length === 0 && (
               <div className="py-8 text-center text-sm text-white/30">
