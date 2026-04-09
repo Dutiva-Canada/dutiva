@@ -312,9 +312,9 @@ export default function Advisor() {
       </div>
 
       {/* Status cards \u2014 horizontal scroll on mobile, 3-col grid on md+ */}
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+      <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
         {/* AI ENGINE card */}
-        <div className="premium-card-soft shrink-0 min-w-[180px] p-4 md:min-w-0 md:p-5">
+        <div className="premium-card-soft shrink-0 p-4 md:min-w-0 md:p-5" style={{ minWidth: '140px' }}>
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">AI engine</div>
             <Sparkles className="h-4 w-4 text-amber-300" />
@@ -327,7 +327,7 @@ export default function Advisor() {
           </div>
         </div>
 
-        <div className="premium-card-soft shrink-0 min-w-[180px] p-4 md:min-w-0 md:p-5">
+        <div className="premium-card-soft shrink-0 p-4 md:min-w-0 md:p-5" style={{ minWidth: '140px' }}>
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
             <ShieldCheck className="h-4 w-4 text-emerald-300" />
@@ -336,7 +336,7 @@ export default function Advisor() {
           <div className="mt-1 text-xs text-zinc-400 md:text-sm">14 Canadian jurisdictions supported</div>
         </div>
 
-        <div className="premium-card-soft shrink-0 min-w-[180px] p-4 md:min-w-0 md:p-5">
+        <div className="premium-card-soft shrink-0 p-4 md:min-w-0 md:p-5" style={{ minWidth: '140px' }}>
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Law updates</div>
             <FileText className="h-4 w-4 text-zinc-300" />
