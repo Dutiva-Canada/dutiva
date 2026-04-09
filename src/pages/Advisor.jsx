@@ -286,7 +286,7 @@ export default function Advisor() {
   const hasLawUpdates = lawUpdates.length > 0;
 
   return (
-    <div className="space-y-8 xl:pb-6" style={{ paddingBottom: '140px' }}>
+    <div className="space-y-8 xl:pb-6" style={{ paddingBottom: '120px' }}>
       {/* Header */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -315,11 +315,11 @@ export default function Advisor() {
       {/* Outer div bleeds to screen edges; inner div carries pl-4 so first card is never clipped by overflow */}
       <div className="">
         <div
-          className="grid grid-cols-3 gap-3"
+          className="grid grid-cols-3 gap-2"
         >
           {/* AI ENGINE card */}
           <div
-            className="premium-card-soft p-3"
+            className="premium-card-soft p-2 md:p-4"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>AI Engine</div>
@@ -343,7 +343,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft p-3"
+            className="premium-card-soft p-2 md:p-4"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Jurisdiction</div>
@@ -359,7 +359,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft p-3"
+            className="premium-card-soft p-2 md:p-4"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Law Updates</div>
@@ -550,10 +550,11 @@ export function MobileChatInputBar({ value, onChange, onSend }) {
       className="xl:hidden fixed left-0 right-0 z-50"
       style={{
         bottom: '64px',
-        background: 'rgba(10,12,18,0.97)',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
-        padding: '12px 16px',
-        paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+        background: 'rgba(10,12,18,1)',
+        borderTop: '1px solid rgba(255,255,255,0.12)',
+        boxShadow: '0 -32px 32px rgba(10,12,18,1)',
+        padding: '10px 16px',
+        paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
       }}
     >
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
