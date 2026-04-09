@@ -90,7 +90,7 @@ async function callAdvisorAPI(messagesForModel, province, lawUpdates = [], onTok
 // ── Sub-components ────────────────────────────────────────────────────────────
 function SectionCard({ title, children, action }) {
   return (
-    <section className="premium-card p-6">
+    <section className="premium-card p-6 overflow-hidden">
       <div className="mb-5 flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-zinc-100">{title}</h2>
         {action ? <div>{action}</div> : null}
@@ -105,7 +105,7 @@ function MessageBubble({ role, text }) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={[
-        "max-w-[88%] min-w-0 break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
+        "max-w-[88%] min-w-0 overflow-hidden break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
         isUser
           ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
           : "border border-white/6 bg-white/[0.03] text-zinc-200",
@@ -393,7 +393,7 @@ export default function Advisor() {
           {/* Message list */}
           <div
             ref={chatScrollRef}
-            className="scroll-area max-h-[560px] space-y-4 overflow-y-auto overflow-x-hidden rounded-[24px] border border-white/6 bg-white/[0.02] p-4"
+            className="scroll-area w-full min-w-0 max-h-[560px] space-y-4 overflow-y-auto overflow-x-hidden rounded-[24px] border border-white/6 bg-white/[0.02] p-4"
           >
             {messages.length === 0 && (
               <div className="py-8 text-center text-sm text-white/30">
@@ -401,7 +401,7 @@ export default function Advisor() {
               </div>
             )}
             {messages.map((msg) => (
-              <div key={msg.id} className="space-y-1.5">
+              <div key={msg.id} className="space-y-1.5 min-w-0 w-full">
                 <MessageBubble role={msg.role} text={msg.text} />
                 <div className={`px-2 text-xs text-zinc-500 ${msg.role === "user" ? "text-right" : "text-left"}`}>
                   {formatMessageTime(msg.createdAt)}
@@ -439,7 +439,7 @@ export default function Advisor() {
           )}
 
           {/* Suggestion chips — horizontally scrollable on mobile */}
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mt-4 flex flex-wrap gap-2">
             <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
               {province} notice · 4yr
             </SuggestionButton>
