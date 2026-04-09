@@ -294,25 +294,26 @@ function MobileBottomNav() {
       }}
     >
       <div className="flex items-center justify-around" style={{ height: '64px' }}>
-        {navItems.map((item) => (
+        {navItems.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 py-2 px-3 min-w-0 transition-colors ${
-                isActive ? 'text-amber-400' : 'text-zinc-500'
-              }`
-            }
+            style={({ isActive }) => ({
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flex: 1,
+              padding: '6px 4px',
+              color: isActive ? '#fbbf24' : '#71717a',
+              textDecoration: 'none',
+              gap: '3px',
+            })}
           >
             {({ isActive }) => (
               <>
-                <item.icon
-                  className={`w-5 h-5 shrink-0 transition-colors ${
-                    isActive ? 'text-amber-400' : 'text-zinc-500'
-                  }`}
-                />
-                <span style={{ fontSize: '10px', lineHeight: 1, marginTop: '2px' }}>
+                <item.icon style={{ width: 22, height: 22, flexShrink: 0 }} />
+                <span style={{ fontSize: 10, lineHeight: 1, fontWeight: isActive ? 600 : 400 }}>
                   {item.label}
                 </span>
               </>
