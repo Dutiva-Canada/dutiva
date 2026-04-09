@@ -315,67 +315,77 @@ export default function Advisor() {
       </div>
 
       {/* Status cards — 1-col on mobile, 3-col on md+ */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {/* AI Engine */}
-        <div className="premium-card-soft p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">AI Engine</div>
-            <Sparkles className="h-4 w-4 text-amber-300" />
-          </div>
-          <div
-            className="metric-value mt-2 text-[17px] font-bold tracking-tight"
-            style={{ color: advisorReady === false ? "rgb(248 113 113)" : advisorReady ? "rgb(252 211 77)" : "rgb(250 250 250)" }}
-          >
-            {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
-          </div>
-          <div className="mt-1 text-[11px] text-zinc-500">
-            {advisorReady === false ? "Check HF_TOKEN in Vercel" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
-          </div>
+      <section className="premium-card p-6">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold text-zinc-100">Compliance status</h2>
         </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          {/* AI Engine */}
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">AI Engine</div>
+              <Sparkles className="h-4 w-4 text-amber-300" />
+            </div>
+            <div
+              className="metric-value mt-2 text-[17px] font-bold tracking-tight"
+              style={{ color: advisorReady === false ? "rgb(248 113 113)" : advisorReady ? "rgb(252 211 77)" : "rgb(250 250 250)" }}
+            >
+              {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
+            </div>
+            <div className="mt-1 text-[11px] text-zinc-500">
+              {advisorReady === false ? "Check HF_TOKEN in Vercel" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
+            </div>
+          </div>
 
-        {/* Jurisdiction */}
-        <div className="premium-card-soft p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
-            <ShieldCheck className="h-4 w-4 text-emerald-300" />
+          {/* Jurisdiction */}
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
+              <ShieldCheck className="h-4 w-4 text-emerald-300" />
+            </div>
+            <div className="metric-value mt-2 text-[17px] font-bold tracking-tight text-zinc-50">
+              {province}
+            </div>
+            <div className="mt-1 text-[11px] text-zinc-500">14 Canadian jurisdictions</div>
           </div>
-          <div className="metric-value mt-2 text-[17px] font-bold tracking-tight text-zinc-50">
-            {province}
-          </div>
-          <div className="mt-1 text-[11px] text-zinc-500">14 Canadian jurisdictions</div>
-        </div>
 
-        {/* Compliance Sync */}
-        <div className="premium-card-soft p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Law Updates</div>
-            <FileText className="h-4 w-4 text-zinc-300" />
-          </div>
-          <div
-            className="metric-value mt-2 text-[17px] font-bold tracking-tight"
-            style={{ color: hasLawUpdates ? "rgb(110 231 183)" : "rgb(113 113 122)" }}
-          >
-            {hasLawUpdates ? `${lawUpdates.length} new` : "Monitoring"}
-          </div>
-          <div className="mt-1 text-[11px] text-zinc-500">
-            {hasLawUpdates ? "Legislative changes detected" : "Govt websites watched daily"}
-          </div>
-        </div>
-      </div>
-
-      {/* Law updates banner */}
-      {hasLawUpdates && (
-        <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/6 px-5 py-4">
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-            <div>
-              <div className="text-sm font-semibold text-emerald-200">Legislative changes detected \u2014 advisor context updated</div>
-              <div className="mt-1 text-xs text-emerald-300/70">
-                {lawUpdates.slice(0, 2).map((u) => u.change_description).join(" \u00b7 ")}
-              </div>
+          {/* Compliance Sync */}
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Law Updates</div>
+              <FileText className="h-4 w-4 text-zinc-300" />
+            </div>
+            <div
+              className="metric-value mt-2 text-[17px] font-bold tracking-tight"
+              style={{ color: hasLawUpdates ? "rgb(110 231 183)" : "rgb(113 113 122)" }}
+            >
+              {hasLawUpdates ? `${lawUpdates.length} new` : "Monitoring"}
+            </div>
+            <div className="mt-1 text-[11px] text-zinc-500">
+              {hasLawUpdates ? "Legislative changes detected" : "Govt websites watched daily"}
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Law updates banner */}
+      {hasLawUpdates && (
+        <section className="premium-card p-6">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-zinc-100">Law updates</h2>
+          </div>
+          <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/6 px-5 py-4">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+              <div>
+                <div className="text-sm font-semibold text-emerald-200">Legislative changes detected \u2014 advisor context updated</div>
+                <div className="mt-1 text-xs text-emerald-300/70">
+                  {lawUpdates.slice(0, 2).map((u) => u.change_description).join(" \u00b7 ")}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       )}
 
       {/* Main content grid */}
