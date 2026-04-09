@@ -105,11 +105,11 @@ function MessageBubble({ role, text }) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={[
-        "max-w-[88%] rounded-[22px] px-4 py-4 text-sm shadow-sm",
+        "max-w-[88%] min-w-0 break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
         isUser
           ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
           : "border border-white/6 bg-white/[0.03] text-zinc-200",
-      ].join(" ")}>
+      ].join(" ")} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
         {isUser ? (
           text.split("\n").map((line, i, arr) => (
             <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
@@ -406,7 +406,12 @@ export default function Advisor() {
             {advisorReady === false ? "Config required" : `${province} \u00b7 Live`}
           </div>}>
 
-          <div ref={chatScrollRef} className="scroll-area max-h-[560px] space-y-4 overflow-auto rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
+          <div ref={chatScrollRef} className="scroll-area max-h-[560px] space-y-4 overflow-auto overflow-x-hidden rounded-[24px] border border-white/6 bg-white/[0.02] p-4">
+            {messages.length === 0 && (
+              <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: '32px 0', fontSize: '14px' }}>
+                Ask a question to get started
+              </div>
+            )}
             {messages.map((msg) => (
               <div key={msg.id} className="space-y-1.5">
                 <MessageBubble role={msg.role} text={msg.text} />
@@ -449,7 +454,7 @@ export default function Advisor() {
           {/* Suggestion chips \u2014 horizontally scrollable on mobile to avoid overflow */}
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
-              {province} notice \u00b7 4yr
+              {province} notice · 4yr
             </SuggestionButton>
             <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
               Probation clause
