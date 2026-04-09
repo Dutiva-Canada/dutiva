@@ -637,9 +637,8 @@ function ESACalculator({ defaultProvince }) {
   const fmt = (n) => n.toLocaleString("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 });
 
   return (
-    <section className="premium-card p-6">
-      <h2 className="text-base font-semibold text-zinc-100">Entitlement calculator</h2>
-      <p className="mt-0.5 mb-4 text-sm text-zinc-500">Calculate ESA notice entitlements before generating your document. Statutory minimums only — common-law notice may be higher.</p>
+    <SectionCard title="Entitlement calculator">
+      <p className="mb-4 text-sm text-zinc-500">Calculate ESA notice entitlements before generating your document. Statutory minimums only — common-law notice may be higher.</p>
       <div className="space-y-3">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-300">Province</label>
@@ -700,7 +699,7 @@ function ESACalculator({ defaultProvince }) {
           <p className="pt-1 text-xs text-zinc-500">Common-law reasonable notice often exceeds statutory minimums. Consult legal counsel before terminating.</p>
         </div>
       )}
-    </section>
+    </SectionCard>
   );
 }
 
