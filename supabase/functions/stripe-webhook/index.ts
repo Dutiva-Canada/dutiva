@@ -7,17 +7,26 @@ async function verifyStripeSignature(payload: string, sigHeader: string, secret:
   const v1 = parts.find((p) => p.startsWith("v1="))?.slice(3);
   if (!ts || !v1) return false;
 
-  const signedPayload = `${ts}.${payload}`;
+  // Import key for constant-time HMAC verification
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"]
+    ["verify"]
   );
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signedPayload));
-  const computed = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
-  return computed === v1;
+
+  // Decode the submitted hex signature into bytes
+  const signedPayload = `${ts}.${payload}`;
+  if (v1.length % 2 !== 0) return false;
+  const v1Bytes = new Uint8Array(v1.length / 2);
+  for (let i = 0; i < v1Bytes.length; i++) {
+    v1Bytes[i] = parseInt(v1.slice(i * 2, i * 2 + 2), 16);
+  }
+
+  // crypto.subtle.verify performs a constant-time comparison:
+  // it checks whether v1Bytes is a valid HMAC-SHA256 of signedPayload
+  return crypto.subtle.verify("HMAC", key, v1Bytes, new TextEncoder().encode(signedPayload));
 }
 
 Deno.serve(async (req: Request) => {

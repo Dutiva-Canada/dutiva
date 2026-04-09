@@ -36,7 +36,7 @@
         { "key": "X-XSS-Protection",           "value": "1; mode=block" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://router.huggingface.co https://khtwpxnvziiyplaflwru.supabase.co https://www.google-analytics.com https://stats.g.doubleclick.net https://region1.google-analytics.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'sha256-+ZYm2NyEllRa9N3sPqG6LosTZkJzrtG9u2ybWK2STd8='; font-src 'self' data:; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.com; connect-src 'self' https://router.huggingface.co https://*.supabase.co https://*.supabase.com wss://*.supabase.co wss://*.supabase.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
         }
       ]
     }

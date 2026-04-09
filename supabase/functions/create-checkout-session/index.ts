@@ -3,6 +3,28 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const STRIPE_API_URL = "https://api.stripe.com/v1";
 
+// Allowed origins for Stripe return URLs — prevents open-redirect abuse
+const ALLOWED_RETURN_ORIGINS = [
+  "https://dutiva.ca",
+  "https://dutiva.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:4173",
+];
+
+function isAllowedReturnUrl(raw: string | undefined): boolean {
+  if (typeof raw !== "string" || raw.length === 0) return false;
+  try {
+    const url = new URL(raw);
+    if (!["https:", "http:"].includes(url.protocol)) return false;
+    // http: only permitted for localhost during local development
+    if (url.protocol === "http:" && !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) return false;
+    const origin = `${url.protocol}//${url.host}`;
+    return ALLOWED_RETURN_ORIGINS.includes(origin);
+  } catch {
+    return false;
+  }
+}
+
 async function stripePost(path: string, params: Record<string, string>, secretKey: string) {
   const body = new URLSearchParams(params).toString();
   const res = await fetch(`${STRIPE_API_URL}${path}`, {
@@ -73,6 +95,13 @@ Deno.serve(async (req: Request) => {
   const { plan, successUrl, cancelUrl } = body;
   if (!plan || !successUrl || !cancelUrl) {
     return new Response(JSON.stringify({ error: "Missing required fields." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
+  }
+
+  if (!isAllowedReturnUrl(successUrl) || !isAllowedReturnUrl(cancelUrl)) {
+    return new Response(JSON.stringify({ error: "Invalid return URL." }), {
       status: 400,
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
     });
