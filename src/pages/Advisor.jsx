@@ -315,11 +315,11 @@ export default function Advisor() {
       {/* Outer div bleeds to screen edges; inner div carries pl-4 so first card is never clipped by overflow */}
       <div className="">
         <div
-          className="grid grid-cols-3 gap-2"
+          className="grid grid-cols-2 gap-2 md:grid-cols-3"
         >
           {/* AI ENGINE card */}
           <div
-            className="premium-card-soft p-2 md:p-4"
+            className="premium-card-soft p-4"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>AI Engine</div>
@@ -343,7 +343,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft p-2 md:p-4"
+            className="premium-card-soft p-4"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Jurisdiction</div>
@@ -359,7 +359,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft p-2 md:p-4"
+            className="premium-card-soft p-4 col-span-2 md:col-span-1"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Law Updates</div>
