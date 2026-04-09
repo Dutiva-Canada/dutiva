@@ -313,15 +313,13 @@ export default function Advisor() {
 
       {/* Status cards \u2014 horizontal scroll on mobile, 3-col grid on md+ */}
       {/* Outer div bleeds to screen edges; inner div carries pl-4 so first card is never clipped by overflow */}
-      <div className="-mx-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:overflow-visible">
+      <div className="">
         <div
-          className="flex gap-3 pb-2 md:pb-0 md:grid md:grid-cols-3"
-          style={{ paddingLeft: '16px', paddingRight: '16px' }}
+          className="grid grid-cols-3 gap-3"
         >
           {/* AI ENGINE card */}
           <div
-            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
-            style={{ minWidth: 'calc(50vw - 24px)' }}
+            className="premium-card-soft p-3"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>AI Engine</div>
@@ -345,8 +343,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
-            style={{ minWidth: 'calc(50vw - 24px)' }}
+            className="premium-card-soft p-3"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Jurisdiction</div>
@@ -362,8 +359,7 @@ export default function Advisor() {
           </div>
 
           <div
-            className="premium-card-soft shrink-0 p-4 md:shrink md:p-5"
-            style={{ minWidth: 'calc(50vw - 24px)' }}
+            className="premium-card-soft p-3"
           >
             <div className="flex items-center justify-between">
               <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgb(161 161 170)' }}>Law Updates</div>

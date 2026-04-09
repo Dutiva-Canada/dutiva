@@ -621,7 +621,7 @@ function ESACalculator({ defaultProvince }) {
         severanceWeeks = Math.min(Math.floor(y), 26);
         severanceNote = "ESA, 2000, s. 64\u201365 \u00b7 Max 26 weeks";
       } else if (y >= 5) {
-        severanceNote = "May apply if payroll \u2265 $2.5M \u2014 confirm above";
+        severanceNote = "May apply if payroll ≥ $2.5M \u2014 confirm above";
       }
     } else if (province === "Federal") {
       if (y >= 1) severanceNote = "Canada Labour Code, s. 235 \u2014 contact legal counsel";
@@ -656,7 +656,7 @@ function ESACalculator({ defaultProvince }) {
             {CANADIAN_JURISDICTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-300">Years of service</label>
             <input type="number" min="0" step="0.5" placeholder="e.g. 3.5" value={years}
@@ -673,7 +673,7 @@ function ESACalculator({ defaultProvince }) {
         {province === "Ontario" && (
           <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/6 bg-white/[0.02] px-3 py-2.5">
             <input type="checkbox" checked={largePay} onChange={(e) => { setLargePay(e.target.checked); setResult(null); }} className="h-4 w-4 accent-amber-400" />
-            <span className="text-xs text-zinc-300">Employer payroll \u2265 $2.5M (enables severance)</span>
+            <span className="text-xs text-zinc-300">Employer payroll ≥ $2.5M (enables severance)</span>
           </label>
         )}
         <button type="button" onClick={calculate} className="gold-button w-full px-4 py-2.5 text-sm">
