@@ -277,8 +277,8 @@ const JURISDICTIONS = {
 };
 
 // ── Template catalogue ─────────────────────────────────────────────────────
-// id + slug must match the generated filenames:
-//   templates_generator/{jCode}/{lang}/{id}_{slug}_{jCode}_{lang}.{ext}
+// id + slug must match the generated filenames hosted in Supabase Storage:
+//   templates/{jCode}/{lang}/{id}_{slug}_{jCode}_{lang}.{ext}
 const templates = [
   {
     id:'T01', slug:'Offer_Letter',
@@ -414,9 +414,12 @@ function setFilter(el, filter) {
 }
 
 // ── File paths ─────────────────────────────────────────────────────────────
+// Files are hosted on Supabase Storage (public bucket: "templates")
+const STORAGE_BASE = "https://khtwpxnvziiyplaflwru.supabase.co/storage/v1/object/public/templates";
+
 function filePath(tpl, ext) {
   const jCode = tpl.onlyJur || selectedJur; // T09 always uses QC
-  return `templates_generator/${jCode}/${selectedLang}/${tpl.id}_${tpl.slug}_${jCode}_${selectedLang}.${ext}`;
+  return `${STORAGE_BASE}/${jCode}/${selectedLang}/${tpl.id}_${tpl.slug}_${jCode}_${selectedLang}.${ext}`;
 }
 
 // ── Category badge colour ──────────────────────────────────────────────────
