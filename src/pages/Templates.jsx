@@ -7,7 +7,7 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const templateCategories = [
   { id: "all", label: "All templates" },
@@ -202,6 +202,7 @@ function TemplateCard({ template, selected, onSelect }) {
 }
 
 export default function Templates() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [selected, setSelected] = useState(templateData[0] ?? null);
@@ -343,7 +344,10 @@ export default function Templates() {
                     key={template.id}
                     template={template}
                     selected={selected?.id === template.id}
-                    onSelect={setSelected}
+                    onSelect={(t) => {
+                      setSelected(t);
+                      navigate(`/app/generator?template=${encodeURIComponent(t.title)}`);
+                    }}
                   />
                 ))
               )}
