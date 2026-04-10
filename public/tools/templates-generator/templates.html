@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Templates — Dutiva Canada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: #06080C; color: #EDE9E0; font-family: 'DM Sans', system-ui, sans-serif; overflow-x: hidden; min-height: 100vh; }
+:root {
+  --gold: #C49355; --goldh: #D4A76B;
+  --bg: #06080C; --bg2: #0B0E13; --bg3: #0E1218;
+  --srf: #1A1F2A; --bdr: #222938;
+  --t1: #EDE9E0; --t2: #8D93A3; --t3: #636B80;
+  --sf: 'Instrument Serif', Georgia, serif;
+  --sn: 'DM Sans', system-ui, sans-serif;
+}
+.gold-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; background: var(--gold); border: none; border-radius: 12px; font: 600 13px var(--sn); color: #06080C; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.gold-button:hover { background: var(--goldh); box-shadow: 0 4px 20px rgba(196,147,85,0.3); }
+.ghost-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font: 600 13px var(--sn); color: var(--t1); cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.ghost-button:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12); }
+.pill { display: inline-flex; align-items: center; padding: 4px 12px; background: rgba(196,147,85,0.08); border: 1px solid rgba(196,147,85,0.15); border-radius: 100px; font: 700 10px var(--sn); color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; }
+.field-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 16px; font: 14px var(--sn); color: var(--t1); outline: none; transition: border-color 0.2s; }
+.field-input:focus { border-color: rgba(196,147,85,0.3); }
+.field-input::placeholder { color: var(--t3); }
+.badge { padding: 4px 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 100px; font-size: 10px; font-weight: 500; color: var(--t2); white-space: nowrap; }
+.badge-gold { background: rgba(196,147,85,0.08); border-color: rgba(196,147,85,0.15); color: var(--gold); }
+.nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--t2); text-decoration: none; transition: all 0.2s; }
+.nav-link:hover { background: rgba(255,255,255,0.04); color: var(--t1); }
+.nav-link.active { background: rgba(196,147,85,0.08); color: var(--gold); border: 1px solid rgba(196,147,85,0.15); }
+.section-card { background: #0B0E13; border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 24px; }
+.section-card-title { font-size: 16px; font-weight: 600; color: var(--t1); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+.stat-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 20px; }
+
+/* App shell */
+header.shell { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 56px; background: rgba(6,8,12,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid #222938; display: flex; align-items: center; padding: 0 20px; gap: 16px; }
+aside.shell { position: fixed; top: 56px; left: 0; bottom: 0; width: 220px; background: #0B0E13; border-right: 1px solid #222938; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+main.shell { margin-left: 220px; margin-top: 56px; padding: 32px; min-height: calc(100vh - 56px); }
+
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-family: var(--sf); font-size: clamp(26px, 3vw, 36px); font-weight: 400; color: var(--t1); margin: 10px 0 10px; }
+.page-header p { font-size: 14px; color: var(--t2); max-width: 540px; line-height: 1.65; }
+.header-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.mini-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+.mini-stat { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px 18px; }
+.mini-stat-label { font-size: 11px; font-weight: 600; color: var(--t3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.mini-stat-value { font-family: var(--sf); font-size: 24px; color: var(--t1); margin-bottom: 3px; }
+.mini-stat-sub { font-size: 11px; color: var(--t2); }
+.content-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+.content-left { display: flex; flex-direction: column; gap: 0; }
+.content-right { display: flex; flex-direction: column; gap: 20px; }
+
+/* Jurisdiction bar */
+.jur-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 12px 16px; }
+.jur-bar-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.jur-bar-label { font-size: 10px; font-weight: 600; color: var(--t3); text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
+.jur-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+.jur-tab { padding: 7px 14px; background: transparent; border: 1px solid transparent; border-radius: 10px; font: 500 12px var(--sn); color: var(--t2); cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+.jur-tab:hover { background: rgba(255,255,255,0.05); color: var(--t1); }
+.jur-tab.active { background: rgba(196,147,85,0.1); border-color: rgba(196,147,85,0.3); color: var(--gold); font-weight: 600; }
+.lang-toggle { display: flex; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+.lang-btn { padding: 7px 16px; background: transparent; border: none; font: 600 12px var(--sn); color: var(--t2); cursor: pointer; transition: all 0.18s; letter-spacing: 0.05em; }
+.lang-btn.active { background: rgba(196,147,85,0.12); color: var(--gold); }
+.lang-btn:hover:not(.active) { color: var(--t1); }
+
+/* Filters */
+.filter-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-pill { padding: 6px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--t2); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.filter-pill:hover { background: rgba(255,255,255,0.06); color: var(--t1); }
+.filter-pill.active { background: rgba(196,147,85,0.08); border-color: rgba(196,147,85,0.2); color: var(--gold); }
+
+/* Template list */
+.template-list { display: flex; flex-direction: column; gap: 8px; max-height: 560px; overflow-y: auto; padding-right: 4px; }
+.template-list::-webkit-scrollbar { width: 4px; }
+.template-list::-webkit-scrollbar-track { background: transparent; }
+.template-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+.template-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; cursor: pointer; transition: all 0.2s; }
+.template-card:hover { border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); }
+.template-card.selected { border-color: rgba(196,147,85,0.35); background: rgba(196,147,85,0.04); }
+.template-card-icon { width: 34px; height: 34px; background: rgba(251,191,36,0.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #FBBF24; }
+.template-card-body { flex: 1; min-width: 0; }
+.template-card-body h4 { font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.template-card-body p { font-size: 11px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.template-card-badges { display: flex; gap: 5px; flex-shrink: 0; }
+
+/* Search */
+.search-wrap { position: relative; margin-bottom: 14px; }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--t3); pointer-events: none; }
+.search-pad { padding-left: 40px !important; }
+
+/* Selected template panel */
+.selected-icon { width: 44px; height: 44px; background: rgba(251,191,36,0.08); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #FBBF24; margin-bottom: 14px; }
+.selected-feat-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.selected-feat-row:last-child { border-bottom: none; }
+.selected-feat-row h5 { font-size: 12px; font-weight: 600; color: var(--t1); margin-bottom: 2px; }
+.selected-feat-row p { font-size: 11px; color: var(--t2); }
+
+/* Jurisdiction context strip */
+.jur-context { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: rgba(196,147,85,0.05); border: 1px solid rgba(196,147,85,0.15); border-radius: 10px; margin-bottom: 14px; }
+.jur-context-body h5 { font-size: 12px; font-weight: 600; color: var(--gold); margin-bottom: 2px; }
+.jur-context-body p { font-size: 10px; color: var(--t2); line-height: 1.5; }
+
+/* Info rows */
+.info-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.info-row:last-child { border-bottom: none; }
+.info-row-num { width: 20px; height: 20px; background: rgba(196,147,85,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+.info-row h5 { font-size: 12px; font-weight: 600; color: var(--t1); margin-bottom: 2px; }
+.info-row p { font-size: 11px; color: var(--t2); line-height: 1.5; }
+
+@media (max-width: 1024px) { .content-grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  aside.shell { display: none; }
+  main.shell { margin-left: 0; padding: 20px; }
+  .mini-stats { grid-template-columns: repeat(2, 1fr); }
+  .jur-bar { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<header class="shell">
+  <div style="font-family:var(--sf);font-size:20px;color:var(--t1);">Duti<b style="color:var(--gold);font-weight:400;">va</b></div>
+  <span class="pill" style="margin-left:4px;font-size:9px;">Canada</span>
+  <div style="flex:1;"></div>
+  <div style="width:32px;height:32px;background:rgba(196,147,85,0.1);border:1px solid rgba(196,147,85,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:13px;font-weight:700;">U</div>
+</header>
+
+<aside class="shell">
+  <a href="dashboard.html" class="nav-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </a>
+  <a href="templates.html" class="nav-link active">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+    Templates
+  </a>
+  <a href="advisor.html" class="nav-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Advisor
+  </a>
+  <a href="settings.html" class="nav-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    Settings
+  </a>
+</aside>
+
+<main class="shell">
+
+  <div class="page-header">
+    <span class="pill">Templates</span>
+    <h1>Generate documents</h1>
+    <p>Jurisdiction-aware HR documents for Ontario, Québec, British Columbia, Alberta, and Federal workplaces — bilingual, legally rigorous, and ready to download.</p>
+    <div class="header-actions">
+      <button class="ghost-button" onclick="alert('Browsing categories…')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Browse categories
+      </button>
+      <button class="gold-button" onclick="alert('Starting new generation…')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New generation
+      </button>
+    </div>
+  </div>
+
+  <div class="mini-stats">
+    <div class="mini-stat">
+      <div class="mini-stat-label">Templates</div>
+      <div class="mini-stat-value">16</div>
+      <div class="mini-stat-sub">Bilingual, jurisdiction-specific</div>
+    </div>
+    <div class="mini-stat">
+      <div class="mini-stat-label">Jurisdictions</div>
+      <div class="mini-stat-value">5</div>
+      <div class="mini-stat-sub">ON · QC · BC · AB · Federal</div>
+    </div>
+    <div class="mini-stat">
+      <div class="mini-stat-label">Documents</div>
+      <div class="mini-stat-value" style="color:var(--gold);">304</div>
+      <div class="mini-stat-sub">Generated across all combinations</div>
+    </div>
+  </div>
+
+  <!-- Jurisdiction & Language selector bar -->
+  <div class="jur-bar">
+    <div class="jur-bar-left">
+      <span class="jur-bar-label">Jurisdiction</span>
+      <div class="jur-tabs" id="jurTabs">
+        <button class="jur-tab active" onclick="setJur(this,'ON')">Ontario</button>
+        <button class="jur-tab" onclick="setJur(this,'QC')">Québec</button>
+        <button class="jur-tab" onclick="setJur(this,'BC')">British Columbia</button>
+        <button class="jur-tab" onclick="setJur(this,'AB')">Alberta</button>
+        <button class="jur-tab" onclick="setJur(this,'FED')">Federal</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="jur-bar-label">Language</span>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="langEN" onclick="setLang('EN')">EN</button>
+        <button class="lang-btn" id="langFR" onclick="setLang('FR')">FR</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="content-left">
+      <div class="section-card">
+        <div class="section-card-title">
+          Browse template library
+          <span id="countBadge" style="font-size:12px;font-weight:500;color:var(--t2);">16 templates</span>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <input type="text" id="searchInput" class="field-input search-pad" placeholder="Search templates..." oninput="filterTemplates()">
+        </div>
+        <div class="filter-pills" id="filterPills">
+          <span class="filter-pill active" data-filter="all" onclick="setFilter(this,'all')">All templates</span>
+          <span class="filter-pill" data-filter="hiring" onclick="setFilter(this,'hiring')">Hiring</span>
+          <span class="filter-pill" data-filter="policy" onclick="setFilter(this,'policy')">Policy</span>
+          <span class="filter-pill" data-filter="termination" onclick="setFilter(this,'termination')">Termination</span>
+          <span class="filter-pill" data-filter="discipline" onclick="setFilter(this,'discipline')">Discipline</span>
+        </div>
+        <div class="template-list" id="templateList"></div>
+      </div>
+    </div>
+
+    <div class="content-right">
+      <div class="section-card" id="selectedPanel">
+        <div class="section-card-title">Selected template</div>
+        <div id="selectedContent">
+          <div style="text-align:center;padding:20px 0;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" style="margin:0 auto 12px;display:block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+            <p style="font-size:13px;color:var(--t3);">Select a template from the list</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-title">What's different</div>
+        <div class="info-row">
+          <div class="info-row-num">1</div>
+          <div>
+            <h5>True jurisdiction specificity</h5>
+            <p>Each document cites the statute that applies in the selected province — ESA, ARLS, BC ESA, AB ESC, or CLC — not a hedged pan-Canadian fallback.</p>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-row-num">2</div>
+          <div>
+            <h5>Bilingual by design</h5>
+            <p>All 16 templates ship in English and French. Québec's Offer Letter is French-primary, aligned with Bill 96 / Charter s. 41.</p>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-row-num">3</div>
+          <div>
+            <h5>Counsel-ready appendix</h5>
+            <p>Every .docx includes a hidden legal notes page with statute citations and case law for your lawyer to review before the document is sent.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── Jurisdiction data ──────────────────────────────────────────────────────
+const JURISDICTIONS = {
+  ON:  { code:'ON',  nameEN:'Ontario',           nameFR:'Ontario',              statute:'Employment Standards Act, 2000 (S.O. 2000, c. 41)', shortStatute:'ESA 2000' },
+  QC:  { code:'QC',  nameEN:'Québec',            nameFR:'Québec',               statute:'Act Respecting Labour Standards (CQLR c N-1.1)',    shortStatute:'ARLS / LNT' },
+  BC:  { code:'BC',  nameEN:'British Columbia',  nameFR:'Colombie-Britannique', statute:'Employment Standards Act (R.S.B.C. 1996, c. 113)',   shortStatute:'BC ESA' },
+  AB:  { code:'AB',  nameEN:'Alberta',           nameFR:'Alberta',              statute:'Employment Standards Code (R.S.A. 2000, c. E-9)',    shortStatute:'AB ESC' },
+  FED: { code:'FED', nameEN:'Federal',           nameFR:'Fédéral',              statute:'Canada Labour Code (R.S.C. 1985, c. L-2)',           shortStatute:'CLC' },
+};
+
+// ── Template catalogue ─────────────────────────────────────────────────────
+// id + slug must match the generated filenames hosted in Supabase Storage:
+//   templates/{jCode}/{lang}/{id}_{slug}_{jCode}_{lang}.{ext}
+const templates = [
+  {
+    id:'T01', slug:'Offer_Letter',
+    title:'Offer Letter',
+    cat:'hiring', onlyJur:null,
+    desc:'Generate a clean, export-ready offer letter with statutory notice, probation, and compensation clauses aligned with the selected province.',
+  },
+  {
+    id:'T02', slug:'Employment_Agreement',
+    title:'Employment Agreement',
+    cat:'hiring', onlyJur:null,
+    desc:'Create a full employment agreement covering compensation, role, just cause, termination-without-cause, and governing law for the selected province.',
+  },
+  {
+    id:'T03', slug:'Termination_Letter',
+    title:'Termination Letter',
+    cat:'termination', onlyJur:null,
+    desc:'Prepare a compliant termination letter with statutory notice, ESA-safe termination clause language, and final pay timing per province.',
+  },
+  {
+    id:'T04', slug:'Employee_Handbook',
+    title:'Employee Handbook',
+    cat:'policy', onlyJur:null,
+    desc:'Build a jurisdiction-specific handbook covering overtime, leaves, right to disconnect (ON), and electronic monitoring obligations.',
+  },
+  {
+    id:'T05', slug:'Confidentiality_Agreement',
+    title:'Confidentiality Agreement',
+    cat:'policy', onlyJur:null,
+    desc:'Protect confidential information with a standalone NDA citing the correct privacy statute — PIPEDA, Québec Law 25, BC PIPA, or AB PIPA.',
+  },
+  {
+    id:'T06', slug:'Written_Warning',
+    title:'Written Warning',
+    cat:'discipline', onlyJur:null,
+    desc:'Document performance or conduct concerns with the contextual just-cause framework and unjust-dismissal recourse paths for the selected province.',
+  },
+  {
+    id:'T07', slug:'Independent_Contractor_Agreement',
+    title:'Independent Contractor Agreement',
+    cat:'hiring', onlyJur:null,
+    desc:'Define scope, rate, and deliverables for an independent contractor while citing province-specific misclassification risk and dependent contractor law.',
+  },
+  {
+    id:'T08', slug:'Restrictive_Covenants_Agreement',
+    title:'Restrictive Covenants Agreement',
+    cat:'hiring', onlyJur:null,
+    desc:'Establish post-employment non-solicitation and non-compete terms — with Ontario's ESA s. 67.2 ban flagged prominently where it applies.',
+  },
+  {
+    id:'T09', slug:'Quebec_Offer_Letter',
+    title:'Offer Letter — Québec (French-primary)',
+    cat:'hiring', onlyJur:'QC',
+    desc:'French-primary bilingual offer letter aligned with Bill 96 / Charter of the French Language s. 41, RQAP, and Québec civil law.',
+  },
+  {
+    id:'T10', slug:'Remote_Work_Policy',
+    title:'Remote Work Policy',
+    cat:'policy', onlyJur:null,
+    desc:'Outline expectations, equipment, tax forms (T2200 or TP-64.3-V for QC), and right-to-disconnect obligations for remote and hybrid work.',
+  },
+  {
+    id:'T11', slug:'Vacation_Leave_Policy',
+    title:'Vacation & Leave Policy',
+    cat:'policy', onlyJur:null,
+    desc:'Document statutory vacation minimums, paid sick leave (0–10 days depending on province), pregnancy, parental, and other statutory leaves.',
+  },
+  {
+    id:'T12', slug:'Code_of_Conduct',
+    title:'Code of Business Conduct',
+    cat:'policy', onlyJur:null,
+    desc:'Set clear workplace behaviour standards with privacy and human rights obligations cited per the correct provincial and federal statutes.',
+  },
+  {
+    id:'T13', slug:'Harassment_Discrimination_Violence_Policy',
+    title:'Anti-Harassment & Violence Policy',
+    cat:'policy', onlyJur:null,
+    desc:'Create a compliant harassment, discrimination, and workplace violence prevention policy citing OHSA, ARLS, WorkSafeBC, OHS Act AB, or WPHVPR.',
+  },
+  {
+    id:'T14', slug:'Resignation_Acceptance',
+    title:'Resignation Acceptance Letter',
+    cat:'termination', onlyJur:null,
+    desc:'Formally acknowledge a resignation with province-specific final pay timing, ROE obligations, and offboarding next steps.',
+  },
+  {
+    id:'T15', slug:'Group_Termination_Notice',
+    title:'Group Termination Notice',
+    cat:'termination', onlyJur:null,
+    desc:'Issue a compliant group layoff notice — triggering thresholds, Minister notice requirements, and Québec comité de reclassement obligations vary by province.',
+  },
+  {
+    id:'T16', slug:'Performance_Improvement_Plan',
+    title:'Performance Improvement Plan (PIP)',
+    cat:'discipline', onlyJur:null,
+    desc:'Document performance gaps, measurable goals, timelines, and consequences — with accommodation-duty and unjust-dismissal scrutiny for the selected province.',
+  },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let selectedJur  = 'ON';
+let selectedLang = 'EN';
+let activeFilter = 'all';
+let selectedId   = null;
+
+// ── Jurisdiction & language controls ──────────────────────────────────────
+function setJur(el, code) {
+  selectedJur = code;
+  document.querySelectorAll('.jur-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // T09 is QC-only — deselect it if we navigate away from QC
+  if (selectedId === 'T09' && code !== 'QC') {
+    selectedId = null;
+    renderEmptyPanel();
+  }
+  filterTemplates();
+  if (selectedId) renderSelectedPanel(selectedId);
+}
+
+function setLang(lang) {
+  selectedLang = lang;
+  document.getElementById('langEN').classList.toggle('active', lang === 'EN');
+  document.getElementById('langFR').classList.toggle('active', lang === 'FR');
+  if (selectedId) renderSelectedPanel(selectedId);
+}
+
+// ── Category filter ────────────────────────────────────────────────────────
+function setFilter(el, filter) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  filterTemplates();
+}
+
+// ── File paths ─────────────────────────────────────────────────────────────
+// Files are hosted on Supabase Storage (public bucket: "templates")
+const STORAGE_BASE = "https://khtwpxnvziiyplaflwru.supabase.co/storage/v1/object/public/templates";
+
+function filePath(tpl, ext) {
+  const jCode = tpl.onlyJur || selectedJur; // T09 always uses QC
+  return `${STORAGE_BASE}/${jCode}/${selectedLang}/${tpl.id}_${tpl.slug}_${jCode}_${selectedLang}.${ext}`;
+}
+
+// ── Category badge colour ──────────────────────────────────────────────────
+function catStyle(cat) {
+  switch (cat) {
+    case 'hiring':      return 'background:rgba(93,174,139,0.08);border-color:rgba(93,174,139,0.2);color:#5DAE8B;';
+    case 'policy':      return 'background:rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.2);color:#60A5FA;';
+    case 'termination': return 'background:rgba(251,146,60,0.08);border-color:rgba(251,146,60,0.2);color:#FB923C;';
+    case 'discipline':  return 'background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.2);color:#A78BFA;';
+    default: return '';
+  }
+}
+
+function catLabel(cat) {
+  return cat.charAt(0).toUpperCase() + cat.slice(1);
+}
+
+// ── Template list renderer ─────────────────────────────────────────────────
+function filterTemplates() {
+  const q    = (document.getElementById('searchInput').value || '').toLowerCase();
+  const list = document.getElementById('templateList');
+
+  const filtered = templates.filter(t => {
+    const jurOk    = !t.onlyJur || t.onlyJur === selectedJur;
+    const filterOk = activeFilter === 'all' || t.cat === activeFilter;
+    const searchOk = t.title.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q);
+    return jurOk && filterOk && searchOk;
+  });
+
+  document.getElementById('countBadge').textContent =
+    filtered.length + ' template' + (filtered.length !== 1 ? 's' : '');
+
+  list.innerHTML = filtered.map(t => `
+    <div class="template-card ${selectedId === t.id ? 'selected' : ''}" onclick="selectTemplate('${t.id}')">
+      <div class="template-card-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+      </div>
+      <div class="template-card-body">
+        <h4>${t.title}</h4>
+        <p>${t.desc}</p>
+      </div>
+      <div class="template-card-badges">
+        ${t.onlyJur ? `<span class="badge" style="background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);color:#A78BFA;">QC only</span>` : ''}
+        <span class="badge" style="${catStyle(t.cat)}">${catLabel(t.cat)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Panel renderers ────────────────────────────────────────────────────────
+function renderEmptyPanel() {
+  document.getElementById('selectedContent').innerHTML = `
+    <div style="text-align:center;padding:20px 0;">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" style="margin:0 auto 12px;display:block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+      <p style="font-size:13px;color:var(--t3);">Select a template from the list</p>
+    </div>`;
+}
+
+function renderSelectedPanel(id) {
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
+  const jCode = t.onlyJur || selectedJur;
+  const j     = JURISDICTIONS[jCode];
+  const html  = filePath(t, 'html');
+  const docx  = filePath(t, 'docx');
+  const langLabel = selectedLang === 'EN' ? 'English' : 'French';
+
+  document.getElementById('selectedContent').innerHTML = `
+    <div class="selected-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+    </div>
+    <h3 style="font-size:15px;font-weight:600;color:var(--t1);margin-bottom:8px;">${t.title}</h3>
+    <p style="font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:14px;">${t.desc}</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+      ${t.onlyJur ? `<span class="badge" style="background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);color:#A78BFA;">QC only</span>` : ''}
+      <span class="badge" style="${catStyle(t.cat)}">${catLabel(t.cat)}</span>
+      <span class="badge">${langLabel}</span>
+    </div>
+
+    <div class="jur-context">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div class="jur-context-body">
+        <h5>${j.nameEN} — ${j.shortStatute}</h5>
+        <p>${j.statute}</p>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div class="selected-feat-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5DAE8B" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <div>
+          <h5>Jurisdiction-specific clauses</h5>
+          <p>Overtime, vacation, sick leave, termination notice, and governing law all reflect ${j.nameEN} law — not a pan-Canadian hedge.</p>
+        </div>
+      </div>
+      <div class="selected-feat-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+        <div>
+          <h5>Counsel-ready legal notes</h5>
+          <p>The .docx includes a hidden appendix page with statute citations and case law for your lawyer to review before sending.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a class="gold-button" href="${html}" target="_blank" style="width:100%;text-decoration:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview in browser
+      </a>
+      <a class="ghost-button" href="${docx}" download style="width:100%;text-decoration:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download .docx
+      </a>
+    </div>
+  `;
+}
+
+// ── Entry point ────────────────────────────────────────────────────────────
+function selectTemplate(id) {
+  selectedId = id;
+  filterTemplates();      // re-render list so selected card highlights
+  renderSelectedPanel(id);
+}
+
+filterTemplates();
+</script>
+</body>
+</html>
