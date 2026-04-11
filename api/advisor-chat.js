@@ -1,49 +1,51 @@
 /**
  * Vercel Serverless function: /api/advisor-chat
  *
- * Streams Canadian HR compliance responses via the HF Inference API (SSE).
- * HF_TOKEN never reaches the browser — only this server-side function sees it.
+ * Flow:
+ *   1. If the latest user message seems to need current info, call Brave Search API
+ *      (top 3 results become grounding context for the LLM).
+ *   2. Call Hugging Face Inference API (Mistral-7B-Instruct-v0.3) with a
+ *      Mistral-formatted [INST] prompt.
+ *   3. Return { response: string, sources: Array<{title, url}> }.
  *
- * Scalability hardening (April 2026):
- *   - Per-IP rate limiting: max 15 requests / minute per IP
- *   - HF 429 retry: single retry with 2 s backoff before surfacing error
- *   - Input validation: max 2 000 chars/message, max 12 messages in history
+ * Environment variables required (set in Vercel project settings):
+ *   HUGGINGFACE_API_KEY  — free token from huggingface.co/settings/tokens
+ *   BRAVE_SEARCH_API_KEY — free from brave.com/search/api (2,000 queries/month)
+ *
+ * Scalability hardening:
+ *   - Per-IP rate limiting: max 15 requests / minute (in-memory, per warm instance)
+ *   - HF 429 retry: single retry with 2 s backoff
+ *   - Input validation: max 2,000 chars/message, max 12 messages in history
  *   - Body size guard: reject payloads > 32 KB
- *   - Request ID for log correlation
+ *   - 55 s abort timeout on HF call
+ *   - Brave Search times out after 5 s (never blocks the main response)
  */
 
-export const config = { maxDuration: 60 }; // Vercel Serverless: up to 60 s on Hobby
+export const config = { maxDuration: 60 };
 
-const HF_MODEL = "Qwen/Qwen2.5-7B-Instruct";
-const HF_API   = "https://router.huggingface.co/v1/chat/completions";
+const HF_MODEL_URL =
+  "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3";
 
 // ── Rate limiter (in-memory, resets per serverless instance) ─────────────────
-// Not a global rate limiter, but still throttles bursts effectively on warm
-// instances and is zero-cost (no Redis needed until 5K+ concurrent users).
-const RATE_WINDOW_MS   = 60_000; // 1 minute
-const RATE_LIMIT       = 15;     // requests per IP per window
-
-const rateLimitMap = new Map(); // ip → { count: number, windowStart: number }
+const RATE_WINDOW_MS = 60_000;
+const RATE_LIMIT = 15;
+const rateLimitMap = new Map();
 
 function checkRateLimit(ip) {
-  const now   = Date.now();
+  const now = Date.now();
   const entry = rateLimitMap.get(ip);
-
   if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
     rateLimitMap.set(ip, { count: 1, windowStart: now });
     return { allowed: true, remaining: RATE_LIMIT - 1 };
   }
-
   if (entry.count >= RATE_LIMIT) {
     const retryAfter = Math.ceil((RATE_WINDOW_MS - (now - entry.windowStart)) / 1000);
     return { allowed: false, remaining: 0, retryAfter };
   }
-
   entry.count++;
   return { allowed: true, remaining: RATE_LIMIT - entry.count };
 }
 
-// Prune stale entries periodically (keep map from growing unboundedly)
 let lastPrune = Date.now();
 function pruneRateLimitMap() {
   const now = Date.now();
@@ -65,6 +67,7 @@ const PROVINCE_ACTS = {
   "Nova Scotia":               "Labour Standards Code (RSNS 1989, c 246)",
   "New Brunswick":             "Employment Standards Act (SNB 1982, c E-7.2)",
   Federal:                     "Canada Labour Code (RSC 1985, c L-2)",
+  "Remote (Federal)":          "Canada Labour Code (RSC 1985, c L-2)",
   "Newfoundland and Labrador": "Labour Standards Act (RSNL 1990, c L-2)",
   "Prince Edward Island":      "Employment Standards Act (RSPEI 1988, c E-6.2)",
   "Northwest Territories":     "Employment Standards Act (SNWT 2007, c 13)",
@@ -72,6 +75,39 @@ const PROVINCE_ACTS = {
   Yukon:                       "Employment Standards Act (RSY 2002, c 72)",
 };
 
+// ── Web search heuristic ──────────────────────────────────────────────────────
+const NEEDS_SEARCH_RE =
+  /\b(current|recent|latest|new|update|change|2024|2025|2026|minimum wage|minimum salary|today|now|this year|last year|bill|regulation|amendment|ontario reg|federal reg|effective date|in force)\b/i;
+
+function needsWebSearch(text) {
+  return NEEDS_SEARCH_RE.test(text);
+}
+
+// ── Brave Search ──────────────────────────────────────────────────────────────
+async function braveSearch(query, apiKey) {
+  try {
+    const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=3`;
+    const resp = await fetch(url, {
+      headers: {
+        "X-Subscription-Token": apiKey,
+        Accept: "application/json",
+      },
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!resp.ok) return { snippets: [], sources: [] };
+    const data = await resp.json();
+    const results = data.web?.results || [];
+    return {
+      snippets: results.map((r) => `${r.title}: ${r.description || r.snippet || ""}`),
+      sources:  results.map((r) => ({ title: r.title, url: r.url })),
+    };
+  } catch {
+    // Brave Search is best-effort — never block the main response
+    return { snippets: [], sources: [] };
+  }
+}
+
+// ── Prompt builders ───────────────────────────────────────────────────────────
 function buildSystemPrompt(province, lawUpdates = []) {
   const actRef = PROVINCE_ACTS[province] || PROVINCE_ACTS["Ontario"];
   const lawContext =
@@ -86,36 +122,66 @@ function buildSystemPrompt(province, lawUpdates = []) {
           .join("\n")}`
       : "";
 
-  return `You are a Canadian HR compliance advisor embedded in Dutiva (dutiva.ca). You are knowledgeable, warm, and conversational — not a legal robot.
+  return `You are Dutiva's AI compliance advisor, specialized in Canadian employment law for Ontario, Quebec, and Federal jurisdictions (including remote workers under Federal standards).
 
-PRIMARY JURISDICTION: ${province} — cite ${actRef} first. Note material differences in other provinces only when directly relevant.
+You help HR professionals and business owners with:
+- Employment Standards Act (Ontario), Act Respecting Labour Standards (Quebec), Canada Labour Code (Federal)
+- Termination, notice periods, severance, and ESA entitlements
+- Accommodation duties, leave management, and workplace wellness compliance
+- Document guidance (offer letters, policies, termination letters)
 
-TONE & CONVERSATION RULES:
-- Respond naturally. Never end a reply with redirect phrases like "How can I assist you with HR compliance?" or "Feel free to ask any HR compliance questions." Let the conversation flow on its own.
-- When someone mentions mental health, stress, burnout, or personal struggles, respond with genuine warmth and empathy. You may briefly connect it to relevant workplace considerations (duty to accommodate, mental health support obligations) only when it fits naturally — don't force it.
-- Match the register of the message. Casual greetings get a warm, brief reply. Deep legal questions get thorough answers. Don't be formal when the person is being human.
+PRIMARY JURISDICTION: ${province} — cite ${actRef} first. Note differences in other provinces only when directly relevant.
 
-ANSWER RULES (for substantive HR/legal questions):
-1. Answer directly and concisely (under 220 words).
-2. Cite exact legislation sections (e.g. "ESA, 2000, s. 57(1)").
-3. Distinguish statutory minimums from common-law obligations.
-4. Flag when legal counsel is needed for complex situations.
-5. Do NOT add any disclaimer like "This is general guidance, not legal advice" — the UI displays that persistently.${lawContext}`;
+TONE & RULES:
+- Be conversational, warm, and direct. Answer in under 220 words.
+- Cite exact legislation sections (e.g. "ESA, 2000, s. 57(1)").
+- Distinguish statutory minimums from common-law obligations.
+- Flag when legal counsel is needed for complex situations.
+- Do NOT add disclaimers like "This is general guidance, not legal advice" — the UI shows that persistently.
+- If web search results are provided, use them to give current, accurate information.
+- Always recommend consulting an employment lawyer for complex situations.${lawContext}`;
 }
 
-/** Read the raw body of a Node.js IncomingMessage (with 32 KB size guard). */
+/**
+ * Build a Mistral [INST] prompt from message history.
+ * System prompt is prepended to the first user turn.
+ * Web search context is appended to the last user turn.
+ */
+function buildMistralPrompt(systemPrompt, messages, webSearchContext) {
+  let prompt = "";
+  let isFirstUser = true;
+
+  for (let i = 0; i < messages.length; i++) {
+    const m = messages[i];
+    const isLast = i === messages.length - 1;
+
+    if (m.role === "user") {
+      let text = m.text;
+      if (isFirstUser) {
+        text = `${systemPrompt}\n\n${text}`;
+        isFirstUser = false;
+      }
+      if (isLast && webSearchContext) {
+        text = `${text}\n\nWEB SEARCH RESULTS (use these for current information):\n${webSearchContext}`;
+      }
+      prompt += `<s>[INST] ${text} [/INST]`;
+    } else if (m.role === "assistant") {
+      prompt += ` ${m.text} </s>`;
+    }
+  }
+
+  return prompt;
+}
+
+// ── Body reader (32 KB guard) ─────────────────────────────────────────────────
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = "";
     let size = 0;
-    const MAX_BYTES = 32_768; // 32 KB
-
+    const MAX_BYTES = 32_768;
     req.on("data", (chunk) => {
       size += chunk.length;
-      if (size > MAX_BYTES) {
-        reject(new Error("PAYLOAD_TOO_LARGE"));
-        return;
-      }
+      if (size > MAX_BYTES) { reject(new Error("PAYLOAD_TOO_LARGE")); return; }
       data += chunk;
     });
     req.on("end", () => {
@@ -126,43 +192,18 @@ function readBody(req) {
   });
 }
 
-/** Single HF fetch attempt. Returns { response, error }. */
-async function fetchHF(hfMessages, hfToken, signal) {
-  try {
-    const response = await fetch(HF_API, {
-      method: "POST",
-      headers: {
-        Authorization:  `Bearer ${hfToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model:       HF_MODEL,
-        messages:    hfMessages,
-        max_tokens:  380,
-        temperature: 0.3,
-        stream:      true,
-      }),
-      signal,
-    });
-    return { response, error: null };
-  } catch (err) {
-    return { response: null, error: err };
-  }
-}
-
-/** Sleep helper for retry backoff. */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// ── Handler ───────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
-  const reqId = Math.random().toString(36).slice(2, 8); // for log correlation
+  const reqId = Math.random().toString(36).slice(2, 8);
 
-  // ── method guard ─────────────────────────────────────────────────────────────
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;
   }
 
-  // ── rate limit ───────────────────────────────────────────────────────────────
+  // Rate limit
   pruneRateLimitMap();
   const clientIp =
     (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
@@ -171,7 +212,7 @@ export default async function handler(req, res) {
 
   const rl = checkRateLimit(clientIp);
   if (!rl.allowed) {
-    res.setHeader("Retry-After", String(rl.retryAfter));
+    res.setHeader("Retry-After",           String(rl.retryAfter));
     res.setHeader("X-RateLimit-Limit",     String(RATE_LIMIT));
     res.setHeader("X-RateLimit-Remaining", "0");
     res.status(429).json({
@@ -182,25 +223,23 @@ export default async function handler(req, res) {
   res.setHeader("X-RateLimit-Limit",     String(RATE_LIMIT));
   res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
 
-  // ── token guard ──────────────────────────────────────────────────────────────
-  const hfToken = process.env.HF_TOKEN;
+  // Token guard
+  const hfToken = process.env.HUGGINGFACE_API_KEY;
   if (!hfToken) {
     res.status(503).json({
-      error: "HF_TOKEN not configured — add it in Vercel project settings.",
+      error: "HUGGINGFACE_API_KEY not configured — add it in Vercel project settings.",
     });
     return;
   }
 
-  // ── body ─────────────────────────────────────────────────────────────────────
+  // Body
   let body;
   try {
     body = await readBody(req);
   } catch (e) {
-    if (e.message === "PAYLOAD_TOO_LARGE") {
-      res.status(413).json({ error: "Request too large." });
-    } else {
-      res.status(400).json({ error: "Invalid JSON body." });
-    }
+    res.status(e.message === "PAYLOAD_TOO_LARGE" ? 413 : 400).json({
+      error: e.message === "PAYLOAD_TOO_LARGE" ? "Request too large." : "Invalid JSON body.",
+    });
     return;
   }
 
@@ -211,26 +250,35 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Input validation: cap message length and history depth
+  // Validate & cap input
   const MAX_MSG_CHARS = 2_000;
-  messages = messages
-    .slice(-12)
-    .map((m) => ({
-      ...m,
-      text: typeof m.text === "string"
-        ? m.text.slice(0, MAX_MSG_CHARS)
-        : String(m.text).slice(0, MAX_MSG_CHARS),
-    }));
+  messages = messages.slice(-12).map((m) => ({
+    ...m,
+    text: typeof m.text === "string"
+      ? m.text.slice(0, MAX_MSG_CHARS)
+      : String(m.text ?? "").slice(0, MAX_MSG_CHARS),
+  }));
 
-  const hfMessages = [
-    { role: "system", content: buildSystemPrompt(province, lawUpdates) },
-    ...messages.map((m) => ({
-      role:    m.role === "assistant" ? "assistant" : "user",
-      content: m.text,
-    })),
-  ];
+  // Web search (best-effort, non-blocking on failure)
+  const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
+  let searchSources = [];
+  let webSearchContext = "";
 
-  // ── call HF with 55 s abort + single 429 retry ───────────────────────────────
+  const braveKey = process.env.BRAVE_SEARCH_API_KEY;
+  if (braveKey && lastUserMsg && needsWebSearch(lastUserMsg.text)) {
+    const query = `Canadian employment law ${province} ${lastUserMsg.text}`;
+    const { snippets, sources } = await braveSearch(query, braveKey);
+    if (snippets.length > 0) {
+      webSearchContext = snippets.join("\n\n");
+      searchSources   = sources;
+    }
+  }
+
+  // Build prompt
+  const systemPrompt  = buildSystemPrompt(province, lawUpdates);
+  const mistralPrompt = buildMistralPrompt(systemPrompt, messages, webSearchContext);
+
+  // Call HF Inference API with retry on 429
   const controller = new AbortController();
   const timeoutId  = setTimeout(() => controller.abort(), 55_000);
 
@@ -238,77 +286,83 @@ export default async function handler(req, res) {
   let fetchErr   = null;
 
   for (let attempt = 0; attempt < 2; attempt++) {
-    const { response, error } = await fetchHF(hfMessages, hfToken, controller.signal);
+    try {
+      const resp = await fetch(HF_MODEL_URL, {
+        method: "POST",
+        headers: {
+          Authorization:  `Bearer ${hfToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: mistralPrompt,
+          parameters: {
+            max_new_tokens:  1024,
+            temperature:     0.3,
+            return_full_text: false,
+          },
+        }),
+        signal: controller.signal,
+      });
 
-    if (error) {
-      fetchErr = error;
-      break; // network error — don't retry
+      if (resp.status === 429 && attempt === 0) {
+        console.warn(`[${reqId}] HF 429 on attempt 0 — retrying in 2 s`);
+        await sleep(2_000);
+        continue;
+      }
+
+      hfResponse = resp;
+      break;
+    } catch (err) {
+      fetchErr = err;
+      break;
     }
-
-    if (response.status === 429 && attempt === 0) {
-      // HF rate-limited: wait 2 s and retry once
-      console.warn(`[${reqId}] HF 429 on attempt 0 — retrying in 2 s`);
-      await sleep(2_000);
-      continue;
-    }
-
-    hfResponse = response;
-    break;
   }
 
+  clearTimeout(timeoutId);
+
   if (fetchErr) {
-    clearTimeout(timeoutId);
-    if (fetchErr.name === "AbortError") {
-      res.status(504).json({
-        error: "The AI took too long to respond. Please try again — it should be faster now that the model is warm.",
-      });
-    } else {
-      res.status(502).json({
-        error: "Could not reach the AI service. Please check your connection and try again.",
-      });
-    }
+    const isTimeout = fetchErr.name === "AbortError";
+    res.status(isTimeout ? 504 : 502).json({
+      error: isTimeout
+        ? "The AI took too long to respond. Please try again — it should be faster now that the model is warm."
+        : "Could not reach the AI service. Please check your connection and try again.",
+    });
     return;
   }
 
-  // ── HF-level errors ───────────────────────────────────────────────────────────
   if (!hfResponse.ok) {
-    clearTimeout(timeoutId);
     const errBody = await hfResponse.text().catch(() => String(hfResponse.status));
     console.error(`[${reqId}] HF API error ${hfResponse.status}:`, errBody);
 
-    if (hfResponse.status === 429) {
-      res.status(429).json({
-        error: "The AI service is busy right now. Please wait a few seconds and try again.",
-      });
-    } else if (hfResponse.status === 503) {
-      res.status(503).json({
-        error: "The AI model is loading. Please try again in about 20 seconds.",
-      });
-    } else {
-      res.status(502).json({
-        error: `AI service returned an error (${hfResponse.status}). Please try again.`,
-      });
-    }
+    const statusMap = {
+      429: "The AI service is busy right now. Please wait a few seconds and try again.",
+      503: "The AI model is loading. Please try again in about 20 seconds.",
+    };
+    res.status(hfResponse.status === 429 || hfResponse.status === 503 ? hfResponse.status : 502).json({
+      error: statusMap[hfResponse.status] || "The AI advisor is temporarily unavailable. Please try again in a moment.",
+    });
     return;
   }
 
-  // ── pipe SSE stream from HF straight to client ───────────────────────────────
-  res.setHeader("Content-Type",      "text/event-stream");
-  res.setHeader("Cache-Control",     "no-store");
-  res.setHeader("X-Accel-Buffering", "no");
-  res.setHeader("X-Request-Id",      reqId);
-
-  const reader = hfResponse.body.getReader();
+  let data;
   try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      res.write(value);
-    }
-  } catch (streamErr) {
-    console.error(`[${reqId}] Stream error:`, streamErr);
-  } finally {
-    clearTimeout(timeoutId);
-    res.end();
+    data = await hfResponse.json();
+  } catch {
+    res.status(502).json({ error: "Invalid response from AI service." });
+    return;
   }
+
+  // HF inference API returns: [{ generated_text: "..." }]
+  const generated = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
+  if (!generated) {
+    res.status(502).json({ error: "No response from AI service." });
+    return;
+  }
+
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("X-Request-Id", reqId);
+  res.status(200).json({
+    response: generated.trim(),
+    sources:  searchSources,
+  });
 }
