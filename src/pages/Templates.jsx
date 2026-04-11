@@ -16,6 +16,7 @@ const templateCategories = [
   { id: "termination", label: "Termination" },
   { id: "discipline", label: "Discipline" },
   { id: "quebec", label: "Quebec" },
+  { id: "wellness", label: "Wellness" },
 ];
 
 const templateData = [
@@ -130,6 +131,34 @@ const templateData = [
     category: "discipline",
     jurisdiction: "Province-specific",
     description: "Document performance gaps, measurable goals, timelines, and consequences in a structured PIP.",
+  },
+  {
+    id: 17,
+    title: "Accommodation Request Form",
+    category: "wellness",
+    jurisdiction: "Province-specific",
+    description: "Employer-fillable form for initiating and documenting an accommodation request under human rights legislation.",
+  },
+  {
+    id: 18,
+    title: "Accommodation Plan Template",
+    category: "wellness",
+    jurisdiction: "Province-specific",
+    description: "Formal plan documenting agreed accommodation measures, responsibilities, review dates, and dual sign-off.",
+  },
+  {
+    id: 19,
+    title: "Leave Request Form",
+    category: "wellness",
+    jurisdiction: "Province-specific",
+    description: "Employee leave of absence request form covering all leave types with statutory entitlement references.",
+  },
+  {
+    id: 20,
+    title: "Sick Day Policy",
+    category: "wellness",
+    jurisdiction: "Province-specific",
+    description: "Company sick day and medical leave policy covering statutory minimums, reporting, and attendance management.",
   },
 ];
 
@@ -248,7 +277,7 @@ export default function Templates() {
             Generate documents
           </h1>
           <p className="mt-3 max-w-2xl text-base text-zinc-400">
-            16 bilingual templates covering Ontario, Quebec, Federal, and Remote (Federal) jurisdictions. Select a template, fill in your details, and export a compliant document in minutes.
+            16 bilingual templates covering every Canadian province. Select a template, fill in your details, and export a compliant document in minutes.
           </p>
         </div>
 
@@ -282,7 +311,7 @@ export default function Templates() {
             Coverage
           </div>
           <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">
-            4
+            14
           </div>
           <div className="mt-1 text-sm text-zinc-400">Canadian jurisdictions supported</div>
         </div>
@@ -417,8 +446,8 @@ export default function Templates() {
           <SectionCard title="Compliance reference">
             <div className="space-y-3 text-sm">
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                <div className="font-medium text-zinc-100">4 jurisdictions covered</div>
-                <div className="mt-1 text-zinc-400">Ontario · Quebec · Federal · Remote (Federal)</div>
+                <div className="font-medium text-zinc-100">14 jurisdictions covered</div>
+                <div className="mt-1 text-zinc-400">ON · QC · BC · AB · MB · SK · NS · NB · NL · PEI · NT · NU · YT · Federal</div>
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                 <div className="font-medium text-zinc-100">English and French</div>

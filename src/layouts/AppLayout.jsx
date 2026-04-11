@@ -1,6 +1,7 @@
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import {
   FileText,
+  Heart,
   LayoutDashboard,
   MessageSquare,
   Settings,
@@ -24,6 +25,7 @@ function useNavItems() {
     { to: "/app/templates",  label: t("Templates",  "Modèles"),         icon: FileText },
     { to: "/app/generator",  label: t("Generator",  "Générateur"),      icon: Wand2 },
     { to: "/app/advisor",    label: t("Advisor",    "Conseiller"),       icon: MessageSquare },
+    { to: "/app/wellness",   label: t("Wellness",   "Bien-être"),        icon: Heart },
     { to: "/app/settings",   label: t("Settings",   "Paramètres"),      icon: Settings },
   ];
 }
@@ -234,6 +236,12 @@ function TopBar() {
       title: t("Workspace & jurisdiction settings", "Paramètres de l'espace de travail"),
       ctaLabel: t("Generate document", "Générer un document"),
       ctaTo: "/app/generator?template=Offer%20Letter",
+    };
+    if (location.pathname.startsWith("/app/wellness")) return {
+      badge: t("Wellness", "Bien-être"),
+      title: t("Accommodation frameworks & leave management", "Cadres d'adaptation et gestion des congés"),
+      ctaLabel: t("Generate document", "Générer un document"),
+      ctaTo: "/app/generator?template=Accommodation%20Request%20Form",
     };
     return {
       badge: t("Dashboard", "Tableau de bord"),

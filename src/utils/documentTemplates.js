@@ -3,10 +3,20 @@
 // Used by GeneratorPage.jsx via formatDocBody(template, form).
 
 const ACT_REF = {
-  Ontario:           'Employment Standards Act, 2000, S.O. 2000, c. 41 ("ESA")',
-  Quebec:            'Act Respecting Labour Standards, CQLR c N-1.1 ("ARLS")',
-  Federal:           'Canada Labour Code, R.S.C., 1985, c. L-2 ("CLC")',
-  "Remote (Federal)":'Canada Labour Code, R.S.C., 1985, c. L-2 ("CLC")',
+  Ontario: 'Employment Standards Act, 2000, S.O. 2000, c. 41 ("ESA")',
+  "British Columbia": 'Employment Standards Act, R.S.B.C. 1996, c. 113 ("ESA")',
+  Alberta: 'Employment Standards Code, R.S.A. 2000, c. E-9 ("ESC")',
+  Quebec: 'Act Respecting Labour Standards, CQLR c N-1.1 ("ARLS")',
+  Manitoba: 'Employment Standards Code, C.C.S.M. c. E110 ("ESC")',
+  Saskatchewan: 'Saskatchewan Employment Act, SS 2013, c S-15.1 ("SEA")',
+  "Nova Scotia": 'Labour Standards Code, R.S.N.S. 1989, c. 246 ("LSC")',
+  "New Brunswick": 'Employment Standards Act, SNB 1982, c E-7.2 ("ESA")',
+  Federal: 'Canada Labour Code, R.S.C., 1985, c. L-2 ("CLC")',
+  "Newfoundland and Labrador": 'Labour Standards Act, R.S.N.L. 1990, c. L-2 ("LSA")',
+  "Prince Edward Island": 'Employment Standards Act, R.S.P.E.I. 1988, c. E-6.2 ("ESA")',
+  "Northwest Territories": 'Employment Standards Act, S.N.W.T. 2007, c. 13 ("ESA")',
+  Nunavut: 'Labour Standards Act, R.S.N.W.T. 1988, c. L-1 ("LSA")',
+  Yukon: 'Employment Standards Act, R.S.Y. 2002, c. 72 ("ESA")',
 };
 
 function today() {
@@ -998,6 +1008,420 @@ Employee: ${form.employeeName}    Title: ${form.jobTitle}
 Signature: ____________________    Date: ________________________`;
 }
 
+// ─── Wellness / Ring 2 template generators ───────────────────────────────────
+
+function genAccommodationRequestForm(form) {
+  return `${today()}
+
+ACCOMMODATION REQUEST FORM
+${form.companyName}
+${form.jurisdiction}
+
+─────────────────────────────────────────────────────────────
+PART A — EMPLOYEE INFORMATION
+
+Employee name:          ${form.employeeName}
+Job title:              ${form.jobTitle}
+Department / Manager:   ${form.manager}
+Date of request:        ${today()}
+Preferred contact:      ___________________________________
+
+─────────────────────────────────────────────────────────────
+PART B — NATURE OF ACCOMMODATION REQUEST
+
+Protected ground disclosed (check all that apply):
+  □ Disability (physical)            □ Disability (mental health)
+  □ Family status                    □ Religion / Creed
+  □ Pregnancy / Parental status      □ Other: _______________
+
+Description of limitation or barrier requiring accommodation:
+________________________________________________________________________
+________________________________________________________________________
+________________________________________________________________________
+
+Specific accommodation requested by employee:
+________________________________________________________________________
+________________________________________________________________________
+
+Requested start date:   ___________________________________
+Expected duration:      □ Temporary (approx. __________)
+                        □ Permanent
+                        □ Unknown / to be determined
+
+─────────────────────────────────────────────────────────────
+PART C — SUPPORTING DOCUMENTATION
+
+  □ Medical documentation (functional limitations report) received
+  □ Supporting statement or letter received
+  □ Documentation requested — pending receipt (deadline: _______________)
+  □ Employee declines to provide documentation (see notes)
+  □ Documentation not required for this accommodation type
+
+Name of healthcare provider / authorizing professional:
+___________________________________
+
+Documentation reviewed by: ___________________________________
+Date reviewed:             ___________________________________
+
+─────────────────────────────────────────────────────────────
+PART D — INTERIM MEASURES
+
+Pending full review of this request, the following interim measures
+are in place effective ${today()}:
+________________________________________________________________________
+________________________________________________________________________
+
+─────────────────────────────────────────────────────────────
+PART E — EMPLOYER RESPONSE
+
+  □ Accommodation approved as requested (see Accommodation Plan)
+  □ Modified / alternative accommodation offered (see Accommodation Plan)
+  □ Further information required (specify below)
+  □ Request under review — legal or medical consultation in progress
+  □ Request declined — undue hardship assessment completed (see attached)
+
+Notes and rationale:
+________________________________________________________________________
+________________________________________________________________________
+
+─────────────────────────────────────────────────────────────
+PART F — NEXT STEPS AND REVIEW
+
+Review date scheduled:              ___________________________________
+HR / Legal counsel consulted:       □ Yes  □ No
+Accommodation Plan to be completed: □ Yes  □ No  Target date: __________
+
+─────────────────────────────────────────────────────────────
+SIGNATURES
+
+This form has been completed in accordance with the ${act(form.jurisdiction)}
+and applicable human rights legislation.
+
+Employee signature: ______________________  Date: ________________
+Printed name: ${form.employeeName}
+
+HR / Manager signature: __________________  Date: ________________
+Printed name: ${form.manager}
+Title: ___________________________________
+
+─────────────────────────────────────────────────────────────
+CONFIDENTIALITY NOTICE
+This form and any attachments contain personal and potentially sensitive
+health information. Store securely and share only with individuals who
+have a legitimate need to know. Retain per your records management policy.`;
+}
+
+function genAccommodationPlan(form) {
+  return `${today()}
+
+WORKPLACE ACCOMMODATION PLAN
+${form.companyName}
+${form.jurisdiction}
+
+This Accommodation Plan documents the measures agreed upon between
+${form.companyName} (the "Employer") and ${form.employeeName} (the "Employee")
+in accordance with the ${act(form.jurisdiction)} and applicable human rights
+legislation.
+
+─────────────────────────────────────────────────────────────
+EMPLOYEE INFORMATION
+
+Employee name:          ${form.employeeName}
+Job title:              ${form.jobTitle}
+Department / Manager:   ${form.manager}
+Plan effective date:    ${today()}
+Plan review date:       ___________________________________
+
+─────────────────────────────────────────────────────────────
+ACCOMMODATION MEASURES
+
+The following accommodation measures have been agreed upon:
+
+1. ________________________________________________________________________
+   Implementation details: ________________________________________________
+
+2. ________________________________________________________________________
+   Implementation details: ________________________________________________
+
+3. ________________________________________________________________________
+   Implementation details: ________________________________________________
+
+Additional measures (if any):
+________________________________________________________________________
+
+─────────────────────────────────────────────────────────────
+EMPLOYER RESPONSIBILITIES
+
+The Employer agrees to:
+  □ Implement the accommodation measures listed above
+  □ Maintain confidentiality of the Employee's medical / personal information
+  □ Conduct a review of this plan on the date specified above
+  □ Provide necessary equipment, technology, or workspace modifications
+  □ Notify the Employee promptly if any measure cannot be maintained
+  □ Other: ______________________________________________________________
+
+─────────────────────────────────────────────────────────────
+EMPLOYEE RESPONSIBILITIES
+
+The Employee agrees to:
+  □ Cooperate in the accommodation process and provide updates on limitations
+  □ Provide updated medical / supporting documentation when requested
+  □ Advise the Employer if the accommodation is no longer working or needed
+  □ Attend scheduled review meetings
+  □ Other: ______________________________________________________________
+
+─────────────────────────────────────────────────────────────
+REVIEW AND MODIFICATION
+
+This plan will be reviewed on: ___________________________________
+
+Either party may request a review sooner if circumstances change. Any
+modification to this plan must be agreed upon in writing and signed by
+both parties.
+
+─────────────────────────────────────────────────────────────
+ESCALATION
+
+If a dispute arises regarding this plan, the parties agree to:
+  □ Escalate to HR / senior management
+  □ Request mediation through the applicable human rights commission
+  □ Seek legal advice
+
+─────────────────────────────────────────────────────────────
+SIGNATURES
+
+Both parties confirm this Accommodation Plan accurately reflects
+the agreed measures and their understanding of their respective
+obligations.
+
+Employee: ${form.employeeName}
+Signature: ______________________  Date: ________________
+
+HR / Manager: ${form.manager}
+Signature: ______________________  Date: ________________
+
+Senior management (if required):
+Signature: ______________________  Date: ________________
+
+─────────────────────────────────────────────────────────────
+CONFIDENTIALITY NOTICE
+This plan is confidential. File in the employee's accommodation record,
+separate from the general personnel file.`;
+}
+
+function genLeaveRequestForm(form) {
+  return `${today()}
+
+LEAVE OF ABSENCE REQUEST FORM
+${form.companyName}
+${form.jurisdiction}
+
+─────────────────────────────────────────────────────────────
+EMPLOYEE INFORMATION
+
+Employee name:     ${form.employeeName}
+Job title:         ${form.jobTitle}
+Manager:           ${form.manager}
+Date of request:   ${today()}
+
+─────────────────────────────────────────────────────────────
+TYPE OF LEAVE REQUESTED
+
+  □ Medical / disability leave
+  □ Maternity leave
+  □ Parental leave (birth, adoption, or foster placement)
+  □ Bereavement leave
+  □ Family responsibility / caregiver leave
+  □ Personal leave (unpaid)
+  □ Jury duty / court appearance
+  □ Reservist leave (Canadian Forces)
+  □ Other: ___________________________________________________
+
+─────────────────────────────────────────────────────────────
+LEAVE DETAILS
+
+Requested leave start date:   ___________________________________
+Expected return-to-work date: ___________________________________
+Total duration requested:     ___________________________________
+Reason for leave (brief):     ___________________________________
+  (Note: For medical leave, a functional limitations report is required.
+   A diagnosis is not required and need not be disclosed.)
+
+─────────────────────────────────────────────────────────────
+PAY AND BENEFITS DURING LEAVE
+
+  □ I understand this leave is unpaid / partially paid per company policy
+  □ I intend to apply for Employment Insurance (EI) benefits
+  □ I intend to apply for Quebec Parental Insurance Plan (QPIP) benefits
+  □ My employment agreement provides for top-up pay (attached)
+  □ I wish to continue group benefits during leave — contribution: _________
+
+─────────────────────────────────────────────────────────────
+SUPPORTING DOCUMENTATION
+
+  □ Medical / functional limitations documentation attached
+  □ Birth / adoption certificate (parental leave)
+  □ Death certificate / obituary (bereavement)
+  □ Legal / court documentation
+  □ No documentation required for this leave type
+
+─────────────────────────────────────────────────────────────
+RETURN TO WORK
+
+I understand I am required to provide reasonable advance notice of my
+return-to-work date to ${form.manager} or HR.
+
+In accordance with the ${actName(form.jurisdiction)}, I understand I am
+entitled to return to the same or a comparable position upon expiry of
+this leave, subject to applicable legislation.
+
+─────────────────────────────────────────────────────────────
+SIGNATURES
+
+Employee: ${form.employeeName}
+Signature: ______________________  Date: ________________
+
+Manager / HR: ${form.manager}
+Signature: ______________________  Date: ________________
+
+Leave approved: □ Yes  □ No  □ Further information required
+
+Notes: ________________________________________________________________________
+
+─────────────────────────────────────────────────────────────
+EMPLOYER NOTE
+Applicable leave standards: ${act(form.jurisdiction)}.
+This form does not limit any greater entitlement under applicable
+employment standards or human rights legislation.`;
+}
+
+function genSickDayPolicy(form) {
+  return `${today()}
+
+SICK DAY AND MEDICAL LEAVE POLICY
+${form.companyName}
+${form.jurisdiction}
+
+─────────────────────────────────────────────────────────────
+1. PURPOSE
+
+This policy establishes ${form.companyName}'s approach to sick days and
+short-term medical leave, in compliance with the ${act(form.jurisdiction)}
+and applicable human rights legislation.
+
+─────────────────────────────────────────────────────────────
+2. SCOPE
+
+This policy applies to all employees of ${form.companyName} in
+${form.jurisdiction}.
+
+─────────────────────────────────────────────────────────────
+3. STATUTORY MINIMUM ENTITLEMENTS
+
+Employees are entitled to the following statutory minimum leave:
+
+${form.jurisdiction === "Ontario"
+  ? `Under the Employment Standards Act, 2000 (Ontario):
+  • 3 days of unpaid sick leave per calendar year
+  • Available after 2 weeks of employment
+  • No medical certificate required for the first 3 days
+  • Longer medical or personal emergency leave may apply under Part XIV of the ESA`
+  : form.jurisdiction === "Quebec"
+  ? `Under the Act Respecting Labour Standards (Quebec):
+  • 2 days of paid sick leave per year (after 3 months of continuous service)
+  • Up to 26 additional weeks of unpaid leave for serious illness
+  • 10 days per year for family-related obligations (2 paid after 3 months)
+  • Medical certificate may be required for absences of 3+ consecutive days`
+  : form.jurisdiction === "Federal"
+  ? `Under the Canada Labour Code:
+  • 10 days of personal leave per calendar year
+  • 3 days are paid after 3 months of continuous employment
+  • Medical certificate may be required after 5+ consecutive days
+  • Up to 17 weeks of unpaid medical leave may apply`
+  : `Under applicable federal / provincial legislation:
+  • Minimum sick leave entitlements vary by jurisdiction
+  • Consult the applicable employment standards legislation for specific minimums
+  • This policy provides at minimum the statutory entitlement`}
+
+─────────────────────────────────────────────────────────────
+4. COMPANY SICK DAY ENTITLEMENT
+
+In addition to statutory minimums, ${form.companyName} provides:
+
+  • ___ paid sick days per calendar year
+  • Available after ___ months of continuous employment
+  • Unused sick days:  □ Carry over  □ Do not carry over  □ Paid out
+  • Sick days are not intended for mental health days, vacation, or personal
+    leave (separate policies apply)
+
+─────────────────────────────────────────────────────────────
+5. REPORTING REQUIREMENTS
+
+  a) Employees must notify their manager (${form.manager} or designate) as
+     early as possible — no later than ___ hour(s) before their scheduled
+     start time.
+  b) Notification method: □ Phone  □ Email  □ HR system  □ Any method
+  c) For absences of ___ or more consecutive days, a medical / functional
+     limitations note from a healthcare provider may be requested.
+  d) ${form.companyName} will not request a diagnosis. Documentation should
+     confirm inability to work and expected return date.
+
+─────────────────────────────────────────────────────────────
+6. PAY DURING SICK LEAVE
+
+  • Paid sick days are paid at the employee's regular rate of pay
+  • For absences beyond the paid entitlement, leave is unpaid unless:
+    — The employee has short-term disability (STD) coverage
+    — Employment Insurance sickness benefits apply (up to 15 weeks)
+    — A top-up arrangement is in place under the employment agreement
+  • Employees are encouraged to apply for EI sickness benefits during
+    extended unpaid medical leave. ${form.companyName} will issue a Record
+    of Employment promptly upon request.
+
+─────────────────────────────────────────────────────────────
+7. ATTENDANCE MANAGEMENT
+
+${form.companyName} will manage attendance patterns in a non-discriminatory
+manner that respects the duty to accommodate under human rights legislation.
+
+  • Attendance concerns will be addressed through dialogue, not discipline,
+    where absences are related to a protected ground (e.g., disability)
+  • Progressive attendance management may apply to non-protected absences
+    after consistent patterns are documented
+  • Any adverse employment action related to illness requires legal review
+
+─────────────────────────────────────────────────────────────
+8. RETURN TO WORK
+
+  • Employees returning after 5+ consecutive days may be required to provide
+    clearance from a healthcare provider confirming fitness to return
+  • For employees returning from extended medical leave, ${form.companyName}
+    will assess accommodation needs prior to the return date
+  • Gradual return-to-work arrangements may be offered subject to
+    operational requirements and the duty to accommodate
+
+─────────────────────────────────────────────────────────────
+9. CONFIDENTIALITY
+
+All medical information collected in connection with this policy is
+confidential. It will be stored separately from the general personnel
+file and accessed only by individuals with a legitimate need to know.
+
+─────────────────────────────────────────────────────────────
+10. GOVERNING LEGISLATION
+
+This policy is governed by and subject to the ${act(form.jurisdiction)},
+applicable human rights legislation, and the employee's employment agreement.
+Where this policy provides a lesser entitlement than applicable legislation,
+the legislation prevails.
+
+─────────────────────────────────────────────────────────────
+ACKNOWLEDGEMENT
+
+Employee: ${form.employeeName}     Title: ${form.jobTitle}
+Signature: ____________________    Date: ________________________`;
+}
+
 // ─── Main export ─────────────────────────────────────────────────────────────
 
 export function formatDocBody(template, form) {
@@ -1052,6 +1476,18 @@ export function formatDocBody(template, form) {
       break;
     case "Employee Handbook":
       body = genEmployeeHandbook(form);
+      break;
+    case "Accommodation Request Form":
+      body = genAccommodationRequestForm(form);
+      break;
+    case "Accommodation Plan Template":
+      body = genAccommodationPlan(form);
+      break;
+    case "Leave Request Form":
+      body = genLeaveRequestForm(form);
+      break;
+    case "Sick Day Policy":
+      body = genSickDayPolicy(form);
       break;
     default:
       body = `This document has been prepared by ${form.companyName} in accordance with the laws of ${form.jurisdiction}.\n\n${form.notes || ""}`.trim();
