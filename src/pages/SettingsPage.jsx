@@ -11,11 +11,16 @@ import {
   CheckCircle2,
   Sparkles,
   RotateCcw,
+  CreditCard,
+  ExternalLink,
+  ArrowRight,
 } from "lucide-react";
 import { saveToStorage, removeFromStorage } from "../utils/storage";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { useLang } from "../context/LanguageContext.jsx";
+import { usePlan } from "../context/PlanContext.jsx";
 import { supabase } from "../lib/supabase";
 import {
   defaultSettings,
@@ -110,7 +115,10 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const { setTheme } = useTheme();
   const { setLanguage, t } = useLang();
+  const { plan, subscriptionStatus, loading: planLoading } = usePlan();
   const [saved, setSaved] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalError, setPortalError]     = useState(null);
   const [bannerText, setBannerText] = useState("Settings saved successfully.");
   const [bannerTone, setBannerTone] = useState("success");
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -184,6 +192,27 @@ export default function SettingsPage() {
       setTimeout(() => setSaved(false), 3000);
     }
   };
+
+  const handleManageSubscription = async () => {
+    if (!user || !supabase) return;
+    setPortalLoading(true);
+    setPortalError(null);
+    try {
+      const returnUrl = `${window.location.origin}/app/settings`;
+      const { data, error } = await supabase.functions.invoke("create-portal-session", {
+        body: { returnUrl },
+      });
+      if (error || !data?.url) throw new Error(error?.message ?? "Could not open billing portal.");
+      window.location.href = data.url;
+    } catch (err) {
+      setPortalError(err.message ?? "Failed to open billing portal. Please try again.");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
+  const planLabel = plan === "growth" ? "Growth" : plan === "advanced" ? "Advanced" : "Free";
+  const planActive = subscriptionStatus === "active" || subscriptionStatus === "trialing";
 
   return (
     <div className="space-y-8">
@@ -324,6 +353,51 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-6">
+          {/* Subscription */}
+          <SectionCard
+            title={t("Subscription", "Abonnement")}
+            action={planLoading ? null : (
+              <div className={["rounded-full border px-3 py-1 text-xs font-medium",
+                planActive ? "border-amber-400/15 bg-amber-400/8 text-amber-300" : "border-white/8 bg-white/[0.03] text-zinc-400",
+              ].join(" ")}>
+                {planActive ? planLabel : t("Free", "Gratuit")}
+              </div>
+            )}
+          >
+            {planLoading ? (
+              <p className="text-sm text-zinc-500">{t("Loading subscription\u2026", "Chargement de l\u2019abonnement\u2026")}</p>
+            ) : planActive ? (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                  <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+                  <div>
+                    <div className="text-sm font-medium text-zinc-100">{t(`${planLabel} plan \u2014 active`, `Plan ${planLabel} \u2014 actif`)}</div>
+                    <div className="mt-1 text-sm text-zinc-400">{t("Manage billing, update your payment method, or cancel anytime from the Stripe billing portal.", "G\u00e9rez la facturation, mettez \u00e0 jour votre mode de paiement ou annulez \u00e0 tout moment via le portail Stripe.")}</div>
+                  </div>
+                </div>
+                {portalError && <div className="rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">{portalError}</div>}
+                <button type="button" disabled={portalLoading} onClick={handleManageSubscription}
+                  className="ghost-button inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                  <ExternalLink className="h-4 w-4" />
+                  {portalLoading ? t("Opening portal\u2026", "Ouverture du portail\u2026") : t("Manage subscription", "G\u00e9rer l\u2019abonnement")}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
+                  <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+                  <div>
+                    <div className="text-sm font-medium text-zinc-100">{t("You\u2019re on the Free plan", "Vous \u00eates sur le plan Gratuit")}</div>
+                    <div className="mt-1 text-sm text-zinc-400">{t("Upgrade to Growth for unlimited document generation, AI Advisor, and all 4 compliance rings.", "Passez \u00e0 Growth pour la g\u00e9n\u00e9ration illimit\u00e9e, le Conseiller IA et les 4 anneaux de conformit\u00e9.")}</div>
+                  </div>
+                </div>
+                <Link to="/pricing" className="gold-button inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm">
+                  {t("Upgrade to Growth \u2014 $39/mo", "Passer \u00e0 Growth \u2014 39\u00a0$/mois")}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            )}
+          </SectionCard>
           <SectionCard
             title={t("Workspace summary", "Résumé de l'espace de travail")}
             action={

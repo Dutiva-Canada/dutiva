@@ -46,12 +46,13 @@ Deno.serve(async (req: Request) => {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const userId = session.metadata?.user_id;
-    const plan = session.metadata?.plan ?? "growth";
+    const userId  = session.metadata?.user_id;
+    const plan    = session.metadata?.plan    ?? "growth";
+    const billing = session.metadata?.billing ?? "monthly";
     if (userId) {
       await supabase
         .from("profiles")
-        .update({ plan, subscription_status: "active" })
+        .update({ plan, subscription_status: "active", billing_period: billing })
         .eq("id", userId);
     }
   }

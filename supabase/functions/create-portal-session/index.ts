@@ -32,12 +32,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const stripeKey          = Deno.env.get("STRIPE_SECRET_KEY");
-  const priceGrowthMonthly = Deno.env.get("STRIPE_PRICE_GROWTH_MONTHLY");
-  const priceGrowthAnnual  = Deno.env.get("STRIPE_PRICE_GROWTH_ANNUAL");
-  const priceAdvanced      = Deno.env.get("STRIPE_PRICE_ADVANCED");
-
-  if (!stripeKey || !priceGrowthMonthly || !priceGrowthAnnual) {
+  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+  if (!stripeKey) {
     return new Response(
       JSON.stringify({ error: "Payments not configured." }),
       {
@@ -81,85 +77,48 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  let body: {
-    plan?: string;
-    billing?: "monthly" | "annual";
-    successUrl?: string;
-    cancelUrl?: string;
-  };
-  try {
-    body = await req.json();
-  } catch {
-    return new Response(JSON.stringify({ error: "Invalid body." }), {
-      status: 400,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
-  }
-
-  const { plan = "growth", billing = "monthly", successUrl, cancelUrl } = body;
-  if (!successUrl || !cancelUrl) {
-    return new Response(JSON.stringify({ error: "Missing required fields." }), {
-      status: 400,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
-  }
-
-  // Pick the right price ID
-  let priceId: string;
-  if (plan === "advanced" && priceAdvanced) {
-    priceId = priceAdvanced;
-  } else if (billing === "annual") {
-    priceId = priceGrowthAnnual;
-  } else {
-    priceId = priceGrowthMonthly;
-  }
-
-  // Look up or create Stripe customer
+  // Get Stripe customer ID from profile
   const { data: profile } = await supabase
     .from("profiles")
     .select("stripe_customer_id")
     .eq("id", user.id)
     .maybeSingle();
 
-  let customerId = profile?.stripe_customer_id;
-  if (!customerId) {
-    const customer = await stripePost(
-      "/customers",
-      { email: user.email ?? "", "metadata[user_id]": user.id },
-      stripeKey,
+  if (!profile?.stripe_customer_id) {
+    return new Response(
+      JSON.stringify({ error: "No active subscription found." }),
+      {
+        status: 404,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      },
     );
-    customerId = customer.id;
-    await supabase
-      .from("profiles")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", user.id);
   }
 
-  const session = await stripePost(
-    "/checkout/sessions",
+  let body: { returnUrl?: string };
+  try {
+    body = await req.json();
+  } catch {
+    body = {};
+  }
+
+  const returnUrl =
+    body.returnUrl ?? `${req.headers.get("origin") ?? "https://dutiva.ca"}/app/settings`;
+
+  const portalSession = await stripePost(
+    "/billing_portal/sessions",
     {
-      customer: customerId,
-      mode: "subscription",
-      "line_items[0][price]": priceId,
-      "line_items[0][quantity]": "1",
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      "metadata[user_id]": user.id,
-      "metadata[plan]": plan,
-      "metadata[billing]": billing,
+      customer: profile.stripe_customer_id,
+      return_url: returnUrl,
     },
     stripeKey,
   );
 
-  if (!session.url) {
+  if (!portalSession.url) {
     return new Response(
-      JSON.stringify({ error: "Failed to create checkout session." }),
+      JSON.stringify({ error: "Failed to create portal session." }),
       {
         status: 502,
         headers: {
@@ -170,7 +129,7 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  return new Response(JSON.stringify({ url: session.url }), {
+  return new Response(JSON.stringify({ url: portalSession.url }), {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
