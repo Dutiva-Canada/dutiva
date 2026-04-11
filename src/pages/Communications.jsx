@@ -92,12 +92,9 @@ function LayoffScriptBuilder({ t }) {
   const [years, setYears] = useState("");
   const [province, setProvince] = useState("ON");
   const pvList = [
-    { value: "ON", label: "Ontario" },
-    { value: "BC", label: "British Columbia" },
-    { value: "AB", label: "Alberta" },
-    { value: "QC", label: "Québec" },
-    { value: "MB", label: "Manitoba" },
-    { value: "SK", label: "Saskatchewan" },
+    { value: "ON",      label: "Ontario" },
+    { value: "QC",      label: "Qu\u00e9bec" },
+    { value: "Federal", label: "Federal (Canada Labour Code)" },
   ];
   const n = Math.max(1, Math.min(8, parseInt(years) || 1));
   const script = name

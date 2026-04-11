@@ -282,7 +282,13 @@ export default function SettingsPage() {
                   className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
               <Field label={t("Province", "Province")} icon={<MapPin className="h-4 w-4" />}>
-                <input value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })}
+                <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })}
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none">
+                  <option value="Ontario">Ontario</option>
+                  <option value="Quebec">Qu&#233;bec</option>
+                  <option value="Federal">Federal (Canada Labour Code)</option>
+                  <option value="Remote (Federal)">Remote (Federal)</option>
+                </select>
                   className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
               <Field label={t("City", "Ville")} icon={<MapPin className="h-4 w-4" />}>

@@ -92,12 +92,9 @@ function SeveranceCalculator({ t }) {
   const [salary, setSalary] = useState("");
   const [province, setProvince] = useState("ON");
   const pvList = [
-    { value: "ON", label: "Ontario" },
-    { value: "BC", label: "British Columbia" },
-    { value: "AB", label: "Alberta" },
-    { value: "QC", label: "Qu\u00e9bec" },
-    { value: "MB", label: "Manitoba" },
-    { value: "SK", label: "Saskatchewan" },
+    { value: "ON",      label: "Ontario" },
+    { value: "QC",      label: "Qu\u00e9bec" },
+    { value: "Federal", label: "Federal (Canada Labour Code)" },
   ];
   const y = parseFloat(years) || 0;
   const s = parseFloat(salary) || 0;

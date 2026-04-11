@@ -512,14 +512,14 @@ export default function LandingPage() {
             </div>
             <p className="mb-4 text-sm leading-6 text-zinc-400">
               {t(
-                "Generate province-specific termination letters with ESA notice weeks automatically calculated — formal, bilingual, and copy-ready.",
-                "Générez des lettres de licenciement propres à chaque province avec les semaines de préavis ESA calculées automatiquement — formelles, bilingues et prêtes à copier."
+                "Generate compliant termination letters tailored to Ontario, Qu\u00e9bec, and Federal jurisdiction with ESA notice weeks automatically calculated.",
+                "G\u00e9n\u00e9rez des lettres de licenciement conformes adapt\u00e9es \u00e0 l\u2019Ontario, au Qu\u00e9bec et au f\u00e9d\u00e9ral, avec les semaines de pr\u00e9avis ESA calcul\u00e9es automatiquement.",
               )}
             </p>
             <ul className="grid gap-2">
               <li className="flex items-center gap-2 text-sm text-zinc-400">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
-                {t("Province selector (ON, BC, AB, QC, MB, SK)", "Sélecteur de province (ON, CB, AB, QC, MB, SK)")}
+                {t("Province selector (Ontario, Qu\u00e9bec, Federal)", "S\u00e9lecteur de province (Ontario, Qu\u00e9bec, F\u00e9d\u00e9ral)")}
               </li>
               <li className="flex items-center gap-2 text-sm text-zinc-400">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
@@ -711,8 +711,8 @@ export default function LandingPage() {
             </div>
             <p className="mb-4 text-sm leading-6 text-zinc-400">
               {t(
-                "ESA statutory notice plus common-law estimates — province-aware across ON, BC, AB, QC, MB, and Federal scope.",
-                "Préavis légal ESA plus estimations de common law — adapté à la province pour ON, CB, AB, QC, MB et portée fédérale."
+                "ESA statutory notice plus common-law estimates \u2014 province-aware for Ontario, Qu\u00e9bec, and Federal (Canada Labour Code).",
+                "Pr\u00e9avis l\u00e9gal ESA plus estimations de common law \u2014 adapt\u00e9 \u00e0 l\u2019Ontario, au Qu\u00e9bec et au f\u00e9d\u00e9ral (Code canadien du travail).",
               )}
             </p>
             <ul className="grid gap-2">
