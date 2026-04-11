@@ -44,47 +44,23 @@ function formatMessageTime(value) {
   } catch { return "Just now"; }
 }
 
-async function callAdvisorAPI(messagesForModel, province, lawUpdates = [], onToken) {
+async function callAdvisorAPI(messagesForModel, province, lawUpdates = []) {
   const response = await fetch("/api/advisor-chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages: messagesForModel, province, lawUpdates }),
   });
 
+  const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
     throw new Error(data.error || `Advisor API error (${response.status})`);
   }
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let fullText = "";
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-
-    for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
-      const payload = line.slice(6).trim();
-      if (payload === "[DONE]") continue;
-      try {
-        const parsed = JSON.parse(payload);
-        const token = parsed.choices?.[0]?.delta?.content ?? "";
-        if (token) {
-          fullText += token;
-          onToken?.(fullText);
-        }
-      } catch { /* ignore malformed SSE lines */ }
-    }
-  }
-
-  return fullText.trim() || "Unable to generate a response.";
+  return {
+    reply:   data.response || "Unable to generate a response.",
+    sources: Array.isArray(data.sources) ? data.sources : [],
+  };
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -259,25 +235,23 @@ export default function Advisor() {
     setLoading(true);
     setAdvisorError(null);
 
-    const streamId = createId("assistant");
-    const streamTs = new Date().toISOString();
-    setMessages((prev) => [...prev, { id: streamId, role: "assistant", text: "", createdAt: streamTs, streaming: true }]);
+    const loadingId = createId("assistant");
+    const loadingTs = new Date().toISOString();
+    setMessages((prev) => [...prev, { id: loadingId, role: "assistant", text: "", createdAt: loadingTs, streaming: true }]);
 
     try {
-      const reply = await callAdvisorAPI(modelHistory, province, lawUpdates, (partial) => {
-        setMessages((prev) => prev.map((m) => (m.id === streamId ? { ...m, text: partial } : m)));
-      });
+      const { reply, sources } = await callAdvisorAPI(modelHistory, province, lawUpdates);
       setAdvisorReady(true);
-      setMessages((prev) => prev.map((m) => m.id === streamId ? { ...m, text: reply, streaming: false } : m));
+      setMessages((prev) => prev.map((m) => m.id === loadingId ? { ...m, text: reply, sources, streaming: false } : m));
     } catch (err) {
       console.error("Advisor error:", err);
-      const isConfig = err.message?.includes("HF_TOKEN not configured");
+      const isConfig = err.message?.includes("HUGGINGFACE_API_KEY not configured");
       if (isConfig) setAdvisorReady(false);
       const msg = isConfig
-        ? "The AI advisor isn't configured yet \u2014 add HF_TOKEN to your Vercel project environment variables."
+        ? "The AI advisor isn't configured yet \u2014 add HUGGINGFACE_API_KEY to your Vercel project environment variables."
         : err.message || "Could not reach the advisor. Please check your connection and try again.";
       setAdvisorError(msg);
-      setMessages((prev) => prev.map((m) => m.id === streamId ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false } : m));
+      setMessages((prev) => prev.map((m) => m.id === loadingId ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false } : m));
     } finally {
       setLoading(false);
     }
@@ -330,10 +304,10 @@ export default function Advisor() {
               className="metric-value mt-2 text-[17px] font-bold tracking-tight"
               style={{ color: advisorReady === false ? "rgb(248 113 113)" : advisorReady ? "rgb(252 211 77)" : "rgb(250 250 250)" }}
             >
-              {advisorReady === false ? "Error" : advisorReady ? "Qwen 2.5" : "Ready"}
+              {advisorReady === false ? "Error" : advisorReady ? "Mistral 7B" : "Ready"}
             </div>
             <div className="mt-1 text-[11px] text-zinc-500">
-              {advisorReady === false ? "Check HF_TOKEN in Vercel" : advisorReady ? "HF Inference API \u2014 live" : "AI advisor ready"}
+              {advisorReady === false ? "Check HUGGINGFACE_API_KEY in Vercel" : advisorReady ? "Mistral + Brave Search \u2014 live" : "AI advisor ready"}
             </div>
           </div>
 
@@ -425,6 +399,22 @@ export default function Advisor() {
             {messages.map((msg) => (
               <div key={msg.id} className="space-y-1.5 min-w-0 w-full">
                 <MessageBubble role={msg.role} text={msg.text} />
+                {msg.role === "assistant" && msg.sources?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 px-1">
+                    {msg.sources.map((s, i) => (
+                      <a
+                        key={i}
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-[10px] text-zinc-400 transition hover:text-zinc-200 hover:border-white/15"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
+                        {s.title.length > 40 ? s.title.slice(0, 40) + "…" : s.title}
+                      </a>
+                    ))}
+                  </div>
+                )}
                 <div className={`px-2 text-xs text-zinc-500 ${msg.role === "user" ? "text-right" : "text-left"}`}>
                   {formatMessageTime(msg.createdAt)}
                 </div>
@@ -456,7 +446,7 @@ export default function Advisor() {
           )}
           {advisorReady === false && (
             <div className="mt-4 rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-3 text-sm text-yellow-200">
-              <strong>Setup required:</strong> Add <code className="rounded bg-black/30 px-1">HF_TOKEN</code> to your Vercel project environment variables, then redeploy.
+              <strong>Setup required:</strong> Add <code className="rounded bg-black/30 px-1">HUGGINGFACE_API_KEY</code> to your Vercel project environment variables, then redeploy.
             </div>
           )}
 
@@ -514,12 +504,17 @@ export default function Advisor() {
             {/* AI disclosure */}
             <div className="mt-3 flex items-start gap-2 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
               <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500" />
-              <p className="text-[11px] leading-5 text-zinc-500">
-                {t(
-                  "AI-generated responses can contain errors. Always verify important HR and legal decisions with a qualified professional before acting.",
-                  "Les r\u00e9ponses g\u00e9n\u00e9r\u00e9es par IA peuvent contenir des erreurs. V\u00e9rifiez toujours les d\u00e9cisions RH et juridiques importantes avec un professionnel qualifi\u00e9 avant d'agir."
-                )}
-              </p>
+              <div className="min-w-0">
+                <p className="text-[11px] leading-5 text-zinc-500">
+                  {t(
+                    "AI-generated responses can contain errors. Always verify important HR and legal decisions with a qualified professional before acting.",
+                    "Les r\u00e9ponses g\u00e9n\u00e9r\u00e9es par IA peuvent contenir des erreurs. V\u00e9rifiez toujours les d\u00e9cisions RH et juridiques importantes avec un professionnel qualifi\u00e9 avant d'agir."
+                  )}
+                </p>
+                <p className="mt-1 text-[10px] text-zinc-600">
+                  Powered by Mistral 7B (HF Inference) + Brave Search
+                </p>
+              </div>
             </div>
           </div>
         </SectionCard>
