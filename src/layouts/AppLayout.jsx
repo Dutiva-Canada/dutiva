@@ -28,7 +28,7 @@ function useNavItems() {
     { to: "/app/templates",  label: t("Templates",  "Modèles"),         icon: FileText },
     { to: "/app/generator",  label: t("Generator",  "Générateur"),      icon: Wand2 },
     { to: "/app/advisor",    label: t("Advisor",    "Conseiller"),       icon: MessageSquare },
-    { to: "/app/wellness",        label: t("Wellness",        "Bien-être"),         icon: Heart },
+    { to: "/app/rings",        label: t("Wellness",        "Bien-être"),         icon: Heart },
     { to: "/app/communications", label: t("Communications", "Communications"),    icon: Megaphone },
     { to: "/app/compensation",   label: t("Compensation",   "R\u00e9mun\u00e9ration"), icon: DollarSign },
     { to: "/app/settings",       label: t("Settings",       "Param\u00e8tres"),        icon: Settings },
@@ -43,10 +43,10 @@ function useMobileNavItems() {
     { to: "/app/generator", label: t("Generate", "G\u00e9n\u00e9rer"),   icon: Wand2 },
     { to: "/app/advisor",   label: t("Advisor",  "Conseiller"), icon: MessageSquare },
     {
-      to: "/app/wellness",
+      to: "/app/rings",
       label: t("Rings", "Anneaux"),
       icon: Layers,
-      matchPaths: ["/app/wellness", "/app/communications", "/app/compensation"],
+      matchPaths: ["/app/rings", "/app/wellness", "/app/communications", "/app/compensation"],
     },
     { to: "/app/settings",  label: t("Settings", "Param\u00e8tres"), icon: Settings },
   ];

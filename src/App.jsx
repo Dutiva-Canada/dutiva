@@ -25,6 +25,7 @@ const CookiesPage       = lazy(() => import("./pages/CookiesPage.jsx"));
 const WellnessPage       = lazy(() => import("./pages/Wellness.jsx"));
 const CommunicationsPage = lazy(() => import("./pages/Communications.jsx"));
 const CompensationPage   = lazy(() => import("./pages/Compensation.jsx"));
+const RingsHub           = lazy(() => import("./pages/RingsHub.jsx"));
 
 function RouteLoader() {
   return (
@@ -75,6 +76,7 @@ export default function App() {
                 <Route path="wellness"       element={withSuspense(<WellnessPage />)} />
                 <Route path="communications" element={withSuspense(<CommunicationsPage />)} />
                 <Route path="compensation"   element={withSuspense(<CompensationPage />)} />
+                <Route path="rings"         element={withSuspense(<RingsHub />)} />
                 <Route path="*" element={<Navigate to="/app" replace />} />
               </Route>
             </Route>
