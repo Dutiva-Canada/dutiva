@@ -4,7 +4,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const HF_ROUTER  = "https://router.huggingface.co/v1/chat/completions";
 const HF_MODEL   = "meta-llama/Llama-3.3-70B-Instruct:cheapest";
 const TAVILY_URL = "https://api.tavily.com/search";
-const DDG_URL    = "https://api.duckduckgo.com/";
+const BRAVE_URL   = "https://api.search.brave.com/res/v1/web/search";
 
 const CORS = {
   "Access-Control-Allow-Origin":  "*",
@@ -85,10 +85,31 @@ async function searchDDG(query: string): Promise<Source[]> {
   return out.slice(0, 4);
 }
 
+
+async function searchBrave(query: string, apiKey: string): Promise<Source[]> {
+  const q   = encodeURIComponent(`${query} Canada employment law`);
+  const res = await fetch(`${BRAVE_URL}?q=${q}&count=4&freshness=pm`, {
+    headers: {
+      "Accept":               "application/json",
+      "Accept-Encoding":      "gzip",
+      "X-Subscription-Token": apiKey,
+    },
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return ((data.web?.results) ?? []).slice(0, 4).map((r: { description: string; url: string; title: string }) => ({
+    snippet: r.description?.slice(0, 400) ?? "",
+    url:     r.url,
+    title:   r.title ?? "",
+  }));
+}
+
 async function webSearch(query: string): Promise<Source[]> {
   const tavilyKey = Deno.env.get("TAVILY_API_KEY");
   try {
     if (tavilyKey) return await searchTavily(query, tavilyKey);
+    const braveKey = Deno.env.get("BRAVE_SEARCH_API_KEY");
+    if (braveKey) return await searchBrave(query, braveKey);
     return await searchDDG(query);
   } catch (e) {
     console.warn("Web search failed:", e);
@@ -107,7 +128,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const hfKey = Deno.env.get("HF_API_KEY");
-  if (!hfKey) {
+  const hfKey = Deno.env.get("HF_API_KEY") ?? Deno.env.get("HUGGINGFACE_API_KEY");
     return new Response(JSON.stringify({ error: "AI service not configured." }), {
       status: 503, headers: { ...CORS, "Content-Type": "application/json" },
     });
