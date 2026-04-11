@@ -48,6 +48,385 @@ function ComingSoon({ pillar, description }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// PILLAR A — MENTAL HEALTH & EAP READINESS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── Mental Health Support Checklist ─────────────────────────────────────────
+const MH_CHECKLIST_ITEMS = [
+  {
+    id: "mh1",
+    text: "Employer has a written mental health policy",
+    note: "A written policy signals organizational commitment and sets expectations for all staff. Reference: National Standard of Canada for Psychological Health and Safety (CSA Z1003-13).",
+  },
+  {
+    id: "mh2",
+    text: "EAP program is in place and communicated to all staff",
+    note: "Employees can only access EAP if they know it exists. Annual all-staff communication is best practice. Include access instructions in the employee handbook.",
+  },
+  {
+    id: "mh3",
+    text: "Managers trained in mental health first aid",
+    note: "Mental Health First Aid Canada training equips managers to recognize signs of distress and respond appropriately. Recommended: 2-day MHFA Standard course.",
+  },
+  {
+    id: "mh4",
+    text: "Return-to-work plan process documented",
+    note: "A documented RTW process reduces inconsistency, supports the duty to accommodate, and protects against human rights complaints during reintegration.",
+  },
+  {
+    id: "mh5",
+    text: "Accommodation process for mental health conditions exists",
+    note: "Mental health disability is a protected ground under all Canadian human rights codes. A clear accommodation process is a legal requirement, not optional.",
+  },
+  {
+    id: "mh6",
+    text: "Confidentiality protocols are documented",
+    note: "Employees are significantly more likely to use EAP and disclose needs when they trust their information is kept private. Protocols must be communicated clearly.",
+  },
+  {
+    id: "mh7",
+    text: "Regular check-ins / pulse surveys scheduled",
+    note: "Ongoing monitoring enables early identification of psychological health risks before they escalate. Surveys should be anonymous, at minimum quarterly.",
+  },
+  {
+    id: "mh8",
+    text: "Mental health days tracked separately from sick days (where required)",
+    note: "Some jurisdictions and organizational policies distinguish mental health leave from general sick leave for reporting, policy, and WSIB/WCB purposes.",
+  },
+];
+
+function MentalHealthChecklist() {
+  const [checked, setChecked] = useState({});
+
+  const checkedCount = MH_CHECKLIST_ITEMS.filter((i) => checked[i.id]).length;
+  const pct = Math.round((checkedCount / MH_CHECKLIST_ITEMS.length) * 100);
+
+  return (
+    <SectionCard
+      title="Mental Health Support Checklist"
+      action={
+        <button
+          onClick={() => setChecked({})}
+          className="ghost-button inline-flex items-center gap-1.5 px-3 py-2 text-xs"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Reset
+        </button>
+      }
+    >
+      <p className="mb-4 text-sm text-zinc-400">
+        Review your organization's mental health readiness. Check each item your workplace has in
+        place. Each item includes a note explaining why it matters.
+      </p>
+
+      {/* Progress */}
+      <div className="mb-2 flex items-center justify-between text-xs text-zinc-400">
+        <span>
+          {checkedCount} of {MH_CHECKLIST_ITEMS.length} items in place
+        </span>
+        {checkedCount === MH_CHECKLIST_ITEMS.length && (
+          <span className="flex items-center gap-1 text-emerald-400">
+            <Check className="h-3.5 w-3.5" />
+            Fully complete
+          </span>
+        )}
+      </div>
+      <div className="mb-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+        <div
+          className="h-1.5 rounded-full bg-amber-400 transition-all duration-300"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <div className="mb-5 text-right text-xs text-zinc-500">{pct}% complete</div>
+
+      {/* Items */}
+      <div className="space-y-2">
+        {MH_CHECKLIST_ITEMS.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setChecked((prev) => ({ ...prev, [item.id]: !prev[item.id] }))}
+            className={[
+              "flex w-full items-start gap-3 rounded-2xl border p-4 text-left transition",
+              checked[item.id]
+                ? "border-emerald-400/20 bg-emerald-400/[0.04]"
+                : "border-white/6 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.03]",
+            ].join(" ")}
+          >
+            <div
+              className={[
+                "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition",
+                checked[item.id]
+                  ? "border-emerald-400/40 bg-emerald-400/20 text-emerald-400"
+                  : "border-white/20 bg-white/[0.03]",
+              ].join(" ")}
+            >
+              {checked[item.id] && <Check className="h-3 w-3" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <span
+                className={`text-sm ${checked[item.id] ? "text-zinc-500 line-through" : "text-zinc-300"}`}
+              >
+                {item.text}
+              </span>
+              <div className="mt-1.5 flex items-start gap-1.5 text-xs text-zinc-500">
+                <Info className="mt-0.5 h-3 w-3 shrink-0 text-amber-300/40" />
+                {item.note}
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── EAP Referral Guide ────────────────────────────────────────────────────────
+const EAP_SECTIONS = [
+  {
+    id: "what",
+    title: "What is an EAP and what does it cover",
+    content: [
+      "An Employee and Family Assistance Program (EAP) is a confidential, employer-sponsored service providing short-term counselling, mental health support, and referrals.",
+      "Typical EAP services: short-term counselling (6–12 sessions/year), mental health assessments, 24/7 crisis lines, financial and legal consultation, and eldercare/childcare referrals.",
+      "EAP providers in Canada include: Morneau Shepell (LifeWorks), Ceridian Lifeworks, Homewood Health, MHM Services, and many regional providers.",
+      "Services are available to the employee and typically their immediate household members at no cost. The employer pays for access, not per-use.",
+      "The employer does not receive any information about individual employee usage — only aggregate, anonymized utilization statistics.",
+    ],
+  },
+  {
+    id: "how",
+    title: "How to refer an employee (step-by-step, all jurisdictions)",
+    content: [
+      "Step 1 — Identify the concern: Notice signs of distress, performance decline, or the employee discloses a mental health struggle.",
+      "Step 2 — Private conversation: Use the Manager Conversation Guide to open the discussion without diagnosing or pressuring.",
+      "Step 3 — Provide EAP contact info: Share the EAP access number or portal URL directly. Confirm the service is available at no cost.",
+      "Step 4 — Confirm confidentiality: Reassure the employee that you will receive no information about what they discuss with an EAP counsellor.",
+      "Step 5 — Document the referral: Record the date, that a referral was offered, and the employee's response. Do NOT record the reason or any suspected diagnosis.",
+      "Step 6 — Follow up: Check in on general well-being in 1–2 weeks. Do not ask whether they contacted the EAP.",
+      "Ontario note: Managers aware of employee distress have a duty-of-care responsibility to refer to available resources. Documented referrals are relevant in WSIB mental stress claims.",
+      "Quebec note: Under ARLS ss. 81.19, employers must take reasonable steps to prevent psychological harassment. EAP referral is part of that obligation.",
+      "Federal note: Under Canada Labour Code Part II, federally regulated employers must have psychological health and safety policies and programs.",
+    ],
+  },
+  {
+    id: "confidentiality",
+    title: "Confidentiality obligations",
+    content: [
+      "The employer cannot request, receive, or be informed of what an employee discusses with an EAP counsellor. EAP providers operate independently under strict confidentiality.",
+      "Aggregate (anonymized, non-identifiable) utilization statistics may be reported to the employer — no individual-level data.",
+      "If an employee voluntarily discloses to their manager what they discussed in EAP, the manager must still treat that information with strict confidentiality.",
+      "Exception: confidentiality may be broken only when there is an imminent risk of harm to the employee or others — in which case the EAP provider follows its own duty-to-warn protocols.",
+      "Employer obligations: Keep mental health disclosures in a separate confidential file, not the general personnel file. Limit access to HR and relevant managers only.",
+    ],
+  },
+  {
+    id: "cost",
+    title: "Cost coverage rules by jurisdiction",
+    content: [
+      "Ontario: No statutory obligation to provide an EAP, but WSIB and occupational health obligations incentivize it. Cost is a fully deductible business expense.",
+      "Quebec: No statutory EAP obligation, but employers with 10+ employees have obligations under the Act respecting labour standards to prevent psychological harassment. Fully deductible.",
+      "Federal: Federally regulated employers (banks, telecoms, transport) have obligations under CLC Part II to protect psychological health. EAP is strongly recommended and may be required.",
+      "Typical cost: $1.50–$5.00 per employee per month (PEPM). Coverage typically includes the employee and all household members.",
+      "Group benefits: Many comprehensive group plans include EAP through the benefits carrier (Sun Life, Manulife, Canada Life, Desjardins).",
+    ],
+  },
+  {
+    id: "free",
+    title: "Free EAP options for small employers",
+    content: [
+      "Wellness Together Canada: Free federal government program offering mental health resources, online CBT tools, and phone counselling (wellnesstogether.ca).",
+      "Provincial crisis lines: All provinces operate free 24/7 crisis lines (Ontario: 1-866-531-2600; Quebec: 1-866-APPELLE; national: 1-833-456-4566 / 988).",
+      "Kids Help Phone: Free 24/7 counselling for employees who are parents or caregivers (kidshelpphone.ca).",
+      "Chamber of Commerce group plans: Some regional chambers offer small-employer group benefit plans with EAP access at reduced rates.",
+      "Mental Health Commission of Canada: Free toolkits, training, and the National Standard for Psychological Health and Safety (mentalhealthcommission.ca) at no cost.",
+      "BounceBack (CMHA): Free structured self-help program with telephone coaching, available in most provinces through CMHA.",
+    ],
+  },
+];
+
+function EAPReferralGuide() {
+  const [open, setOpen] = useState(null);
+
+  return (
+    <SectionCard title="EAP Referral Guide">
+      <p className="mb-4 text-sm text-zinc-400">
+        Reference guide covering EAP fundamentals, referral procedures, confidentiality rules, and
+        free options for small employers. Expand each section for details.
+      </p>
+      <div className="space-y-2">
+        {EAP_SECTIONS.map((s) => (
+          <div key={s.id} className="overflow-hidden rounded-2xl border border-white/8">
+            <button
+              onClick={() => setOpen(open === s.id ? null : s.id)}
+              className="flex w-full items-center justify-between p-4 text-left transition hover:bg-white/[0.02]"
+            >
+              <div className="text-sm font-medium text-zinc-100">{s.title}</div>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-zinc-500 transition-transform ${open === s.id ? "rotate-180" : ""}`}
+              />
+            </button>
+            {open === s.id && (
+              <div className="border-t border-white/6 px-4 pb-4 pt-3">
+                <ul className="space-y-2">
+                  {s.content.map((line, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-zinc-400">
+                      <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300/60" />
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Return-to-Work After Mental Health Leave card ─────────────────────────────
+function ReturnToWorkMentalHealthCard() {
+  return (
+    <SectionCard
+      title="Return-to-Work Plan (Mental Health)"
+      action={
+        <Link
+          to="/app/generator?template=Return-to-Work%20Plan%20(Mental%20Health)"
+          className="gold-button inline-flex items-center gap-1.5 px-4 py-2 text-xs"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Generate
+        </Link>
+      }
+    >
+      <p className="mb-4 text-sm text-zinc-400">
+        Structured return-to-work plan for employees returning from mental health leave. Documents
+        modified duties, schedule, support resources, check-in cadence, and review dates — aligned
+        with the duty to accommodate.
+      </p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {[
+          "Employee info and medical restrictions",
+          "Modified duties and schedule",
+          "Support resources and EAP referral",
+          "Manager check-in cadence",
+          "Gradual return timeline",
+          "Review date and exit criteria",
+        ].map((item) => (
+          <div key={item} className="flex items-center gap-2 text-xs text-zinc-400">
+            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+            {item}
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Manager Conversation Guide ────────────────────────────────────────────────
+const MANAGER_CONVO_STEPS = [
+  {
+    id: "open",
+    title: "Opening the conversation",
+    content: [
+      "Choose a private, quiet setting — never in an open office or over email.",
+      "Sample opening: 'I've noticed you haven't seemed like yourself lately. I just wanted to check in and see how you're doing.'",
+      "Do NOT say: 'You seem depressed,' 'Is this a mental health thing?' or 'Your performance has been impacted — are you okay?'",
+      "Lead with care, not performance concerns. The first conversation should be about the person, not the job.",
+      "If the employee discloses a mental health condition: thank them for sharing, confirm you take it seriously, and reassure them of confidentiality.",
+    ],
+  },
+  {
+    id: "listen",
+    title: "Active listening techniques",
+    content: [
+      "Use open-ended questions: 'How are you feeling about work lately?' not 'Are you okay?'",
+      "Reflect back what you heard: 'It sounds like you've been under a lot of pressure — is that right?'",
+      "Do not rush to solutions. Silence is okay. Let the employee lead.",
+      "Avoid minimizing: 'Everyone feels that way sometimes' or 'Just try to push through it' can increase distress.",
+      "Watch for language suggesting crisis (hopelessness, inability to cope). If you hear it, ask directly: 'Are you having thoughts of harming yourself?' and connect to crisis resources immediately.",
+      "Federal note: CLC Part II requires managers at federally regulated employers to complete psychological health and safety training.",
+    ],
+  },
+  {
+    id: "resources",
+    title: "Connecting to EAP / resources",
+    content: [
+      "Always offer EAP: 'We have an Employee Assistance Program — it's completely confidential and at no cost to you or your family.'",
+      "Provide the access number and/or link directly. Don't just say 'there's an EAP' — give them the information in the moment.",
+      "If the employee appears in crisis: call 988 (Canada Suicide Crisis Helpline) together, or 911 if there is immediate risk of harm.",
+      "Quebec: Inform the employee of their right to take leave under the ARLS for psychological harassment or mental health grounds.",
+      "Refer to HR or occupational health for formal support and accommodation assessment when appropriate.",
+    ],
+  },
+  {
+    id: "documentation",
+    title: "Documentation best practices",
+    content: [
+      "Record: date of conversation and that you offered EAP resources. Do NOT record the employee's disclosures or any suspected diagnosis.",
+      "Keep mental health disclosures in a separate confidential HR accommodation file — not the general personnel file.",
+      "Ontario WSIB: If the employee later files a WSIB mental stress claim, documented proactive support may be relevant. Keep records factual and objective.",
+      "Do NOT discuss the conversation with team members, clients, or other managers without a legitimate need to know.",
+      "If formal accommodation is being considered, initiate the Accommodation Request process and consult HR.",
+    ],
+  },
+  {
+    id: "followup",
+    title: "Follow-up cadence",
+    content: [
+      "Follow up in 1–2 weeks with a brief informal check-in: 'Just wanted to see how you're doing.' Do not ask whether they used the EAP.",
+      "If the employee is off work: maintain periodic contact with their consent (e.g., monthly) — silence can worsen isolation. Confirm frequency is acceptable.",
+      "Ontario / Federal: Regular contact during medical leave, with consent, supports RTW planning and is considered best practice.",
+      "Quebec: Under the ARLS, the employer must take reasonable steps to re-integrate the employee following harassment — documented check-ins help demonstrate this.",
+      "At all follow-ups: focus on well-being and support, not performance. Performance discussions resume after stabilization.",
+    ],
+  },
+];
+
+function ManagerConversationGuide() {
+  const [open, setOpen] = useState(null);
+
+  return (
+    <SectionCard title="Manager Conversation Guide">
+      <p className="mb-4 text-sm text-zinc-400">
+        Step-by-step guide for opening mental health conversations, active listening, connecting to
+        resources, and follow-up. Jurisdiction notes included.
+      </p>
+      <div className="space-y-2">
+        {MANAGER_CONVO_STEPS.map((step, idx) => (
+          <div key={step.id} className="overflow-hidden rounded-2xl border border-white/8">
+            <button
+              onClick={() => setOpen(open === step.id ? null : step.id)}
+              className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-white/[0.02]"
+            >
+              <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-amber-400/20 bg-amber-400/10 text-xs font-semibold text-amber-300">
+                {idx + 1}
+              </div>
+              <div className="flex-1 text-sm font-medium text-zinc-100">{step.title}</div>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-zinc-500 transition-transform ${open === step.id ? "rotate-180" : ""}`}
+              />
+            </button>
+            {open === step.id && (
+              <div className="border-t border-white/6 px-4 pb-4 pt-3">
+                <ul className="space-y-2">
+                  {step.content.map((line, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-zinc-400">
+                      <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300/60" />
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // PILLAR B — ACCOMMODATION FRAMEWORKS
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -652,6 +1031,513 @@ function UndueHardshipAssessment() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// PILLAR C — PSYCHOLOGICAL SAFETY & PREVENTION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── CSA Z1003-13 Psychological Safety Self-Assessment ────────────────────────
+const PSA_QUESTIONS = [
+  { id: "q1",  domain: "Leadership commitment",                    text: "Senior leadership visibly supports psychological health and safety initiatives." },
+  { id: "q2",  domain: "Civility & respect",                       text: "Employees treat each other with respect and civility at all levels of the organization." },
+  { id: "q3",  domain: "Psychological protection",                  text: "Employees feel safe expressing concerns or disagreements without fear of reprisal." },
+  { id: "q4",  domain: "Growth & development",                     text: "Employees have access to learning and development opportunities that support their career growth." },
+  { id: "q5",  domain: "Recognition & reward",                     text: "Employees' contributions are acknowledged and recognized in meaningful ways." },
+  { id: "q6",  domain: "Involvement & influence",                  text: "Employees have meaningful input into decisions that affect their work." },
+  { id: "q7",  domain: "Workload management",                      text: "Workloads are reasonable and employees have the resources to meet their job demands." },
+  { id: "q8",  domain: "Engagement",                               text: "Employees feel connected to and engaged with the organization's purpose and goals." },
+  { id: "q9",  domain: "Balance",                                   text: "Employees are supported in maintaining a healthy balance between work and personal life." },
+  { id: "q10", domain: "Protection from violence",                  text: "The organization proactively prevents workplace bullying, harassment, and violence." },
+  { id: "q11", domain: "Clear leadership & expectations",          text: "Employees have clear information about their roles, responsibilities, and performance expectations." },
+  { id: "q12", domain: "Psychological competencies of managers",   text: "Managers demonstrate empathy, active listening, and psychological safety in their teams." },
+  { id: "q13", domain: "Organizational culture",                   text: "The workplace culture values mental health and discourages stigma around seeking help." },
+  { id: "q14", domain: "Protection from chronic stress",           text: "The organization monitors and addresses sources of chronic workplace stress." },
+  { id: "q15", domain: "Conflict resolution",                      text: "There are fair and accessible processes for resolving interpersonal conflicts and grievances." },
+];
+
+const PSA_LABELS = ["Never", "Rarely", "Sometimes", "Often", "Always"];
+
+const PSA_BANDS = [
+  {
+    min: 15, max: 25,
+    label: "Critical risk",
+    color: "text-red-300",
+    bg: "bg-red-400/[0.06]",
+    border: "border-red-400/25",
+    bar: "bg-red-400",
+    recs: [
+      "Conduct an immediate workplace psychological health and safety risk assessment.",
+      "Engage a qualified occupational mental health consultant or EAP provider.",
+      "Senior leadership must make a visible, documented commitment to change — starting now.",
+      "Review and update your workplace harassment policy and reporting procedures immediately.",
+      "Establish a psychological health and safety committee with employee representation.",
+    ],
+  },
+  {
+    min: 26, max: 45,
+    label: "Needs attention",
+    color: "text-amber-300",
+    bg: "bg-amber-400/[0.06]",
+    border: "border-amber-400/25",
+    bar: "bg-amber-400",
+    recs: [
+      "Identify the two lowest-scoring domains and build a 90-day action plan for each.",
+      "Implement regular manager training on psychological health and safety topics.",
+      "Establish or review your EAP referral process and ensure all staff know how to access it.",
+      "Conduct a pulse survey to identify specific stressors and gather employee input.",
+      "Review workloads and resourcing against actual operational demands.",
+    ],
+  },
+  {
+    min: 46, max: 60,
+    label: "Moderate — developing",
+    color: "text-blue-300",
+    bg: "bg-blue-400/[0.06]",
+    border: "border-blue-400/25",
+    bar: "bg-blue-400",
+    recs: [
+      "Develop a formal Psychological Health and Safety policy aligned with CSA Z1003-13.",
+      "Recognize and reinforce practices that are working — share wins with the team.",
+      "Focus on domains scoring below 3 (Sometimes) to bring them to at least Often.",
+      "Consider voluntary third-party assessment against the National Standard of Canada.",
+      "Engage employees in co-designing improvements — involvement increases buy-in.",
+    ],
+  },
+  {
+    min: 61, max: 75,
+    label: "Strong",
+    color: "text-emerald-300",
+    bg: "bg-emerald-400/[0.06]",
+    border: "border-emerald-400/25",
+    bar: "bg-emerald-400",
+    recs: [
+      "Formalize your practices by documenting them in a Psychological Health and Safety policy.",
+      "Consider pursuing third-party certification against the National Standard (CSA Z1003-13).",
+      "Share your practices across the organization and mentor peer teams or organizations.",
+      "Continue annual assessments to monitor for regression and identify new risk areas.",
+      "Celebrate your workplace's commitment to psychological health — it is a differentiator.",
+    ],
+  },
+];
+
+function PsychSafetyAssessment() {
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const allAnswered = PSA_QUESTIONS.every((q) => answers[q.id] !== undefined);
+  const score = Object.values(answers).reduce((sum, v) => sum + v, 0);
+  const band = PSA_BANDS.find((b) => score >= b.min && score <= b.max);
+  const maxScore = PSA_QUESTIONS.length * 5;
+  const pct = (score / maxScore) * 100;
+
+  function reset() {
+    setAnswers({});
+    setSubmitted(false);
+  }
+
+  function handlePrint() {
+    if (!band) return;
+    const lines = [
+      "CSA Z1003-13 PSYCHOLOGICAL SAFETY SELF-ASSESSMENT",
+      `Date: ${new Date().toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })}`,
+      "",
+      "RESPONSES:",
+      ...PSA_QUESTIONS.map((q) => {
+        const val = answers[q.id];
+        return `  [${q.domain}]\n  ${q.text}\n  Answer: ${val !== undefined ? PSA_LABELS[val - 1] : "Not answered"} (${val}/5)`;
+      }),
+      "",
+      `TOTAL SCORE: ${score} / ${maxScore}`,
+      `RESULT: ${band.label}`,
+      "",
+      "RECOMMENDATIONS:",
+      ...band.recs.map((r, i) => `  ${i + 1}. ${r}`),
+    ].join("\n");
+    const w = window.open("", "_blank");
+    if (w) {
+      w.document.write(
+        `<pre style="font-family:monospace;white-space:pre-wrap;max-width:800px;margin:2rem auto;font-size:14px;">${lines}</pre>`
+      );
+      w.print();
+    }
+  }
+
+  return (
+    <SectionCard
+      title="CSA Z1003-13 Psychological Safety Assessment"
+      action={
+        submitted ? (
+          <button
+            onClick={reset}
+            className="ghost-button inline-flex items-center gap-1.5 px-3 py-2 text-xs"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Retake
+          </button>
+        ) : null
+      }
+    >
+      <p className="mb-5 text-sm text-zinc-400">
+        15-question self-assessment based on the National Standard of Canada for Psychological
+        Health and Safety (CSA Z1003-13 / BNQ 9700-803). Rate each statement 1–5. Score out of 75.
+      </p>
+
+      {!submitted ? (
+        <>
+          <div className="space-y-4">
+            {PSA_QUESTIONS.map((q) => (
+              <div key={q.id} className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
+                <div className="mb-1 text-xs font-medium text-amber-300/70">{q.domain}</div>
+                <div className="mb-3 text-sm text-zinc-200">{q.text}</div>
+                <div className="flex flex-wrap gap-2">
+                  {PSA_LABELS.map((label, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: i + 1 }))}
+                      className={[
+                        "rounded-xl border px-3 py-1.5 text-xs font-medium transition",
+                        answers[q.id] === i + 1
+                          ? "border-amber-400/30 bg-amber-400/15 text-amber-200"
+                          : "border-white/8 bg-white/[0.02] text-zinc-400 hover:border-white/15 hover:text-zinc-300",
+                      ].join(" ")}
+                    >
+                      {i + 1} — {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 flex items-center justify-between">
+            <div className="text-xs text-zinc-500">
+              {Object.keys(answers).length} of {PSA_QUESTIONS.length} answered
+            </div>
+            <button
+              onClick={() => setSubmitted(true)}
+              disabled={!allAnswered}
+              className={[
+                "gold-button px-5 py-2.5 text-sm font-medium transition",
+                !allAnswered ? "cursor-not-allowed opacity-40" : "",
+              ].join(" ")}
+            >
+              View results
+            </button>
+          </div>
+        </>
+      ) : (
+        band && (
+          <div className="space-y-5">
+            {/* Score summary */}
+            <div className={`rounded-[24px] border p-5 ${band.border} ${band.bg}`}>
+              <div className="mb-1 flex items-center justify-between">
+                <div className={`text-sm font-semibold ${band.color}`}>{band.label}</div>
+                <div className={`text-lg font-bold ${band.color}`}>
+                  {score} / {maxScore}
+                </div>
+              </div>
+              <div className="my-3 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                <div
+                  className={`h-2 rounded-full transition-all ${band.bar}`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <div className="mb-1 mt-3 text-xs font-medium text-zinc-300">Recommendations</div>
+              <ul className="space-y-1.5">
+                {band.recs.map((r, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-zinc-400">
+                    <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300/60" />
+                    {r}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  onClick={handlePrint}
+                  className="ghost-button inline-flex items-center gap-1.5 px-3 py-2 text-xs"
+                >
+                  <Printer className="h-3.5 w-3.5" />
+                  Print results
+                </button>
+                <button
+                  onClick={reset}
+                  className="ghost-button inline-flex items-center gap-1.5 px-3 py-2 text-xs"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Retake
+                </button>
+              </div>
+            </div>
+
+            {/* Question breakdown */}
+            <div>
+              <div className="mb-2 text-xs font-medium text-zinc-300">Question breakdown</div>
+              <div className="space-y-2">
+                {PSA_QUESTIONS.map((q) => {
+                  const val = answers[q.id] || 0;
+                  return (
+                    <div
+                      key={q.id}
+                      className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-2.5"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-xs text-zinc-400">{q.text}</div>
+                        <div className="text-xs text-zinc-600">{q.domain}</div>
+                      </div>
+                      <div
+                        className={`shrink-0 text-xs font-semibold ${val >= 4 ? "text-emerald-400" : val >= 3 ? "text-amber-300" : "text-red-400"}`}
+                      >
+                        {val}/5 — {PSA_LABELS[val - 1]}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )
+      )}
+    </SectionCard>
+  );
+}
+
+// ─── Respectful Workplace Policy card ─────────────────────────────────────────
+function RespectfulWorkplacePolicyCard() {
+  return (
+    <SectionCard
+      title="Respectful Workplace Policy"
+      action={
+        <Link
+          to="/app/generator?template=Respectful%20Workplace%20Policy"
+          className="gold-button inline-flex items-center gap-1.5 px-4 py-2 text-xs"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Generate
+        </Link>
+      }
+    >
+      <p className="mb-4 text-sm text-zinc-400">
+        Comprehensive respectful workplace policy aligned with provincial human rights and
+        occupational health legislation. Covers prohibited conduct, reporting procedures,
+        investigation process, and non-retaliation obligations.
+      </p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {[
+          "Purpose and scope",
+          "Prohibited conduct definitions",
+          "Reporting procedures",
+          "Investigation process",
+          "Confidentiality provisions",
+          "Consequences and non-retaliation",
+        ].map((item) => (
+          <div key={item} className="flex items-center gap-2 text-xs text-zinc-400">
+            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+            {item}
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Bystander Intervention Guide ─────────────────────────────────────────────
+const FIVE_DS = [
+  {
+    name: "Direct",
+    desc: "Address the behaviour in the moment.",
+    examples: [
+      "Calmly interrupt: 'That comment isn't okay here — let's keep it respectful.'",
+      "Name what you saw: 'That sounded like a personal attack. I think we should move forward differently.'",
+      "Only use Direct if it is safe to do so and the situation is not escalating.",
+    ],
+  },
+  {
+    name: "Distract",
+    desc: "Disrupt the situation without direct confrontation.",
+    examples: [
+      "Change the subject: 'Hey, can I grab you for a second? I need your input on something.'",
+      "Create a natural interruption: ask an unrelated question, invite the target to step away.",
+      "Useful when direct intervention may escalate the situation or put the target at further risk.",
+    ],
+  },
+  {
+    name: "Delegate",
+    desc: "Involve someone with more authority or a better position to intervene.",
+    examples: [
+      "Report to a manager, HR, or union representative who can act on the situation.",
+      "Ask a colleague to intervene if they are better placed to do so.",
+      "Appropriate when the behaviour is serious, ongoing, or involves a significant power imbalance.",
+    ],
+  },
+  {
+    name: "Delay",
+    desc: "Check in with the target after the moment has passed.",
+    examples: [
+      "'I saw what happened earlier — are you okay? I want you to know that wasn't acceptable and I'm here to help.'",
+      "Offer to accompany them to HR or a manager to report the incident.",
+      "Delay is always appropriate, even if you couldn't act in the moment — it shows solidarity.",
+    ],
+  },
+  {
+    name: "Document",
+    desc: "Record what happened to support a future report or investigation.",
+    examples: [
+      "Write down: date, time, location, what was said/done, who was present, and any witnesses.",
+      "Do not share your notes publicly — provide them only to HR or the person filing a complaint.",
+      "If you are the target: preserve all written communications (emails, messages) in a secure personal location.",
+    ],
+  },
+];
+
+const BYSTANDER_REPORTING = [
+  {
+    id: "br-ontario",
+    label: "Ontario",
+    notes: [
+      "Under OHSA ss. 32.0.1–32.0.8, employers must have a written workplace harassment policy and program.",
+      "An employer who becomes aware of workplace harassment must conduct a workplace harassment investigation.",
+      "Employees have the right to report harassment and are protected from retaliation under the OHSA.",
+      "Filing a complaint in good faith is protected — retaliation constitutes a separate violation.",
+    ],
+  },
+  {
+    id: "br-quebec",
+    label: "Quebec",
+    notes: [
+      "Under ARLS ss. 81.18–81.20, psychological harassment is prohibited in Quebec workplaces.",
+      "Employees may file a complaint with the CNESST within 2 years of the last incident.",
+      "The employer has an obligation to take reasonable means to end harassment and prevent recurrence.",
+      "The employer must investigate within 90 days of receiving a complaint.",
+    ],
+  },
+  {
+    id: "br-federal",
+    label: "Federal",
+    notes: [
+      "Under CLC Part II and the Work Place Harassment and Violence Prevention Regulations (SOR/2020-130), a Notice of Occurrence process is required.",
+      "Federally regulated employers must have a workplace harassment and violence prevention policy.",
+      "Employees may file a complaint with the Canadian Human Rights Commission or the Labour Program.",
+      "Resolution options include: negotiated resolution, conciliation, or investigation.",
+    ],
+  },
+];
+
+function BystanderInterventionGuide() {
+  const [open, setOpen] = useState(null);
+
+  return (
+    <SectionCard title="Bystander Intervention Guide">
+      <p className="mb-4 text-sm text-zinc-400">
+        The 5 D's bystander framework adapted for workplace settings. Includes scenario examples,
+        documentation guidance, and jurisdiction-specific reporting obligations.
+      </p>
+
+      {/* 5 D's */}
+      <div className="mb-5 space-y-2">
+        {FIVE_DS.map((d, idx) => (
+          <div key={idx} className="overflow-hidden rounded-2xl border border-white/8">
+            <button
+              onClick={() => setOpen(open === `d${idx}` ? null : `d${idx}`)}
+              className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-white/[0.02]"
+            >
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-amber-400/20 bg-amber-400/10 text-sm font-bold text-amber-300">
+                D
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-zinc-100">{d.name}</div>
+                <div className="text-xs text-zinc-500">{d.desc}</div>
+              </div>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-zinc-500 transition-transform ${open === `d${idx}` ? "rotate-180" : ""}`}
+              />
+            </button>
+            {open === `d${idx}` && (
+              <div className="border-t border-white/6 px-4 pb-4 pt-3">
+                <ul className="space-y-2">
+                  {d.examples.map((ex, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-zinc-400">
+                      <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300/60" />
+                      {ex}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Reporting obligations */}
+      <div className="mb-2 text-xs font-medium text-zinc-300">Reporting obligations by jurisdiction</div>
+      <div className="space-y-2">
+        {BYSTANDER_REPORTING.map((j) => (
+          <div key={j.id} className="overflow-hidden rounded-2xl border border-white/8">
+            <button
+              onClick={() => setOpen(open === j.id ? null : j.id)}
+              className="flex w-full items-center justify-between p-4 text-left transition hover:bg-white/[0.02]"
+            >
+              <div className="text-sm font-medium text-zinc-100">{j.label}</div>
+              <ChevronDown
+                className={`h-4 w-4 text-zinc-500 transition-transform ${open === j.id ? "rotate-180" : ""}`}
+              />
+            </button>
+            {open === j.id && (
+              <div className="border-t border-white/6 px-4 pb-4 pt-3">
+                <ul className="space-y-2">
+                  {j.notes.map((note, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-zinc-400">
+                      <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300/60" />
+                      {note}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Wellness Action Plan card ──────────────────────────────────────────────────
+function WellnessActionPlanCard() {
+  return (
+    <SectionCard
+      title="Wellness Action Plan"
+      action={
+        <Link
+          to="/app/generator?template=Wellness%20Action%20Plan"
+          className="gold-button inline-flex items-center gap-1.5 px-4 py-2 text-xs"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Generate
+        </Link>
+      }
+    >
+      <p className="mb-4 text-sm text-zinc-400">
+        Individual employee wellness action plan co-developed with the manager. Documents current
+        state, goals, action steps, support resources, and review schedule — voluntary and
+        confidential.
+      </p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {[
+          "Current state assessment",
+          "Physical wellness goals",
+          "Mental wellness goals",
+          "Work-life balance goals",
+          "Action steps and resources",
+          "Review schedule and sign-off",
+        ].map((item) => (
+          <div key={item} className="flex items-center gap-2 text-xs text-zinc-400">
+            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+            {item}
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // PILLAR D — LEAVE MANAGEMENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1023,339 +1909,6 @@ function SickDayPolicyCard() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PILLAR A — MENTAL HEALTH & EAP READINESS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const MENTAL_HEALTH_CHECKLIST = [
-  { id: "policy", label: "Written mental health policy", note: "Required under Ontario OHSA and CSA Z1003-13 framework." },
-  { id: "eap", label: "EAP program in place and communicated to all staff", note: "Employees must be aware of the program; posting on intranet is insufficient alone." },
-  { id: "training", label: "Managers trained in mental health first aid", note: "Standard practice under Duty to Accommodate — managers need awareness to identify triggers." },
-  { id: "rtw", label: "Return-to-work plan process documented", note: "Required for any mental health leave exceeding 2 weeks in most jurisdictions." },
-  { id: "accommodation", label: "Accommodation process for mental health conditions exists", note: "Mental health is a protected ground under human rights legislation in all jurisdictions." },
-  { id: "confidentiality", label: "Confidentiality protocols documented", note: "Medical information is strictly confidential — only functional limitations shared with employer." },
-  { id: "checkins", label: "Regular check-ins / pulse surveys scheduled", note: "Proactive monitoring reduces WCB/WSIB claims and tribunal exposure." },
-  { id: "tracking", label: "Mental health days tracked separately from sick days", note: "Required in Quebec (Act Respecting Labour Standards, s. 79.7); recommended practice elsewhere." },
-];
-
-function MentalHealthChecklist() {
-  const [checked, setChecked] = useState({});
-  const [openNote, setOpenNote] = useState(null);
-  const total = MENTAL_HEALTH_CHECKLIST.length;
-  const done = Object.values(checked).filter(Boolean).length;
-  const pct = Math.round((done / total) * 100);
-  const band = pct === 100 ? "emerald" : pct >= 75 ? "amber" : pct >= 40 ? "orange" : "red";
-  const bandLabel = pct === 100 ? "Fully compliant" : pct >= 75 ? "Nearly there" : pct >= 40 ? "In progress" : "Action required";
-
-  return (
-    <SectionCard title="Mental Health Support Checklist">
-      <p className="mb-4 text-sm text-zinc-400">
-        Track your organization's mental health readiness. Check each item your workplace has in place.
-      </p>
-      <div className="mb-4 flex items-center gap-3">
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${band === "emerald" ? "bg-emerald-400" : band === "amber" ? "bg-amber-400" : band === "orange" ? "bg-orange-400" : "bg-red-400"}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <span className="text-xs font-medium text-zinc-300">{done}/{total}</span>
-        <span className={`text-xs font-semibold ${band === "emerald" ? "text-emerald-400" : band === "amber" ? "text-amber-400" : band === "orange" ? "text-orange-400" : "text-red-400"}`}>{bandLabel}</span>
-      </div>
-      <div className="space-y-2">
-        {MENTAL_HEALTH_CHECKLIST.map((item) => (
-          <div key={item.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02]">
-            <div className="flex items-start gap-3 p-3">
-              <button
-                onClick={() => setChecked((p) => ({ ...p, [item.id]: !p[item.id] }))}
-                className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition ${checked[item.id] ? "border-emerald-500 bg-emerald-500" : "border-white/20 hover:border-white/40"}`}
-              >
-                {checked[item.id] && <Check className="h-3 w-3 text-white" />}
-              </button>
-              <div className="flex-1 min-w-0">
-                <div className={`text-sm ${checked[item.id] ? "text-zinc-500 line-through" : "text-zinc-200"}`}>{item.label}</div>
-              </div>
-              <button onClick={() => setOpenNote(openNote === item.id ? null : item.id)} className="shrink-0 text-zinc-600 hover:text-zinc-400">
-                <Info className="h-3.5 w-3.5" />
-              </button>
-            </div>
-            {openNote === item.id && (
-              <div className="border-t border-white/[0.04] px-4 pb-3 pt-2 text-xs text-zinc-400">{item.note}</div>
-            )}
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-const EAP_SECTIONS = [
-  {
-    title: "What does an EAP cover?",
-    body: "Employee Assistance Programs typically cover: short-term counselling (6–12 sessions), financial advice, legal referrals, crisis support, substance use programs, and family/relationship counselling. Coverage varies by provider — review your plan documents.",
-  },
-  {
-    title: "How to refer an employee (by jurisdiction)",
-    body: "Ontario & Federal: Provide the EAP contact number privately. Do not attend sessions or receive session details. Quebec: Same process — L'ARLS requires that employees not be coerced into EAP use. All jurisdictions: A referral is voluntary unless part of a formal fitness-for-duty assessment agreed to in writing.",
-  },
-  {
-    title: "Confidentiality obligations",
-    body: "Employers have NO right to session content, diagnosis, or attendance details. You may receive aggregate utilization reports only. Disclosing that an employee used an EAP without consent may violate PIPEDA and provincial privacy legislation.",
-  },
-  {
-    title: "Cost coverage",
-    body: "Employer-paid EAPs: cost is a business expense. If the employer does not offer an EAP, employees may access provincial mental health resources (OHIP-covered therapy in Ontario, Accès Soins in Quebec). Under the Federal CLC, federally regulated employers with 100+ employees must provide a basic EAP (as of 2023).",
-  },
-  {
-    title: "Free EAP options for small employers",
-    body: "Options include: CAMH (Ontario) — free navigator; Wellness Together Canada — 24/7 free counselling online; Quebec — 811 mental health line; Indigenous employees — Hope for Wellness Helpline (federal). Many insurance carriers offer bundled EAP at no additional premium for groups over 10.",
-  },
-];
-
-function EAPReferralGuide() {
-  const [open, setOpen] = useState(null);
-  return (
-    <SectionCard title="EAP Referral Guide">
-      <p className="mb-4 text-sm text-zinc-400">Province-specific guidance on Employee Assistance Programs — referral process, confidentiality, and free options for small employers.</p>
-      <div className="space-y-2">
-        {EAP_SECTIONS.map((s) => (
-          <div key={s.title} className="overflow-hidden rounded-2xl border border-white/8">
-            <button onClick={() => setOpen(open === s.title ? null : s.title)} className="flex w-full items-center justify-between p-4 text-left transition hover:bg-white/[0.02]">
-              <span className="text-sm font-medium text-zinc-200">{s.title}</span>
-              <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${open === s.title ? "rotate-180" : ""}`} />
-            </button>
-            {open === s.title && (
-              <div className="border-t border-white/6 p-4 text-sm text-zinc-400">{s.body}</div>
-            )}
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-function ReturnToWorkCard() {
-  return (
-    <SectionCard
-      title="Return-to-Work Plan (Mental Health)"
-      action={
-        <a href="/app/generator?template=Return-to-Work%20Plan%20(Mental%20Health)" className="gold-button inline-flex items-center gap-1.5 px-4 py-2 text-xs">
-          <FileText className="h-3.5 w-3.5" />Generate
-        </a>
-      }
-    >
-      <p className="mb-4 text-sm text-zinc-400">Structured return-to-work plan for employees returning from a mental health leave. Covers modified duties, schedule, check-in cadence, and accommodation commitments.</p>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {["Employee info & leave dates", "Medical restrictions (functional)", "Modified duties plan", "Graduated return schedule", "Check-in frequency", "Review date & plan owner"].map((f) => (
-          <div key={f} className="flex items-center gap-2 text-xs text-zinc-400">
-            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />{f}
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-const MANAGER_STEPS = [
-  { title: "Opening the conversation", body: "Use private, neutral settings. Start with: \"I've noticed you seem to be having a harder time lately — I want to check in.\" Avoid: \"You seem depressed\" or \"What's wrong with you?\" — these are medical conclusions. Focus on observable behaviour, not diagnosis." },
-  { title: "Active listening techniques", body: "Reflect back what you hear: \"It sounds like the workload has been really overwhelming.\" Avoid advice-giving in the first conversation. Don't minimize (\"Everyone feels that way\"). Don't rush to solutions — listen for 80% of the conversation." },
-  { title: "Connecting to EAP / resources", body: "Offer clearly but without pressure: \"We have an EAP you can contact anytime — it's completely confidential, and I won't know what you discuss.\" Provide the number in writing. Do not mandate EAP use." },
-  { title: "Documentation best practices", body: "Document: date, observable concerns raised, resources offered. Do NOT document: mental health diagnoses, speculation about conditions, session details. Keep in a separate medical file, accessible only to HR." },
-  { title: "Follow-up cadence", body: "Check in weekly for the first month — keep it brief and low-pressure. Ask: \"How are things going? Is there anything I can help with?\" Avoid: \"Are you feeling better yet?\" Consistency is more important than intensity." },
-];
-
-function ManagerConversationGuide() {
-  const [open, setOpen] = useState(null);
-  return (
-    <SectionCard title="Manager Conversation Guide">
-      <p className="mb-4 text-sm text-zinc-400">Step-by-step guide for managers on opening mental health conversations, active listening, connecting employees to resources, and appropriate documentation.</p>
-      <div className="space-y-2">
-        {MANAGER_STEPS.map((s, i) => (
-          <div key={s.title} className="overflow-hidden rounded-2xl border border-white/8">
-            <button onClick={() => setOpen(open === s.title ? null : s.title)} className="flex w-full items-center justify-between p-4 text-left transition hover:bg-white/[0.02]">
-              <div className="flex items-center gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-400/20 bg-amber-400/10 text-xs font-semibold text-amber-300">{i + 1}</span>
-                <span className="text-sm font-medium text-zinc-200">{s.title}</span>
-              </div>
-              <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${open === s.title ? "rotate-180" : ""}`} />
-            </button>
-            {open === s.title && (
-              <div className="border-t border-white/6 p-4 text-sm text-zinc-400">{s.body}</div>
-            )}
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// PILLAR C — PSYCHOLOGICAL SAFETY & PREVENTION
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const CSA_QUESTIONS = [
-  { id: 1, domain: "Leadership commitment", text: "Senior leaders visibly support psychological health and safety initiatives." },
-  { id: 2, domain: "Civility & respect", text: "Employees treat each other with respect, regardless of their role." },
-  { id: 3, domain: "Psychological protection", text: "Employees feel safe to speak up about concerns without fear of retaliation." },
-  { id: 4, domain: "Growth & development", text: "Employees have opportunities to learn and advance in their careers." },
-  { id: 5, domain: "Recognition & reward", text: "Employees feel their contributions are recognized and valued." },
-  { id: 6, domain: "Involvement & influence", text: "Employees are consulted on decisions that affect their work." },
-  { id: 7, domain: "Workload management", text: "Workloads are manageable and deadlines are realistic." },
-  { id: 8, domain: "Engagement", text: "Employees feel motivated and committed to their work." },
-  { id: 9, domain: "Balance", text: "The organization supports employees in balancing work and personal life." },
-  { id: 10, domain: "Psychological protection from violence", text: "The workplace is free from harassment, bullying, and intimidation." },
-  { id: 11, domain: "Clear leadership", text: "Employees understand their roles, responsibilities, and performance expectations." },
-  { id: 12, domain: "Psychological competence", text: "Managers are equipped to support employee mental health." },
-  { id: 13, domain: "Protection from violence", text: "Incidents of workplace violence or threats are addressed promptly." },
-  { id: 14, domain: "Workload management", text: "Employees have adequate resources (time, tools, support) to do their jobs well." },
-  { id: 15, domain: "Overall", text: "Overall, this workplace supports the psychological health and safety of its employees." },
-];
-
-const SCORE_BANDS = [
-  { min: 61, max: 75, label: "Strong", color: "emerald", desc: "Your organization demonstrates strong psychological safety. Focus on maintaining practices and continuous improvement." },
-  { min: 46, max: 60, label: "Moderate", color: "amber", desc: "Your foundation is solid. Identify 2–3 lowest-scoring domains and build targeted action plans." },
-  { min: 26, max: 45, label: "Needs attention", color: "orange", desc: "Significant gaps exist. Prioritize leadership commitment and workload management. Consider a formal CSA Z1003 gap assessment." },
-  { min: 0, max: 25, label: "Critical risk", color: "red", desc: "Immediate action required. Engage an occupational health professional. Review harassment and violence prevention programs urgently." },
-];
-
-function CSAAssessment() {
-  const [scores, setScores] = useState({});
-  const answered = Object.keys(scores).length;
-  const total = CSA_QUESTIONS.length;
-  const rawScore = Object.values(scores).reduce((a, b) => a + b, 0);
-  const complete = answered === total;
-  const band = complete ? SCORE_BANDS.find((b) => rawScore >= b.min && rawScore <= b.max) : null;
-
-  return (
-    <SectionCard title="CSA Z1003-13 Psychological Safety Self-Assessment">
-      <p className="mb-1 text-sm text-zinc-400">Rate each statement on a 1–5 scale (1 = Never, 5 = Always). Based on the National Standard of Canada for Psychological Health and Safety in the Workplace.</p>
-      <div className="mb-4 flex items-center gap-2 text-xs text-zinc-500">
-        <span>{answered}/{total} answered</span>
-        {complete && <span className="font-semibold text-zinc-300">· Score: {rawScore}/75</span>}
-      </div>
-      <div className="space-y-4">
-        {CSA_QUESTIONS.map((q) => (
-          <div key={q.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-            <div className="mb-1 text-xs font-medium text-amber-300/70">{q.domain}</div>
-            <div className="mb-3 text-sm text-zinc-200">{q.text}</div>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setScores((p) => ({ ...p, [q.id]: v }))}
-                  className={`flex h-8 w-8 items-center justify-center rounded-xl border text-xs font-semibold transition ${scores[q.id] === v ? "border-amber-400/40 bg-amber-400/20 text-amber-200" : "border-white/10 text-zinc-500 hover:border-white/20 hover:text-zinc-300"}`}
-                >
-                  {v}
-                </button>
-              ))}
-              <span className="ml-1 self-center text-xs text-zinc-600">{scores[q.id] ? ["", "Never", "Rarely", "Sometimes", "Often", "Always"][scores[q.id]] : ""}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-      {complete && band && (
-        <div className={`mt-6 rounded-2xl border p-5 ${band.color === "emerald" ? "border-emerald-400/20 bg-emerald-400/[0.04]" : band.color === "amber" ? "border-amber-400/20 bg-amber-400/[0.04]" : band.color === "orange" ? "border-orange-400/20 bg-orange-400/[0.04]" : "border-red-400/20 bg-red-400/[0.04]"}`}>
-          <div className={`mb-1 text-base font-semibold ${band.color === "emerald" ? "text-emerald-300" : band.color === "amber" ? "text-amber-300" : band.color === "orange" ? "text-orange-300" : "text-red-300"}`}>
-            {rawScore}/75 — {band.label}
-          </div>
-          <p className="text-sm text-zinc-400">{band.desc}</p>
-          <button onClick={() => window.print()} className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-zinc-300 hover:bg-white/[0.06]">
-            <Printer className="h-3.5 w-3.5" />Print results
-          </button>
-        </div>
-      )}
-      {!complete && answered > 0 && (
-        <div className="mt-4 rounded-xl border border-white/6 bg-white/[0.02] p-3 text-xs text-zinc-500">
-          Answer all {total} questions to see your score and recommendations.
-        </div>
-      )}
-    </SectionCard>
-  );
-}
-
-function RespectfulWorkplaceCard() {
-  return (
-    <SectionCard
-      title="Respectful Workplace Policy"
-      action={
-        <a href="/app/generator?template=Respectful%20Workplace%20Policy" className="gold-button inline-flex items-center gap-1.5 px-4 py-2 text-xs">
-          <FileText className="h-3.5 w-3.5" />Generate
-        </a>
-      }
-    >
-      <p className="mb-4 text-sm text-zinc-400">Comprehensive policy covering harassment, discrimination, and workplace violence — aligned with Ontario OHSA, Quebec ARLS, and the Canada Labour Code.</p>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {["Purpose & scope", "Prohibited conduct (harassment, discrimination, violence)", "Reporting procedures", "Investigation process", "Confidentiality obligations", "Consequences & disciplinary framework"].map((f) => (
-          <div key={f} className="flex items-center gap-2 text-xs text-zinc-400">
-            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />{f}
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-const BYSTANDER_DS = [
-  { d: "Direct", icon: "🛑", desc: "Safely and calmly address the behaviour in the moment. Example: \"Hey, that comment isn't okay here.\" Only use if it's safe to do so." },
-  { d: "Distract", icon: "💬", desc: "Interrupt the situation without confronting it directly. Example: Change the subject, ask an unrelated question, or create a diversion to break the dynamic." },
-  { d: "Delegate", icon: "👥", desc: "Involve someone with more authority or resources. Example: Alert HR, a supervisor, or a union rep who can intervene appropriately." },
-  { d: "Delay", icon: "🕐", desc: "Check in with the affected person after the incident. Example: \"I saw what happened — how are you doing? Would you like help reporting it?\"" },
-  { d: "Document", icon: "📋", desc: "Record what happened: date, time, location, witnesses, exact words or actions. Provide your notes to HR or the affected person if asked." },
-];
-
-function BystanderGuide() {
-  const [open, setOpen] = useState(null);
-  return (
-    <SectionCard title="Bystander Intervention Guide">
-      <p className="mb-4 text-sm text-zinc-400">The 5 D's framework for responding to workplace harassment or inappropriate behaviour as a bystander. Jurisdiction reporting obligations included.</p>
-      <div className="space-y-2">
-        {BYSTANDER_DS.map((item) => (
-          <div key={item.d} className="overflow-hidden rounded-2xl border border-white/8">
-            <button onClick={() => setOpen(open === item.d ? null : item.d)} className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-white/[0.02]">
-              <span className="text-lg">{item.icon}</span>
-              <span className="flex-1 text-sm font-semibold text-zinc-200">{item.d}</span>
-              <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${open === item.d ? "rotate-180" : ""}`} />
-            </button>
-            {open === item.d && (
-              <div className="border-t border-white/6 p-4 text-sm text-zinc-400">{item.desc}</div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.04] p-4">
-        <div className="mb-2 text-xs font-semibold text-amber-300">Reporting obligations by jurisdiction</div>
-        <div className="space-y-1 text-xs text-zinc-400">
-          <div><span className="font-medium text-zinc-300">Ontario:</span> OHSA requires employers to have a harassment reporting procedure. Employees can also file with the OHRC.</div>
-          <div><span className="font-medium text-zinc-300">Quebec:</span> ARLS s. 81.3 — employees have 2 years from last act to file a psychological harassment complaint with the CNESST.</div>
-          <div><span className="font-medium text-zinc-300">Federal:</span> CLC Part II — harassment and violence complaints through the Work Place Harassment and Violence Prevention Regulations (2021).</div>
-        </div>
-      </div>
-    </SectionCard>
-  );
-}
-
-function WellnessActionPlanCard() {
-  return (
-    <SectionCard
-      title="Wellness Action Plan Template"
-      action={
-        <a href="/app/generator?template=Wellness%20Action%20Plan" className="gold-button inline-flex items-center gap-1.5 px-4 py-2 text-xs">
-          <FileText className="h-3.5 w-3.5" />Generate
-        </a>
-      }
-    >
-      <p className="mb-4 text-sm text-zinc-400">Individual employee wellness plan supporting physical, mental, and work-life wellbeing goals — with action steps, support resources, and review schedule.</p>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {["Current state self-assessment", "Physical health goals & actions", "Mental health goals & actions", "Work-life balance strategies", "Support resources & contacts", "Check-in dates & review schedule"].map((f) => (
-          <div key={f} className="flex items-center gap-2 text-xs text-zinc-400">
-            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />{f}
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
 // PILLAR WRAPPERS
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1363,11 +1916,11 @@ function PillarA() {
   return (
     <div className="space-y-6">
       <MentalHealthChecklist />
+      <EAPReferralGuide />
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <ReturnToWorkCard />
-        <EAPReferralGuide />
+        <ReturnToWorkMentalHealthCard />
+        <ManagerConversationGuide />
       </div>
-      <ManagerConversationGuide />
     </div>
   );
 }
@@ -1389,12 +1942,12 @@ function PillarB() {
 function PillarC() {
   return (
     <div className="space-y-6">
-      <CSAAssessment />
+      <PsychSafetyAssessment />
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <RespectfulWorkplaceCard />
+        <RespectfulWorkplacePolicyCard />
         <WellnessActionPlanCard />
       </div>
-      <BystanderGuide />
+      <BystanderInterventionGuide />
     </div>
   );
 }
