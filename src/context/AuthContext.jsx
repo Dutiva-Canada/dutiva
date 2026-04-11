@@ -3,10 +3,22 @@ import { buildMagicLinkRedirectUrl, isSupabaseConfigured, supabase } from "../li
 
 const AuthContext = createContext(null);
 
+const ALLOWED_EMAILS = ['martin.constantineau@dutiva.ca'];
+
 export function AuthProvider({ children }) {
   const authConfigured = isSupabaseConfigured;
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(null);
+
+  const enforceWhitelist = async (u) => {
+    if (!u) return;
+    if (!ALLOWED_EMAILS.includes(u.email.toLowerCase())) {
+      await supabase.auth.signOut();
+      setUser(null);
+      setAuthError("Access is currently by invitation only. Contact hello@dutiva.ca to request access.");
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -18,8 +30,10 @@ export function AuthProvider({ children }) {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
-      setUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setUser(u);
       setLoading(false);
+      if (u) enforceWhitelist(u);
     }).catch(() => {
       if (!mounted) return;
       setLoading(false);
@@ -28,8 +42,10 @@ export function AuthProvider({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setUser(u);
       setLoading(false);
+      if (u) enforceWhitelist(u);
     });
 
     return () => {
@@ -40,6 +56,9 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, nextPath) => {
     if (!supabase) throw new Error("Authentication is not configured.");
+    if (!ALLOWED_EMAILS.includes(email.trim().toLowerCase())) {
+      throw new Error("Access is currently by invitation only. Contact hello@dutiva.ca to request access.");
+    }
     const emailRedirectTo = buildMagicLinkRedirectUrl(nextPath);
     const { error } = await supabase.auth.signInWithOtp(
       emailRedirectTo
@@ -61,7 +80,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ authConfigured, user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ authConfigured, user, loading, authError, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

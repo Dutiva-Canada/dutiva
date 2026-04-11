@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { sanitizeAppPath } from "../lib/supabase";
 
 export default function AuthPage() {
-  const { authConfigured, signIn, loading, user, signOut } = useAuth();
+  const { authConfigured, signIn, loading, user, signOut, authError } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -148,7 +148,11 @@ export default function AuthPage() {
             </form>
           )}
 
-          {status ? (
+          {authError ? (
+            <div className="mt-4 rounded-2xl border border-red-400/20 bg-red-400/8 px-4 py-4 text-sm text-red-300">
+              {authError}
+            </div>
+          ) : status ? (
             <div className="mt-4 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 text-sm text-zinc-300">
               {status}
             </div>
