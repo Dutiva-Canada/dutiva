@@ -1422,6 +1422,439 @@ Employee: ${form.employeeName}     Title: ${form.jobTitle}
 Signature: ____________________    Date: ________________________`;
 }
 
+// ─── Wellness / Ring 2 — additional template generators ──────────────────────
+
+function genReturnToWorkPlanMentalHealth(form) {
+  return `${today()}
+
+RETURN-TO-WORK PLAN — MENTAL HEALTH LEAVE
+${form.companyName}
+${form.jurisdiction}
+
+CONFIDENTIAL — Mental health accommodation document.
+Store separately from the general personnel file.
+
+─────────────────────────────────────────────────────────────
+EMPLOYEE INFORMATION
+
+Employee name:        ${form.employeeName}
+Job title:            ${form.jobTitle}
+Department:           ___________________________________
+Manager:              ${form.manager}
+Leave start date:     ___________________________________
+Anticipated RTW date: ___________________________________
+Plan prepared by:     ___________________________________
+Plan date:            ${today()}
+
+─────────────────────────────────────────────────────────────
+PART A — MEDICAL RESTRICTIONS AND FUNCTIONAL LIMITATIONS
+
+The following functional limitations and restrictions have been
+documented by the employee's treating healthcare provider:
+
+  Limitations:  ___________________________________________
+  Restrictions: ___________________________________________
+  Expected duration: □ Temporary (approx. _______)  □ Ongoing
+
+Note: A diagnosis is not required and must not be recorded here.
+This section reflects only functional limitations relevant to
+the employee's ability to perform their duties.
+
+─────────────────────────────────────────────────────────────
+PART B — MODIFIED DUTIES
+
+During the return-to-work period, ${form.employeeName}'s duties
+will be modified as follows:
+
+Week 1–2:
+  □ Reduced hours: _______ hours/day   □ Full hours
+  Duties: _______________________________________________
+
+Week 3–4:
+  □ Reduced hours: _______ hours/day   □ Full hours
+  Duties: _______________________________________________
+
+Week 5+:
+  □ Full duties and hours resumed
+  □ Continued modified arrangement — specify: _______________
+
+─────────────────────────────────────────────────────────────
+PART C — SCHEDULE AND WORKING ARRANGEMENTS
+
+Work location:    □ Office    □ Remote    □ Hybrid
+Working hours:    ___________________________________________
+Days of work:     ___________________________________________
+Start/end times:  ___________________________________________
+
+Special arrangements (e.g., quiet workspace, reduced meetings):
+___________________________________________________________
+
+─────────────────────────────────────────────────────────────
+PART D — SUPPORT RESOURCES
+
+EAP access confirmed:       □ Yes — Access #: _______________
+Occupational health:        □ Referred    □ Not required
+Healthcare provider has approved this plan:  □ Yes   □ No
+
+Additional supports in place:
+___________________________________________________________
+
+─────────────────────────────────────────────────────────────
+PART E — MANAGER CHECK-IN CADENCE
+
+  Week 1:    Date: _____________  Format: □ In-person  □ Virtual
+  Week 2:    Date: _____________  Format: □ In-person  □ Virtual
+  Week 4:    Date: _____________  Format: □ In-person  □ Virtual
+  Monthly thereafter until full duties resumed.
+
+Check-ins must focus on well-being and plan progress, not
+performance. Performance discussions resume after stabilization.
+
+─────────────────────────────────────────────────────────────
+PART F — REVIEW DATE AND EXIT CRITERIA
+
+Plan review date:  ___________________________________
+
+This plan will be considered complete when:
+  □ Employee has returned to full duties and hours
+  □ Employee and manager agree the plan is no longer needed
+  □ Healthcare provider has cleared full return to work
+
+─────────────────────────────────────────────────────────────
+APPLICABLE LEGISLATION
+
+This plan is established in accordance with the ${act(form.jurisdiction)}
+and applicable human rights legislation, including the employer's
+duty to accommodate mental health disability to the point of
+undue hardship.
+
+─────────────────────────────────────────────────────────────
+SIGNATURES
+
+Employee (${form.employeeName}):
+Signature: ______________________  Date: ________________
+
+Manager (${form.manager}):
+Signature: ______________________  Date: ________________
+
+HR Representative:
+Signature: ______________________  Date: ________________
+
+─────────────────────────────────────────────────────────────
+CONFIDENTIALITY NOTICE
+This document is strictly confidential. File in the employee's
+accommodation record, separate from the general personnel file.
+Share only with individuals who have a legitimate need to know.`;
+}
+
+function genRespectfulWorkplacePolicy(form) {
+  const isON = form.jurisdiction === "Ontario";
+  const isQC = form.jurisdiction === "Quebec";
+  return `${today()}
+
+RESPECTFUL WORKPLACE POLICY
+${form.companyName}
+${form.jurisdiction}
+Effective date: ${form.startDate || today()}
+Policy owner:   ${form.manager}
+
+─────────────────────────────────────────────────────────────
+1. PURPOSE
+
+${form.companyName} is committed to fostering a respectful,
+inclusive, and psychologically safe workplace for all employees,
+contractors, clients, and visitors. This policy establishes the
+standards of conduct expected and the processes for addressing
+violations.
+
+─────────────────────────────────────────────────────────────
+2. SCOPE
+
+This policy applies to all persons who work for or represent
+${form.companyName}, in all workplaces and work-related settings,
+including virtual and off-site environments.
+
+─────────────────────────────────────────────────────────────
+3. LEGAL FRAMEWORK
+
+This policy is established in compliance with:
+  • ${act(form.jurisdiction)}
+${isON
+? `  • Ontario Human Rights Code, R.S.O. 1990, c. H.19
+  • Occupational Health and Safety Act (OHSA), R.S.O. 1990, c. O.1
+    ss. 32.0.1–32.0.8 (Workplace Harassment and Violence Prevention)`
+: isQC
+? `  • Charter of Human Rights and Freedoms, CQLR c C-12
+  • Act Respecting Labour Standards (ARLS), CQLR c N-1.1
+    ss. 81.18–81.20 (Psychological Harassment)`
+: `  • Canadian Human Rights Act, R.S.C. 1985, c. H-6
+  • Canada Labour Code, Part II — Workplace Health and Safety
+  • Work Place Harassment and Violence Prevention Regulations,
+    SOR/2020-130`}
+
+─────────────────────────────────────────────────────────────
+4. PROHIBITED CONDUCT
+
+The following conduct is strictly prohibited:
+
+4.1 Harassment
+Any vexatious comment or conduct directed at a worker that is
+known or ought reasonably to be known to be unwelcome, including:
+  • Personal attacks, ridicule, or humiliation
+  • Persistent criticism unrelated to legitimate work feedback
+  • Exclusion or isolation from workplace activities
+  • Spreading malicious rumours or misinformation
+
+4.2 Sexual Harassment
+Unwelcome conduct of a sexual nature, including:
+  • Unwanted touching, advances, or comments of a sexual nature
+  • Requests for sexual favours, with or without implied benefit
+  • Gender-based taunting, jokes, or demeaning remarks
+
+4.3 Discrimination
+Treating a person adversely on the basis of a protected ground
+under applicable human rights legislation, including race,
+ancestry, colour, place of origin, ethnic origin, citizenship,
+creed, sex, sexual orientation, gender identity or expression,
+age, marital status, family status, disability, or any other
+protected characteristic.
+
+4.4 Workplace Violence
+  • The exercise of, or threat to exercise, physical force
+  • Verbal threats causing reasonable belief of physical harm
+  • Conduct a reasonable person would interpret as a risk of
+    physical injury
+
+4.5 Psychological Harassment
+${isQC
+? `As defined under the ARLS: any vexatious behaviour in the form
+of repeated and hostile or unwanted conduct, verbal comments,
+actions, or gestures, that affect an employee's dignity or
+psychological integrity and that result in a harmful work
+environment.`
+: `Any repeated, hostile, or unwanted conduct that harms the
+psychological health of another person, including bullying,
+intimidation, and persistent demeaning treatment.`}
+
+─────────────────────────────────────────────────────────────
+5. RESPONSIBILITIES
+
+5.1 All employees
+  • Conduct themselves in accordance with this policy
+  • Report incidents they experience or witness
+  • Cooperate in any investigation
+
+5.2 Managers and supervisors
+  • Model respectful workplace behaviour at all times
+  • Address policy violations promptly, regardless of seniority
+  • Maintain confidentiality and avoid retaliation
+
+5.3 The Employer
+  • Investigate all formal complaints thoroughly and impartially
+  • Maintain a confidential reporting channel
+  • Take appropriate corrective action promptly
+
+─────────────────────────────────────────────────────────────
+6. REPORTING PROCEDURE
+
+Step 1 — Informal resolution (if safe to do so)
+If the conduct is not serious or is a single incident, the
+affected person may advise the other party directly that their
+conduct is unwelcome.
+
+Step 2 — Formal report
+Submit a written report to HR or ${form.manager} (or to the
+designated confidential contact if the manager is the respondent).
+Include: description of conduct, date(s), location, witnesses.
+
+Step 3 — Preserve evidence
+Retain copies of relevant written communications (emails,
+messages, notes) in a secure personal location.
+
+Reports may be made anonymously to the extent possible.
+Anonymous reports may limit the scope of investigation.
+
+─────────────────────────────────────────────────────────────
+7. INVESTIGATION PROCESS
+
+  a) The Company will acknowledge receipt within 5 business days.
+  b) An impartial investigator (internal or external) will be
+     assigned.
+  c) Both parties will be interviewed and given the opportunity
+     to present their account and relevant information.
+  d) Investigation will be completed within 45 business days
+     where reasonably practicable.
+  e) Findings will be communicated to both parties, subject to
+     confidentiality obligations.
+  f) If the complaint is substantiated, corrective action will
+     be implemented promptly.
+
+─────────────────────────────────────────────────────────────
+8. CONFIDENTIALITY
+
+All participants in a complaint or investigation must maintain
+confidentiality to the extent possible. Information may be
+shared only as required to conduct a thorough investigation
+or comply with legal obligations.
+
+─────────────────────────────────────────────────────────────
+9. CONSEQUENCES
+
+If a complaint is substantiated, disciplinary action may include:
+  • Written warning
+  • Mandatory training or coaching
+  • Suspension with or without pay
+  • Termination of employment for cause
+  • Referral to applicable regulatory authority
+
+─────────────────────────────────────────────────────────────
+10. NON-RETALIATION
+
+Retaliation against any person who, in good faith, reports
+harassment, participates in an investigation, or exercises
+rights under this policy is strictly prohibited and constitutes
+a separate, serious violation.
+
+─────────────────────────────────────────────────────────────
+11. REVIEW
+
+This policy will be reviewed annually and updated as required
+to reflect changes in applicable legislation or organizational
+needs.
+
+─────────────────────────────────────────────────────────────
+EMPLOYEE ACKNOWLEDGEMENT
+
+Employee: ${form.employeeName}    Title: ${form.jobTitle}
+Signature: ____________________    Date: ________________________`;
+}
+
+function genWellnessActionPlan(form) {
+  return `${today()}
+
+INDIVIDUAL WELLNESS ACTION PLAN
+${form.companyName}
+${form.jurisdiction}
+
+This Wellness Action Plan is developed collaboratively between
+the employee and their manager. It is a voluntary, confidential
+document. Employees are not required to disclose medical
+information or diagnoses.
+
+─────────────────────────────────────────────────────────────
+EMPLOYEE INFORMATION
+
+Employee name:   ${form.employeeName}
+Job title:       ${form.jobTitle}
+Manager:         ${form.manager}
+Plan date:       ${today()}
+Review date:     ___________________________________
+
+─────────────────────────────────────────────────────────────
+PART A — CURRENT STATE ASSESSMENT
+
+In my own words, how I would describe my current wellness:
+___________________________________________________________
+___________________________________________________________
+
+What is going well at work right now:
+___________________________________________________________
+
+What is most challenging at work right now:
+___________________________________________________________
+
+Signs that may indicate I am not doing well (for manager
+reference only, shared voluntarily by the employee):
+___________________________________________________________
+(e.g., increased absence, withdrawing from team, reduced output)
+
+─────────────────────────────────────────────────────────────
+PART B — WELLNESS GOALS
+
+Physical Wellness
+Goal:        _______________________________________________
+Measures:    _______________________________________________
+Target date: _______________________________________________
+
+Mental and Emotional Wellness
+Goal:        _______________________________________________
+Measures:    _______________________________________________
+Target date: _______________________________________________
+
+Work-Life Balance
+Goal:        _______________________________________________
+Measures:    _______________________________________________
+Target date: _______________________________________________
+
+─────────────────────────────────────────────────────────────
+PART C — ACTION STEPS
+
+The following specific steps will support the goals above:
+
+  1. Action:    ________________________________________________
+     By when:   _______________   Support needed: ______________
+
+  2. Action:    ________________________________________________
+     By when:   _______________   Support needed: ______________
+
+  3. Action:    ________________________________________________
+     By when:   _______________   Support needed: ______________
+
+─────────────────────────────────────────────────────────────
+PART D — SUPPORT RESOURCES
+
+EAP access confirmed:   □ Yes — Access #: ___________________
+Workplace supports:     ___________________________________
+External supports:      ___________________________________
+
+What helps me manage stress at work:
+___________________________________________________________
+
+What my manager can do to support me:
+___________________________________________________________
+
+What I will do to support myself:
+___________________________________________________________
+
+─────────────────────────────────────────────────────────────
+PART E — MANAGER COMMITMENTS
+
+${form.manager} agrees to:
+  □ Check in with ${form.employeeName} on the agreed schedule
+  □ Maintain confidentiality of this plan
+  □ Provide the workspace / schedule supports noted above
+  □ Not use information in this plan in performance management
+     without the employee's explicit written consent
+  □ Other: _________________________________________________
+
+─────────────────────────────────────────────────────────────
+PART F — REVIEW SCHEDULE
+
+  First review:   Date: _______________   □ Completed
+  Second review:  Date: _______________   □ Completed
+  Final review:   Date: _______________   □ Completed
+
+─────────────────────────────────────────────────────────────
+CONFIDENTIALITY NOTICE
+
+This plan is strictly confidential. It is not part of the
+employee's personnel file and will not be shared without
+the employee's written consent, except as required by law.
+
+This plan is not an accommodation plan under human rights
+legislation. If a formal accommodation is needed, use the
+Accommodation Request Form process.
+
+─────────────────────────────────────────────────────────────
+SIGNATURES
+
+Employee (${form.employeeName}):
+Signature: ______________________  Date: ________________
+
+Manager (${form.manager}):
+Signature: ______________________  Date: ________________`;
+}
+
 // ─── Main export ─────────────────────────────────────────────────────────────
 
 export function formatDocBody(template, form) {
@@ -1488,6 +1921,15 @@ export function formatDocBody(template, form) {
       break;
     case "Sick Day Policy":
       body = genSickDayPolicy(form);
+      break;
+    case "Return-to-Work Plan (Mental Health)":
+      body = genReturnToWorkPlanMentalHealth(form);
+      break;
+    case "Respectful Workplace Policy":
+      body = genRespectfulWorkplacePolicy(form);
+      break;
+    case "Wellness Action Plan":
+      body = genWellnessActionPlan(form);
       break;
     default:
       body = `This document has been prepared by ${form.companyName} in accordance with the laws of ${form.jurisdiction}.\n\n${form.notes || ""}`.trim();
