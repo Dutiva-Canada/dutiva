@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles, Scale, Calendar } from "lucide-react";
+import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles, Scale, Calendar, Megaphone, Users, ShieldAlert, DollarSign, TrendingUp, BookOpen } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 
 function Section({ children, className = "" }) {
@@ -475,6 +475,397 @@ export default function LandingPage() {
           </span>
         </div>
       </Section>
+
+      {/* ══ COMMUNICATIONS ══ */}
+      <Section className="py-6 md:py-10">
+        <div className="mb-8 max-w-3xl">
+          <Pill>{t("Internal Communications — Ring 3 fully live", "Communications internes — Anneau 3 entièrement disponible")}</Pill>
+          <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+            {t(
+              "Scripts, memos, and crisis guides — built for the hardest HR conversations.",
+              "Scripts, mémos et guides de crise — conçus pour les conversations RH les plus difficiles."
+            )}
+          </h2>
+          <p className="mt-3 text-base leading-7 text-zinc-400">
+            {t(
+              "Ring 3 delivers bilingual, jurisdiction-aware communication tools for layoffs, restructuring, policy rollouts, and workplace crises — so every message is legally grounded and professionally delivered.",
+              "L'anneau 3 offre des outils de communication bilingues et adaptés à la juridiction pour les mises à pied, restructurations, déploiements de politiques et crises — chaque message est ancré légalement et livré professionnellement."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Layoff Script Builder */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Megaphone className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Tool 1", "Outil 1")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Layoff Script Builder", "Générateur de scripts de mise à pied")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Generate province-specific termination letters with ESA notice weeks automatically calculated — formal, bilingual, and copy-ready.",
+                "Générez des lettres de licenciement propres à chaque province avec les semaines de préavis ESA calculées automatiquement — formelles, bilingues et prêtes à copier."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Province selector (ON, BC, AB, QC, MB, SK)", "Sélecteur de province (ON, CB, AB, QC, MB, SK)")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("ESA notice weeks auto-calculated", "Semaines de préavis ESA calculées automatiquement")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Formal termination letter output", "Sortie de lettre de licenciement formelle")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Restructuring memo generator", "Générateur de mémo de restructuration")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Policy & FAQ */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Tool 2", "Outil 2")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Policy Memos & FAQ Builder", "Mémos de politique et générateur de FAQ")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Scenario-based FAQ documents and formal policy memos with rationale — for layoffs, restructuring, and policy rollouts.",
+                "Documents FAQ basés sur des scénarios et mémos de politique formels avec justification — pour les mises à pied, restructurations et déploiements de politiques."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Layoff / restructuring / policy FAQ scenarios", "Scénarios FAQ : mise à pied / restructuration / politique")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Policy memo with rationale field", "Mémo de politique avec champ de justification")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Effective date & contact tracking", "Suivi de la date d'entrée en vigueur et du contact")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("One-click copy output", "Sortie copie en un clic")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Crisis Guide */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <ShieldAlert className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Tool 3", "Outil 3")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Crisis Communication Guide", "Guide de communication de crise")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Pre-built crisis playbooks for workplace accidents (WSIB), data breaches (OPC), and media inquiries — with step-by-step scripts and Q&A frameworks.",
+                "Guides de crise prédéfinis pour les accidents au travail (WSIB), les violations de données (CPVP) et les demandes médias — avec scripts et cadres Q&R étape par étape."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Workplace accident & WSIB reporting guide", "Guide de signalement d'accident et WSIB")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Data breach & OPC notification script", "Script de notification de violation de données et CPVP")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Media inquiry response framework", "Cadre de réponse aux demandes médias")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Expandable Q&A playbook per scenario", "Guide Q&R extensible par scénario")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Coming Soon placeholder */}
+          <div className="premium-card-soft p-6 opacity-60">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Coming soon", "À venir")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Town Hall & All-Hands Builder", "Générateur d'assemblées générales")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Structured town hall agendas, talking-point decks, and post-event FAQ documents — for company-wide change announcements.",
+                "Ordres du jour structurés, présentations de points de discussion et FAQ post-événement — pour les annonces de changements à l'échelle de l'entreprise."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Agenda builder with timed segments", "Générateur d'ordre du jour avec segments minutés")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Leadership talking-point generator", "Générateur de points de discussion pour la direction")}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* CTA into Communications */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Link
+            to="/app/communications"
+            className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+          >
+            {t("Explore Ring 3 Communications", "Explorer l'anneau 3 Communications")}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <span className="text-sm text-zinc-500">
+            {t("5 tools across 3 communication categories", "5 outils sur 3 catégories de communication")}
+          </span>
+        </div>
+      </Section>
+
+      {/* ══ COMPENSATION ══ */}
+      <Section className="py-6 md:py-10">
+        <div className="mb-8 max-w-3xl">
+          <Pill>{t("Compensation & Financial Literacy — Ring 4 fully live", "Rémunération et littératie financière — Anneau 4 entièrement disponible")}</Pill>
+          <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+            {t(
+              "Severance math, pay equity, and salary bands — no spreadsheet required.",
+              "Calcul des indemnités, équité salariale et bandes salariales — sans feuille de calcul."
+            )}
+          </h2>
+          <p className="mt-3 text-base leading-7 text-zinc-400">
+            {t(
+              "Ring 4 puts ESA severance calculators, pay equity gap analysis, salary band builders, and financial literacy references in one place — jurisdiction-aware and bilingual for Canadian HR teams.",
+              "L'anneau 4 regroupe les calculateurs d'indemnités ESA, l'analyse des écarts d'équité salariale, les outils de bandes salariales et les références de littératie financière — adaptés à la juridiction et bilingues pour les équipes RH canadiennes."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Severance Calculator */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <DollarSign className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Tool 1", "Outil 1")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Severance Calculator", "Calculateur d'indemnités de départ")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "ESA statutory notice plus common-law estimates — province-aware across ON, BC, AB, QC, MB, and Federal scope.",
+                "Préavis légal ESA plus estimations de common law — adapté à la province pour ON, CB, AB, QC, MB et portée fédérale."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("ESA notice weeks by province & tenure", "Semaines de préavis ESA par province et ancienneté")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Common-law estimate (1.2 weeks/year)", "Estimation de common law (1,2 semaine/année)")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Pay in lieu + severance dollar amounts", "Indemnités en lieu de préavis + montants en dollars")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Statutory citation per jurisdiction", "Citation légale par juridiction")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Pay Equity Checker */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Scale className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Tool 2", "Outil 2")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Pay Equity Checker", "Vérificateur d'équité salariale")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Compare compensation by gender across roles — flags gaps above 5% and generates a copy-ready equity summary.",
+                "Comparez la rémunération par genre selon les rôles — signale les écarts supérieurs à 5% et génère un résumé d'équité prêt à copier."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Dynamic role-by-role comp table", "Tableau de rémunération dynamique par rôle")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Gender pay gap flagged at >5%", "Écart salarial signalé à >5%")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Average female vs male salary breakdown", "Ventilation salaire moyen femmes vs hommes")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Copy-ready equity analysis output", "Sortie d'analyse d'équité prête à copier")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Salary Band Builder */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Tool 3", "Outil 3")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Salary Band Builder", "Générateur de bandes salariales")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Enter a market midpoint and spread — get min/mid/max bands with P50 positioning guidance and a copy-ready summary.",
+                "Entrez un point médian de marché et un écart — obtenez des bandes min/milieu/max avec des conseils de positionnement P50 et un résumé prêt à copier."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Market midpoint + spread % inputs", "Entrées de point médian de marché + % d'écart")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Min / midpoint / max calculation", "Calcul minimum / point médian / maximum")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("P50 positioning placement guide", "Guide de positionnement P50")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Copy-ready formatted band summary", "Résumé de bande formaté prêt à copier")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Financial Literacy */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Tool 4", "Outil 4")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Financial Literacy Reference", "Référence de littératie financière")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Plain-language guides on pay stubs, RRSP vs TFSA, and benefits terms — so employees understand what they're earning.",
+                "Guides en langage simple sur les talons de paie, REER vs CELI et les conditions d'avantages sociaux — pour que les employés comprennent ce qu'ils gagnent."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Pay stub line-by-line explainer", "Explication ligne par ligne du talon de paie")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("RRSP vs TFSA comparison guide", "Guide comparatif REER vs CELI")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Benefits terms glossary", "Glossaire des termes d'avantages sociaux")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("3 interactive accordion topics", "3 sujets en accordéon interactifs")}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* CTA into Compensation */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Link
+            to="/app/compensation"
+            className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+          >
+            {t("Explore Ring 4 Compensation", "Explorer l'anneau 4 Rémunération")}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <span className="text-sm text-zinc-500">
+            {t("5 tools across 3 compensation categories", "5 outils sur 3 catégories de rémunération")}
+          </span>
+        </div>
+      </Section>
+
 
       {/* ── ABOUT ── */}
       <Section className="py-8 md:py-14" id="about">
