@@ -183,7 +183,9 @@ function DocRow({ title, meta, province, to }) {
   );
 }
 
-function QuickLaunchCard({ label, desc, icon: Icon, to }) {
+function QuickLaunchCard(props) {
+  const { label, desc, to } = props;
+  const Icon = props.icon;
   return (
     <Link to={to}>
       <div className="flex flex-col gap-2 rounded-[20px] border border-white/6 bg-white/[0.02] p-4 transition hover:border-amber-400/20 hover:bg-white/[0.03]">
@@ -446,7 +448,6 @@ export default function Dashboard() {
   const savedSettings = getStoredSettings();
   const companyName = savedSettings.companyName || null;
   const province = savedSettings.province || null;
-  const displayName = companyName || user?.email?.split("@")[0] || "your workspace";
 
   const [documents, setDocuments] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(true);

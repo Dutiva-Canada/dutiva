@@ -7,15 +7,10 @@ const FONTS = [
   { label: "Print", value: "print", css: "20px 'Segoe UI', Arial, sans-serif" },
 ];
 
-function renderTypedToCanvas(canvas, text, fontCss) {
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (!text.trim()) return;
-  ctx.font = fontCss;
-  ctx.fillStyle = "#C49355";
-  ctx.textBaseline = "middle";
-  ctx.fillText(text, 20, canvas.height / 2);
-}
+const MODE_TABS = [
+  { id: "draw", icon: PenLine, label: "Draw" },
+  { id: "type", icon: Type, label: "Type" },
+];
 
 export default function SignaturePad({ onSignatureChange }) {
   const canvasRef = useRef(null);
@@ -122,18 +117,21 @@ export default function SignaturePad({ onSignatureChange }) {
     <div className="space-y-4">
       {/* Mode tabs */}
       <div className="flex gap-2">
-        {[{ id: "draw", icon: PenLine, label: "Draw" }, { id: "type", icon: Type, label: "Type" }].map(({ id, icon: Icon, label }) => (
-          <button key={id} type="button" onClick={() => switchMode(id)}
-            className={[
-              "inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition",
-              mode === id
-                ? "border-amber-400/25 bg-amber-400/10 text-amber-300"
-                : "border-white/8 bg-white/[0.02] text-zinc-400 hover:text-zinc-200",
-            ].join(" ")}>
-            <Icon className="h-3.5 w-3.5" />
-            {label} signature
-          </button>
-        ))}
+        {MODE_TABS.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button key={tab.id} type="button" onClick={() => switchMode(tab.id)}
+              className={[
+                "inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition",
+                mode === tab.id
+                  ? "border-amber-400/25 bg-amber-400/10 text-amber-300"
+                  : "border-white/8 bg-white/[0.02] text-zinc-400 hover:text-zinc-200",
+              ].join(" ")}>
+              <Icon className="h-3.5 w-3.5" />
+              {tab.label} signature
+            </button>
+          );
+        })}
       </div>
 
       {/* Type mode: input + font picker */}

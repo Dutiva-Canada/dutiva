@@ -6,7 +6,6 @@
 // dashboard generator can substitute them at render time.
 
 const fs = require("fs");
-const path = require("path");
 const {
   Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
   Table, TableRow, TableCell, WidthType, BorderStyle, LevelFormat,

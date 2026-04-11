@@ -555,10 +555,6 @@ export default function Advisor() {
   );
 }
 
-function trimmedInput(val) {
-  return val.trim();
-}
-
 // Exported so Advisor can render this outside its scroll context on mobile
 export function MobileChatInputBar({ value, onChange, onSend }) {
   return (

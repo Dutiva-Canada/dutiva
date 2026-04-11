@@ -92,10 +92,21 @@ function PriceCard({
   );
 }
 
+// Annual savings: $39 * 12 = $468 vs $390 = $78 saved per year (~17%).
+// TODO(stripe): Wire two Stripe price IDs for Growth — one monthly, one annual.
+//   price_growth_monthly_cad  → $39/mo CAD recurring
+//   price_growth_annual_cad   → $390/yr CAD recurring
+//   Pass { plan: "growth", billing: "monthly" | "annual" } to the Supabase edge
+//   function and let it pick the correct Stripe price ID server-side.
 export default function PricingPage() {
   const { user } = useAuth();
   const [checkingOut, setCheckingOut] = useState(null);
   const [checkoutError, setCheckoutError] = useState(null);
+  const [billing, setBilling] = useState("monthly"); // "monthly" | "annual"
+
+  const growthPrice = billing === "annual" ? "$390" : "$39";
+  const growthSuffix = billing === "annual" ? "/yr CAD" : "/mo CAD";
+  const growthCta = billing === "annual" ? "Choose Growth · Annual" : "Choose Growth";
 
   const handleCheckout = async (plan) => {
     if (!supabase || !user) {
@@ -107,11 +118,11 @@ export default function PricingPage() {
     setCheckoutError(null);
 
     try {
-      const successUrl = `${window.location.origin}/payment-success?plan=${plan}`;
+      const successUrl = `${window.location.origin}/payment-success?plan=${plan}&billing=${billing}`;
       const cancelUrl = `${window.location.origin}/pricing`;
 
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-        body: { plan, successUrl, cancelUrl },
+        body: { plan, billing, successUrl, cancelUrl },
       });
 
       if (error || !data?.url) throw new Error(error?.message ?? "Could not start checkout.");
@@ -144,6 +155,47 @@ export default function PricingPage() {
             No contracts, no lock-in. Start free and upgrade when you need more.
             Cancel anytime.
           </p>
+
+          {/* Billing cycle toggle */}
+          <div className="mt-8 flex justify-center">
+            <div
+              role="tablist"
+              aria-label="Billing cycle"
+              className="inline-flex items-center gap-1 rounded-full border border-white/6 bg-white/[0.03] p-1"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={billing === "monthly"}
+                onClick={() => setBilling("monthly")}
+                className={[
+                  "rounded-full px-4 py-2 text-sm transition",
+                  billing === "monthly"
+                    ? "bg-amber-400/12 text-amber-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+                    : "text-zinc-400 hover:text-zinc-200",
+                ].join(" ")}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={billing === "annual"}
+                onClick={() => setBilling("annual")}
+                className={[
+                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm transition",
+                  billing === "annual"
+                    ? "bg-amber-400/12 text-amber-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+                    : "text-zinc-400 hover:text-zinc-200",
+                ].join(" ")}
+              >
+                Annual
+                <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-300">
+                  Save $78
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="mt-12 grid gap-6 xl:grid-cols-3">
@@ -162,16 +214,23 @@ export default function PricingPage() {
 
           <PriceCard
             title="Growth"
-            price="$39"
-            suffix="/mo CAD"
+            price={growthPrice}
+            suffix={growthSuffix}
             featured
-            desc="For SMBs and growing teams that need compliant HR documents on a regular basis."
+            desc={
+              billing === "annual"
+                ? "For SMBs committing for the year — same features, best price."
+                : "For SMBs and growing teams that need compliant HR documents on a regular basis."
+            }
             features={[
               "Unlimited document generation",
               "AI Advisor with legislation citations",
               "ESA auto-calculator + e-signatures",
+              billing === "annual"
+                ? "2 months free vs. monthly billing"
+                : "Switch to annual anytime and save $78",
             ]}
-            cta="Choose Growth"
+            cta={growthCta}
             onCheckout={() => handleCheckout("growth")}
             loading={checkingOut === "growth"}
           />
@@ -209,8 +268,10 @@ export default function PricingPage() {
           <div className="rounded-[20px] border border-white/6 bg-white/[0.02] p-5">
             <div className="text-sm font-semibold text-zinc-100">Which provinces are covered?</div>
             <div className="mt-2 text-sm text-zinc-400">
-              All 10 provinces, 3 territories, and federal — 14 jurisdictions total, each with
-              current Employment Standards Act references.
+              Ontario, Quebec, federally regulated employers, and remote workers
+              under federal jurisdiction — with current Employment Standards Act,
+              Loi sur les normes du travail, and Canada Labour Code references.
+              Additional provinces rolling out through 2026.
             </div>
           </div>
           <div className="rounded-[20px] border border-white/6 bg-white/[0.02] p-5">

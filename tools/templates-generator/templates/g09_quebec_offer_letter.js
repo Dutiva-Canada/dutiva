@@ -1,7 +1,7 @@
 // G09 — Québec Offer Letter (French-primary, Bill 96 / Charter s. 41 compliant)
 // Québec-only template: exports function(j) => templateObject
 
-module.exports = function(j) {
+module.exports = function(_j) {
   return {
     id: "T09",
     slug: "Quebec_Offer_Letter",
