@@ -15,11 +15,12 @@ import {
   Globe,
   Megaphone,
   DollarSign,
+  Layers,
 } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 
-/** Returns translated nav items — must be called inside a component. */
+/** Full sidebar nav — all pages */
 function useNavItems() {
   const { t } = useLang();
   return [
@@ -31,6 +32,23 @@ function useNavItems() {
     { to: "/app/communications", label: t("Communications", "Communications"),    icon: Megaphone },
     { to: "/app/compensation",   label: t("Compensation",   "R\u00e9mun\u00e9ration"), icon: DollarSign },
     { to: "/app/settings",       label: t("Settings",       "Param\u00e8tres"),        icon: Settings },
+  ];
+}
+
+/** Mobile bottom nav — 5 items only; all Ring pages share one "Rings" tab */
+function useMobileNavItems() {
+  const { t } = useLang();
+  return [
+    { to: "/app",           label: t("Home",     "Accueil"),    icon: LayoutDashboard, end: true },
+    { to: "/app/generator", label: t("Generate", "G\u00e9n\u00e9rer"),   icon: Wand2 },
+    { to: "/app/advisor",   label: t("Advisor",  "Conseiller"), icon: MessageSquare },
+    {
+      to: "/app/wellness",
+      label: t("Rings", "Anneaux"),
+      icon: Layers,
+      matchPaths: ["/app/wellness", "/app/communications", "/app/compensation"],
+    },
+    { to: "/app/settings",  label: t("Settings", "Param\u00e8tres"), icon: Settings },
   ];
 }
 
@@ -305,24 +323,27 @@ function TopBar() {
   );
 }
 
-/** Mobile bottom navigation bar — visible on screens smaller than xl */
+/** Mobile bottom navigation — in-flow flex child, never overlaps content */
 function MobileBottomNav({ navItems }) {
   const location = useLocation();
 
   return (
     <nav
-      className="flex xl:hidden fixed bottom-0 left-0 right-0 z-50"
+      className="xl:hidden shrink-0 flex"
       style={{
         background: 'rgba(10,12,18,0.97)',
         borderTop: '1px solid rgba(255,255,255,0.08)',
-        height: '64px',
+        minHeight: '64px',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         alignItems: 'stretch',
       }}
     >
       {navItems.map(item => {
-        const isActive = item.end
-          ? location.pathname === item.to
-          : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+        const isActive = item.matchPaths
+          ? item.matchPaths.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))
+          : item.end
+            ? location.pathname === item.to
+            : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
         return (
           <Link
             key={item.to}
@@ -352,22 +373,26 @@ function MobileBottomNav({ navItems }) {
 
 export default function AppLayout() {
   const navItems = useNavItems();
+  const mobileNavItems = useMobileNavItems();
   return (
-    <div className="app-shell min-h-screen text-zinc-100">
-      <div className="flex min-h-screen">
+    <div className="app-shell text-zinc-100">
+      {/*
+        Mobile: h-dvh constrains to viewport so main can scroll independently
+        and MobileBottomNav (in-flow) never overlaps content.
+        xl: h-auto / min-h-screen reverts to natural document flow.
+      */}
+      <div className="flex h-dvh xl:h-auto xl:min-h-screen">
         <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden xl:overflow-visible">
           <TopBar />
-          {/* pb-16 on mobile/tablet leaves room above the fixed bottom nav bar */}
-          <main className="flex-1 px-4 pt-6 pb-16 md:px-6 xl:px-8 xl:pb-6">
+          <main className="flex-1 overflow-y-auto xl:overflow-visible px-4 pt-6 pb-6 md:px-6 xl:px-8">
             <div className="mx-auto max-w-7xl">
               <Outlet />
             </div>
           </main>
+          <MobileBottomNav navItems={mobileNavItems} />
         </div>
       </div>
-      {/* Mobile bottom navigation — hidden on xl+ where sidebar is visible */}
-      <MobileBottomNav navItems={navItems} />
     </div>
   );
 }

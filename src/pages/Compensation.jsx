@@ -362,7 +362,7 @@ function FinancialLiteracy({ t }) {
                 <ul className="space-y-2">
                   {topic.items.map((item, j) => (
                     <li key={j} className="flex gap-3 text-sm text-zinc-300">
-                      <span className="text-amber-400 shrink-0 mt-0.5">\u2022</span>
+                      <span className="text-amber-400 shrink-0 mt-0.5">•</span>
                       <span>{item}</span>
                     </li>
                   ))}

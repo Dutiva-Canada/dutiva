@@ -48,22 +48,6 @@ const CANADIAN_JURISDICTIONS = [
   "Remote (Federal)",
 ];
 
-// ── ESA notice data ───────────────────────────────────────────────────────────
-const ESA_NOTICE = {
-  Ontario:           [[0,1,0],[1,3,2],[3,4,3],[4,5,4],[5,6,5],[6,7,6],[7,8,7],[8,Infinity,8]],
-  Quebec:            [[0,0.25,0],[0.25,1,1],[1,5,2],[5,10,4],[10,Infinity,8]],
-  Federal:           [[0,0.25,0],[0.25,Infinity,2]],
-  "Remote (Federal)":[[0,0.25,0],[0.25,Infinity,2]],
-};
-
-function getNoticeWeeks(province, years) {
-  const table = ESA_NOTICE[province] || ESA_NOTICE["Ontario"];
-  for (const [min, max, weeks] of table) {
-    if (years >= min && years < max) return weeks;
-  }
-  return table[table.length - 1][2];
-}
-
 const STORAGE_KEY = "dutiva.generatorDraft.v1";
 
 const defaultForm = {
@@ -575,113 +559,6 @@ function ESignModal({
   );
 }
 
-// ── ESA Calculator component ──────────────────────────────────────────────────
-function ESACalculator({ defaultProvince }) {
-  const settings = getStoredSettings();
-  const [province, setProvince] = useState(defaultProvince || settings.province || "Ontario");
-  const [years, setYears] = useState("");
-  const [annualSalary, setAnnualSalary] = useState("");
-  const [largePay, setLargePay] = useState(false);
-  const [result, setResult] = useState(null);
-
-  const calculate = () => {
-    const y = parseFloat(years);
-    const s = parseFloat(String(annualSalary).replace(/[,$]/g, ""));
-    if (!y || y < 0 || !s || s <= 0) return;
-    const weeklyWage = s / 52;
-    const noticeWeeks = getNoticeWeeks(province, y);
-    const payInLieu = noticeWeeks * weeklyWage;
-    let severanceWeeks = 0;
-    let severanceNote = "";
-    if (province === "Ontario") {
-      if (y >= 5 && largePay) {
-        severanceWeeks = Math.min(Math.floor(y), 26);
-        severanceNote = "ESA, 2000, s. 64\u201365 \u00b7 Max 26 weeks";
-      } else if (y >= 5) {
-        severanceNote = "May apply if payroll ≥ $2.5M \u2014 confirm above";
-      }
-    } else if (province === "Federal" || province === "Remote (Federal)") {
-      if (y >= 1) severanceNote = "Canada Labour Code, s. 235 \u2014 contact legal counsel";
-    }
-    const severancePay = severanceWeeks * weeklyWage;
-    const actMap = {
-      Ontario:           "ESA, 2000, s. 57",
-      Quebec:            "Act Respecting Labour Standards, s. 82",
-      Federal:           "Canada Labour Code, s. 230",
-      "Remote (Federal)":"Canada Labour Code, s. 230",
-    };
-    setResult({ noticeWeeks, payInLieu, weeklyWage, severanceWeeks, severancePay, severanceNote, actRef: actMap[province] || "applicable ESA" });
-  };
-
-  const fmt = (n) => n.toLocaleString("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 });
-
-  return (
-    <SectionCard title="Entitlement calculator">
-      <p className="mb-4 text-sm text-zinc-500">Calculate ESA notice entitlements before generating your document. Statutory minimums only — common-law notice may be higher.</p>
-      <div className="space-y-3">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-300">Province</label>
-          <select value={province} onChange={(e) => { setProvince(e.target.value); setResult(null); }}
-            className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-[16px] text-zinc-100 outline-none">
-            {CANADIAN_JURISDICTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
-          </select>
-        </div>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-300">Years of service</label>
-            <input type="number" min="0" step="0.5" placeholder="e.g. 3.5" value={years}
-              onChange={(e) => { setYears(e.target.value); setResult(null); }}
-              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-[16px] text-zinc-100 outline-none" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-300">Annual salary ($)</label>
-            <input type="number" min="0" step="1000" placeholder="e.g. 65000" value={annualSalary}
-              onChange={(e) => { setAnnualSalary(e.target.value); setResult(null); }}
-              className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-[16px] text-zinc-100 outline-none" />
-          </div>
-        </div>
-        {province === "Ontario" && (
-          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/6 bg-white/[0.02] px-3 py-2.5">
-            <input type="checkbox" checked={largePay} onChange={(e) => { setLargePay(e.target.checked); setResult(null); }} className="h-4 w-4 accent-amber-400" />
-            <span className="text-xs text-zinc-300">Employer payroll ≥ $2.5M (enables severance)</span>
-          </label>
-        )}
-        <button type="button" onClick={calculate} className="gold-button w-full px-4 py-2.5 text-sm">
-          Calculate entitlements
-        </button>
-      </div>
-      {result && (
-        <div className="mt-4 space-y-2">
-          <div className="rounded-xl border border-amber-400/15 bg-amber-400/6 px-4 py-3">
-            <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Statutory notice</div>
-            <div className="mt-1 text-xl font-bold text-amber-300">{result.noticeWeeks} week{result.noticeWeeks !== 1 ? "s" : ""}</div>
-            <div className="mt-0.5 text-xs text-zinc-400">Pay in lieu: {fmt(result.payInLieu)} \u00b7 Weekly wage: {fmt(result.weeklyWage)}</div>
-          </div>
-          {(result.severanceWeeks > 0 || result.severanceNote) && (
-            <div className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Severance pay</div>
-              {result.severanceWeeks > 0 ? (
-                <>
-                  <div className="mt-1 text-xl font-bold text-zinc-100">{result.severanceWeeks} weeks \u00b7 {fmt(result.severancePay)}</div>
-                  <div className="mt-0.5 text-xs text-zinc-500">{result.severanceNote}</div>
-                </>
-              ) : (
-                <div className="mt-1 text-sm text-zinc-400">{result.severanceNote}</div>
-              )}
-            </div>
-          )}
-          <div className="rounded-xl border border-emerald-400/12 bg-emerald-400/6 px-4 py-3">
-            <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Total minimum exposure</div>
-            <div className="mt-1 text-xl font-bold text-emerald-300">{fmt(result.payInLieu + result.severancePay)}</div>
-            <div className="mt-0.5 text-xs text-zinc-500">{result.actRef} \u00b7 statutory only</div>
-          </div>
-          <p className="pt-1 text-xs text-zinc-500">Common-law reasonable notice often exceeds statutory minimums. Consult legal counsel before terminating.</p>
-        </div>
-      )}
-    </SectionCard>
-  );
-}
-
 function ActionLink({ to, title, desc }) {
   return (
     <Link to={to}
@@ -1024,8 +901,6 @@ export default function GeneratorPage() {
 
         <StatusToast text={statusMessage} tone={statusTone} />
 
-        {/* Entitlement calculator */}
-        <ESACalculator defaultProvince={form.jurisdiction} />
 
         {/* Next steps — step pills live inside this card */}
         <SectionCard title="Next steps">
