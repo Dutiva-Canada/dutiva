@@ -280,22 +280,63 @@ export default function LandingPage() {
       {/* ── WELLNESS ── */}
       <Section className="py-6 md:py-10">
         <div className="mb-8 max-w-3xl">
-          <Pill>{t("Workplace Wellness — now available", "Bien-être au travail — maintenant disponible")}</Pill>
+          <Pill>{t("Workplace Wellness — Ring 2 fully live", "Bien-être au travail — Anneau 2 entièrement disponible")}</Pill>
           <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
             {t(
-              "Beyond documents — interactive compliance workflows.",
-              "Au-delà des documents — des flux de conformité interactifs."
+              "Beyond documents — four pillars of wellness compliance.",
+              "Au-delà des documents — quatre piliers de conformité en bien-être."
             )}
           </h2>
           <p className="mt-3 text-base leading-7 text-zinc-400">
             {t(
-              "Dutiva now includes guided decision trees, checklists, and assessment tools for workplace wellness compliance — the interactive workflows your team needs alongside the documents.",
-              "Dutiva inclut maintenant des arbres de décision guidés, des listes de vérification et des outils d'évaluation pour la conformité en matière de bien-être au travail — les flux interactifs dont votre équipe a besoin en complément des documents."
+              "Ring 2 brings guided decision trees, scored assessments, interactive checklists, and manager scripts across all four wellness pillars — fully live and jurisdiction-aware for Canadian employers.",
+              "L'anneau 2 offre des arbres de décision guidés, des évaluations notées, des listes de vérification interactives et des scripts de gestion sur les quatre piliers du bien-être — entièrement disponibles et adaptés aux juridictions canadiennes."
             )}
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
+          {/* Pillar A — Mental Health & EAP */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Pillar A", "Pilier A")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Mental Health & EAP", "Santé mentale et PAE")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Interactive mental health checklists, EAP referral guides, and manager conversation scripts — grounded in CSA Z1003 and federal Bill C-65.",
+                "Listes de vérification interactives en santé mentale, guides d'orientation PAE et scripts pour gestionnaires — ancrés dans la norme CSA Z1003 et le projet de loi fédéral C-65."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("8-point mental health compliance checklist", "Liste de conformité en santé mentale en 8 points")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("EAP referral guide (5 categories)", "Guide d'orientation PAE (5 catégories)")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Manager conversation scripts", "Scripts de conversation pour gestionnaires")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Return-to-work planning guide", "Guide de planification du retour au travail")}
+              </li>
+            </ul>
+          </div>
+
           {/* Pillar B — Accommodation Frameworks */}
           <div className="premium-card-soft p-6">
             <div className="mb-4 flex items-center gap-3">
@@ -333,6 +374,47 @@ export default function LandingPage() {
               <li className="flex items-center gap-2 text-sm text-zinc-400">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
                 {t("Undue hardship assessment", "Évaluation de la contrainte excessive")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Pillar C — Psychological Safety */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Pillar C", "Pilier C")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Psychological Safety", "Sécurité psychologique")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Scored workplace climate assessments, bystander intervention guides, and respectful workplace tools — aligned with Bill C-65 and provincial harassment obligations.",
+                "Évaluations notées du climat de travail, guides d'intervention pour témoins et outils de milieu de travail respectueux — conformes au projet de loi C-65 et aux obligations provinciales sur le harcèlement."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("15-question CSA Z1003 climate assessment", "Évaluation climatique CSA Z1003 (15 questions)")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Bystander intervention guide (5 D's)", "Guide d'intervention pour témoins (les 5 D)")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Respectful workplace policy template", "Modèle de politique sur le milieu respectueux")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Jurisdiction reporting obligations", "Obligations de signalement par juridiction")}
               </li>
             </ul>
           </div>
@@ -379,14 +461,136 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Coming soon */}
+        {/* CTA into Wellness */}
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <span className="text-sm text-zinc-500">{t("Coming soon:", "À venir :")}</span>
-          <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-400">
-            {t("Pillar A · Mental Health & EAP", "Pilier A · Santé mentale et PAE")}
+          <Link
+            to="/app/wellness"
+            className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+          >
+            {t("Explore Ring 2 Wellness", "Explorer l'anneau 2 Bien-être")}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <span className="text-sm text-zinc-500">
+            {t("16 interactive tools across 4 pillars", "16 outils interactifs sur 4 piliers")}
+          </span>
+        </div>
+      </Section>
+
+      {/* ── ABOUT ── */}
+      <Section className="py-8 md:py-14" id="about">
+        <div className="mb-10 max-w-3xl">
+          <Pill>{t("About Dutiva", "À propos de Dutiva")}</Pill>
+          <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+            {t("Built with purpose. Rooted in law.", "Conçu avec intention. Ancré dans la loi.")}
+          </h2>
+        </div>
+
+        {/* Mission + Vision row */}
+        <div className="grid gap-4 md:grid-cols-2 mb-4">
+          <div className="premium-card-soft p-8">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+              {t("Our Mission", "Notre mission")}
+            </div>
+            <p className="text-lg font-medium leading-8 text-zinc-100">
+              {t(
+                "Make Canadian employment law accessible to every employer — regardless of size, budget, or HR headcount.",
+                "Rendre le droit du travail canadien accessible à tous les employeurs — peu importe la taille, le budget ou l'effectif RH."
+              )}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-zinc-400">
+              {t(
+                "Too many Canadian SMBs operate without access to the compliance tools that large organizations take for granted. Dutiva closes that gap — not with generic advice, but with tools built on the actual legislation.",
+                "Trop de PME canadiennes n'ont pas accès aux outils de conformité que les grandes organisations tiennent pour acquis. Dutiva comble cet écart — non pas avec des conseils généraux, mais avec des outils fondés sur la législation réelle."
+              )}
+            </p>
           </div>
-          <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-400">
-            {t("Pillar C · Psychological Safety", "Pilier C · Sécurité psychologique")}
+
+          <div className="premium-card-soft p-8">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+              {t("Our Vision", "Notre vision")}
+            </div>
+            <p className="text-lg font-medium leading-8 text-zinc-100">
+              {t(
+                "A Canada where no employer is caught off-guard by compliance — and no employee falls through the cracks.",
+                "Un Canada où aucun employeur n'est pris au dépourvu en matière de conformité — et aucun employé ne passe entre les mailles du filet."
+              )}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-zinc-400">
+              {t(
+                "Compliance failures hurt both sides. Our long-term goal is a platform where staying compliant is the path of least resistance — proactive, guided, and plain-language by default.",
+                "Les manquements à la conformité nuisent aux deux parties. Notre objectif à long terme est une plateforme où rester conforme est la voie de la moindre résistance — proactive, guidée et en langage clair par défaut."
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Philosophy */}
+        <div className="premium-card-soft p-8 mb-4">
+          <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+            {t("Product Philosophy", "Philosophie du produit")}
+          </div>
+          <p className="text-base leading-7 text-zinc-300 max-w-3xl">
+            {t(
+              "Dutiva is not a form builder. It's a compliance layer built around what Canadian employment law actually requires — ESA, LNT, Canada Labour Code, CSA Z1003, Bill C-65 — not around what's popular in US HR software. Every tool, every template, and every guided workflow traces back to a specific act, article, and jurisdiction. We build the tool; you own the decision.",
+              "Dutiva n'est pas un générateur de formulaires. C'est une couche de conformité construite autour de ce que le droit du travail canadien exige réellement — LNE, LNT, Code canadien du travail, CSA Z1003, projet de loi C-65 — et non ce qui est populaire dans les logiciels RH américains. Chaque outil, chaque modèle et chaque flux guidé est lié à un acte, un article et une juridiction spécifiques. Nous construisons l'outil; vous prenez la décision."
+            )}
+          </p>
+        </div>
+
+        {/* Core Values */}
+        <div>
+          <div className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
+            {t("Core Values", "Valeurs fondamentales")}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            {[
+              {
+                num: "01",
+                title: t("Legislation first", "La législation d'abord"),
+                desc: t(
+                  "Every tool cites the exact act, article, and jurisdiction — no approximations.",
+                  "Chaque outil cite l'acte, l'article et la juridiction exacts — sans approximations."
+                ),
+              },
+              {
+                num: "02",
+                title: t("Built for Canadians", "Conçu pour les Canadiens"),
+                desc: t(
+                  "ESA, LNT, and CLC by default — not adapted from American software.",
+                  "LNE, LNT et CCT par défaut — pas adapté d'un logiciel américain."
+                ),
+              },
+              {
+                num: "03",
+                title: t("Proactive over reactive", "Proactif plutôt que réactif"),
+                desc: t(
+                  "Prevent compliance failures before they become HR crises or legal disputes.",
+                  "Prévenir les manquements avant qu'ils deviennent des crises RH ou des litiges."
+                ),
+              },
+              {
+                num: "04",
+                title: t("Transparency", "Transparence"),
+                desc: t(
+                  "Plain language, no legalese, and citations you can verify independently.",
+                  "Langage clair, sans jargon juridique, et des citations que vous pouvez vérifier."
+                ),
+              },
+              {
+                num: "05",
+                title: t("Accessibility", "Accessibilité"),
+                desc: t(
+                  "SMBs deserve the same quality of HR guidance as enterprises — at a fraction of the cost.",
+                  "Les PME méritent la même qualité de conseils RH que les grandes entreprises — à une fraction du coût."
+                ),
+              },
+            ].map((v) => (
+              <div key={v.num} className="rounded-[20px] border border-white/6 bg-white/[0.02] p-5">
+                <div className="mb-2 font-serif text-2xl text-amber-400">{v.num}</div>
+                <div className="mb-1 text-sm font-semibold text-zinc-100">{v.title}</div>
+                <div className="text-xs leading-5 text-zinc-400">{v.desc}</div>
+              </div>
+            ))}
           </div>
         </div>
       </Section>
