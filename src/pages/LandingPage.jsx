@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles, Scale, Calendar } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 
 function Section({ children, className = "" }) {
@@ -231,8 +231,8 @@ export default function LandingPage() {
           </h2>
           <p className="mt-3 text-base leading-7 text-zinc-400">
             {t(
-              "Templates, calculations, guidance, and e-signatures — built around Canadian employment law, not adapted from generic software.",
-              "Modèles, calculs, conseils et signatures électroniques — conçus autour du droit du travail canadien, pas adaptés d'un logiciel générique."
+              "Templates, interactive compliance workflows, guided assessments, and legislation-cited guidance — built around Canadian employment law, not adapted from generic software.",
+              "Modèles, flux de conformité interactifs, évaluations guidées et conseils référencés à la législation — conçus autour du droit du travail canadien, pas adaptés d'un logiciel générique."
             )}
           </p>
         </div>
@@ -274,6 +274,120 @@ export default function LandingPage() {
               "Posez une question en français ou en anglais. Obtenez une réponse avec l'article exact de la LNE, LNT ou du CCT et sa date d'entrée en vigueur."
             )}
           />
+        </div>
+      </Section>
+
+      {/* ── WELLNESS ── */}
+      <Section className="py-6 md:py-10">
+        <div className="mb-8 max-w-3xl">
+          <Pill>{t("Workplace Wellness — now available", "Bien-être au travail — maintenant disponible")}</Pill>
+          <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+            {t(
+              "Beyond documents — interactive compliance workflows.",
+              "Au-delà des documents — des flux de conformité interactifs."
+            )}
+          </h2>
+          <p className="mt-3 text-base leading-7 text-zinc-400">
+            {t(
+              "Dutiva now includes guided decision trees, checklists, and assessment tools for workplace wellness compliance — the interactive workflows your team needs alongside the documents.",
+              "Dutiva inclut maintenant des arbres de décision guidés, des listes de vérification et des outils d'évaluation pour la conformité en matière de bien-être au travail — les flux interactifs dont votre équipe a besoin en complément des documents."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Pillar B — Accommodation Frameworks */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Scale className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Pillar B", "Pilier B")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Accommodation Frameworks", "Cadres d'accommodement")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Guided duty-to-accommodate workflows — from initial request to documented plan — built around human rights obligations across Canadian jurisdictions.",
+                "Des flux guidés d'obligation d'accommodement — de la demande initiale au plan documenté — fondés sur les obligations relatives aux droits de la personne dans les juridictions canadiennes."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Duty-to-accommodate decision tree", "Arbre de décision sur l'obligation d'accommodement")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Accommodation request & plan templates", "Modèles de demande et de plan d'accommodement")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Functional limitations guide", "Guide sur les limitations fonctionnelles")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Undue hardship assessment", "Évaluation de la contrainte excessive")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Pillar D — Leave Management */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  {t("Pillar D", "Pilier D")}
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">
+                  {t("Leave Management", "Gestion des congés")}
+                </div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              {t(
+                "Jurisdiction-aware leave documentation — checklists, request forms, and policy templates that match the rules for your province or federal scope.",
+                "Documentation des congés adaptée à la juridiction — listes de vérification, formulaires de demande et modèles de politique qui correspondent aux règles de votre province ou portée fédérale."
+              )}
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Leave of absence checklist", "Liste de vérification pour le congé d'absence")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Leave request form", "Formulaire de demande de congé")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Parental leave guide (ON / QC / Federal)", "Guide sur le congé parental (ON / QC / Fédéral)")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Sick day policy template", "Modèle de politique sur les jours de maladie")}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Coming soon */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <span className="text-sm text-zinc-500">{t("Coming soon:", "À venir :")}</span>
+          <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-400">
+            {t("Pillar A · Mental Health & EAP", "Pilier A · Santé mentale et PAE")}
+          </div>
+          <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-400">
+            {t("Pillar C · Psychological Safety", "Pilier C · Sécurité psychologique")}
+          </div>
         </div>
       </Section>
 
