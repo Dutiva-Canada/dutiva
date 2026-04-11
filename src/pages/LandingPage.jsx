@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles, Scale, Calendar } from "lucide-react";
 
 function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-7xl px-4 md:px-6 ${className}`}>{children}</section>;
@@ -194,8 +194,8 @@ export default function LandingPage() {
             Everything you need to stay compliant.
           </h2>
           <p className="mt-3 text-base leading-7 text-zinc-400">
-            Templates, calculations, guidance, and e-signatures — built around Canadian employment
-            law, not adapted from generic software.
+            Templates, interactive compliance workflows, guided assessments, and legislation-cited
+            guidance — built around Canadian employment law, not adapted from generic software.
           </p>
         </div>
 
@@ -224,6 +224,107 @@ export default function LandingPage() {
             title="Legislation-cited advisor"
             desc="Ask a compliance question in plain English. Get an answer with the exact ESA section, province, and effective date."
           />
+        </div>
+      </Section>
+
+      {/* ── WELLNESS ── */}
+      <Section className="py-6 md:py-10">
+        <div className="mb-8 max-w-3xl">
+          <Pill>Workplace Wellness — now available</Pill>
+          <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+            Beyond documents — interactive compliance workflows.
+          </h2>
+          <p className="mt-3 text-base leading-7 text-zinc-400">
+            Dutiva now includes guided decision trees, checklists, and assessment tools for workplace
+            wellness compliance — the interactive workflows your team needs alongside the documents.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Pillar B — Accommodation Frameworks */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Scale className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  Pillar B
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">Accommodation Frameworks</div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              Guided duty-to-accommodate workflows — from initial request to documented plan —
+              built around human rights obligations across Canadian jurisdictions.
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                Duty-to-accommodate decision tree
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                Accommodation request &amp; plan templates
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                Functional limitations guide
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                Undue hardship assessment
+              </li>
+            </ul>
+          </div>
+
+          {/* Pillar D — Leave Management */}
+          <div className="premium-card-soft p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  Pillar D
+                </div>
+                <div className="text-lg font-semibold text-zinc-100">Leave Management</div>
+              </div>
+            </div>
+            <p className="mb-4 text-sm leading-6 text-zinc-400">
+              Province-aware leave documentation — checklists, request forms, and policy templates
+              that match the rules for your jurisdiction.
+            </p>
+            <ul className="grid gap-2">
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                Leave of absence checklist
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                Leave request form
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                Parental leave guide (ON / QC / Federal)
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                Sick day policy template
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Coming soon */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <span className="text-sm text-zinc-500">Coming soon:</span>
+          <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-400">
+            Pillar A · Mental Health &amp; EAP
+          </div>
+          <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-400">
+            Pillar C · Psychological Safety
+          </div>
         </div>
       </Section>
 
