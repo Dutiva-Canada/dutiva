@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Megaphone, FileText, AlertTriangle, Copy, Check,
-  ChevronDown, ChevronUp, Users, ShieldAlert, BookOpen, ClipboardList,
+  ChevronDown, ChevronUp, Users, ShieldAlert, BookOpen, ClipboardList, Mic2,
 } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 
@@ -331,6 +331,192 @@ function CrisisGuide({ t }) {
 
 // ── Tab wrappers ──────────────────────────────────────────────────────────────
 
+// ══ Tool 6: Town Hall Agenda Builder ═══════════════════════════════════════════
+
+const MEETING_TYPES = [
+  { value: "all-hands",  label: "All-Hands (Full company)",    labelFr: "Assembl\u00e9e g\u00e9n\u00e9rale (Toute l'entreprise)" },
+  { value: "department", label: "Department Town Hall",         labelFr: "Assembl\u00e9e de d\u00e9partement"                    },
+  { value: "leadership", label: "Leadership / Exec Offsite",    labelFr: "R\u00e9union de direction / Hors-site"                 },
+  { value: "crisis",     label: "Crisis / Emergency All-Hands", labelFr: "Assembl\u00e9e d'urgence / Crise"                     },
+];
+
+const DURATIONS = [
+  { value: "30",  label: "30 minutes" },
+  { value: "45",  label: "45 minutes" },
+  { value: "60",  label: "60 minutes (1 hour)" },
+  { value: "90",  label: "90 minutes (1.5 hours)" },
+  { value: "120", label: "120 minutes (2 hours)" },
+];
+
+function TownHallAgendaBuilder({ t }) {
+  const [company,     setCompany]     = useState("");
+  const [meetingType, setMeetingType] = useState("all-hands");
+  const [date,        setDate]        = useState("");
+  const [time,        setTime]        = useState("");
+  const [facilitator, setFacilitator] = useState("");
+  const [duration,    setDuration]    = useState("60");
+  const [topics,      setTopics]      = useState("");
+
+  const typeLabel = MEETING_TYPES.find((m) => m.value === meetingType)?.label ?? "Town Hall";
+  const mins = parseInt(duration, 10);
+
+  const buildAgenda = () => {
+    if (!company) return "";
+    const topicLines = topics.split("\n").map((l) => l.trim()).filter(Boolean);
+    const openingMins = Math.round(mins * 0.10);
+    const closingMins = Math.round(mins * 0.05);
+    const qaMins      = Math.round(mins * 0.20);
+    const mainMins    = mins - openingMins - closingMins - qaMins;
+    const perTopic    = topicLines.length > 0 ? Math.floor(mainMins / topicLines.length) : mainMins;
+    const line        = "\u2500".repeat(60);
+
+    let a = `${typeLabel.toUpperCase()} \u2014 ${company}\n`;
+    a += `Date: ${date || "[Date]"}   Time: ${time || "[Time]"}   Duration: ${duration} min\n`;
+    a += `Facilitator: ${facilitator || "[Facilitator Name]"}\n${line}\n\nAGENDA\n\n`;
+
+    let cur = 0;
+    const fmt = (n) => `[+${n} min]`.padEnd(12);
+    a += `${fmt(cur)} Welcome & Opening Remarks (${openingMins} min)\n`;
+    a += `             \u2022 Meeting objectives and ground rules\n`;
+    cur += openingMins;
+
+    topicLines.forEach((topic, i) => {
+      a += `\n${fmt(cur)} ${i + 1}. ${topic} (${perTopic} min)\n`;
+      cur += perTopic;
+    });
+    if (topicLines.length === 0) {
+      a += `\n${fmt(cur)} [Add agenda topics above] (${mainMins} min)\n`;
+      cur += mainMins;
+    }
+
+    a += `\n${fmt(cur)} Q&A / Open Floor (${qaMins} min)\n`;
+    a += `             \u2022 Encourage questions via chat or raise hand\n`;
+    cur += qaMins;
+
+    a += `\n${fmt(cur)} Closing & Next Steps (${closingMins} min)\n`;
+    a += `             \u2022 Key decisions / action items recap\n`;
+    a += `             \u2022 Recording and notes shared by [date]\n\n${line}\n`;
+    a += `Prepared by ${facilitator || "[Facilitator]"} \u00b7 ${company}`;
+    return a;
+  };
+
+  const agenda = buildAgenda();
+
+  return (
+    <SectionCard icon={Mic2}
+      title={t("Town Hall Agenda Builder", "G\u00e9n\u00e9rateur d'ordre du jour d'assembl\u00e9e")}
+      subtitle={t("Structured agenda with timed segments for any company-wide meeting", "Ordre du jour structur\u00e9 pour toute r\u00e9union d'entreprise")}>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("Company Name", "Nom de l'entreprise")}>
+          <Input value={company} onChange={setCompany} placeholder="Acme Corp" />
+        </Field>
+        <Field label={t("Meeting Type", "Type de r\u00e9union")}>
+          <Select value={meetingType} onChange={setMeetingType}
+            options={MEETING_TYPES.map((m) => ({ value: m.value, label: t(m.label, m.labelFr) }))} />
+        </Field>
+        <Field label={t("Date", "Date")}>
+          <Input value={date} onChange={setDate} placeholder="2025-09-15" />
+        </Field>
+        <Field label={t("Start Time", "Heure de d\u00e9but")}>
+          <Input value={time} onChange={setTime} placeholder="10:00 AM ET" />
+        </Field>
+        <Field label={t("Facilitator / Host", "Animateur / H\u00f4te")}>
+          <Input value={facilitator} onChange={setFacilitator} placeholder="CEO / VP People" />
+        </Field>
+        <Field label={t("Meeting Duration", "Dur\u00e9e de la r\u00e9union")}>
+          <Select value={duration} onChange={setDuration} options={DURATIONS} />
+        </Field>
+      </div>
+      <div className="mt-4">
+        <Field label={t("Agenda Topics (one per line)", "Sujets \u00e0 l'ordre du jour (un par ligne)")}>
+          <textarea
+            value={topics}
+            onChange={(e) => setTopics(e.target.value)}
+            rows={4}
+            placeholder={t(
+              "Q2 financial results\nProduct roadmap update\nPeople & culture initiatives\nAnnouncements",
+              "R\u00e9sultats financiers T2\nMise \u00e0 jour feuille de route\nInitiatives RH\nAnnonces"
+            )}
+            className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-amber-400/30 focus:ring-1 focus:ring-amber-400/20 resize-none"
+          />
+        </Field>
+      </div>
+      {agenda ? (
+        <div className="mt-5 space-y-3"><ScriptBlock text={agenda} /><CopyButton text={agenda} /></div>
+      ) : (
+        <p className="mt-4 text-sm text-zinc-500">{t("Enter company name above to generate.", "Entrez le nom de l'entreprise ci-dessus pour g\u00e9n\u00e9rer.")}</p>
+      )}
+    </SectionCard>
+  );
+}
+
+// ══ Tool 7: Talking Points Builder ════════════════════════════════════════════
+
+function TalkingPointsBuilder({ t }) {
+  const [topic,    setTopic]    = useState("");
+  const [audience, setAudience] = useState("");
+  const [keyMsg,   setKeyMsg]   = useState("");
+  const [point1,   setPoint1]   = useState("");
+  const [point2,   setPoint2]   = useState("");
+  const [point3,   setPoint3]   = useState("");
+  const [toughQ,   setToughQ]   = useState("");
+
+  const line = "\u2500".repeat(60);
+  const doc  = topic
+    ? `LEADERSHIP TALKING POINTS\nTopic: ${topic}\nAudience: ${audience || "All employees"}\nDate: ${new Date().toLocaleDateString("en-CA")}\n${line}\n\nCORE MESSAGE\n\u201c${keyMsg || "[Insert your 1\u20132 sentence key message here]"}\u201d\n\nSUPPORTING POINTS\n\n${point1 ? `1. ${point1}` : "1. [Supporting point]"}\n\n${point2 ? `2. ${point2}` : "2. [Supporting point]"}\n\n${point3 ? `3. ${point3}` : "3. [Supporting point]"}\n\n${line}\n\nANTICIPATED TOUGH QUESTIONS\n\n${
+        toughQ
+          ? toughQ.split("\n").filter(Boolean).map((q, i) => `Q${i + 1}: ${q}\nA:  [Prepare your answer here]\n`).join("\n")
+          : "Q1: [Add anticipated tough question]\nA:  [Prepare your answer here]"
+      }\n${line}\n\nKEY DELIVERY REMINDERS\n\u2022 Return to the core message if sidetracked\n\u2022 Acknowledge uncertainty honestly \u2014 don\u2019t over-promise\n\u2022 Thank employees for questions and engagement\n\u2022 Refer legal/HR specifics to the appropriate contact\n\nPresenter: [Name / Title] \u00b7 ${new Date().toLocaleDateString("en-CA")}`
+    : "";
+
+  return (
+    <SectionCard icon={ClipboardList}
+      title={t("Leadership Talking Points Builder", "G\u00e9n\u00e9rateur de points de discussion pour la direction")}
+      subtitle={t("Copy-ready talking points for announcements, change management, or difficult messages", "Points de discussion pour annonces, gestion du changement ou messages difficiles")}>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("Announcement Topic", "Sujet de l'annonce")}>
+          <Input value={topic} onChange={setTopic} placeholder="Q2 Restructuring Plan" />
+        </Field>
+        <Field label={t("Audience", "Auditoire")}>
+          <Input value={audience} onChange={setAudience} placeholder="All employees / Sales team" />
+        </Field>
+        <Field label={t("Core Message (1\u20132 sentences)", "Message cl\u00e9 (1\u20132 phrases)")}>
+          <Input value={keyMsg} onChange={setKeyMsg} placeholder="We are restructuring to focus on our core strengths..." />
+        </Field>
+        <Field label={t("Supporting Point 1", "Point d'appui 1")}>
+          <Input value={point1} onChange={setPoint1} placeholder="Why this decision was made" />
+        </Field>
+        <Field label={t("Supporting Point 2", "Point d'appui 2")}>
+          <Input value={point2} onChange={setPoint2} placeholder="What changes employees can expect" />
+        </Field>
+        <Field label={t("Supporting Point 3", "Point d'appui 3")}>
+          <Input value={point3} onChange={setPoint3} placeholder="Timeline and next steps" />
+        </Field>
+      </div>
+      <div className="mt-4">
+        <Field label={t("Anticipated Tough Questions (one per line)", "Questions difficiles anticip\u00e9es (une par ligne)")}>
+          <textarea
+            value={toughQ}
+            onChange={(e) => setToughQ(e.target.value)}
+            rows={3}
+            placeholder={t(
+              "Will there be layoffs?\nWhy wasn't this communicated earlier?\nHow does this affect my role?",
+              "Y aura-t-il des mises \u00e0 pied?\nPourquoi n'a-t-on pas communiqu\u00e9 plus t\u00f4t?\nComment cela affecte-t-il mon r\u00f4le?"
+            )}
+            className="w-full rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-amber-400/30 focus:ring-1 focus:ring-amber-400/20 resize-none"
+          />
+        </Field>
+      </div>
+      {doc ? (
+        <div className="mt-5 space-y-3"><ScriptBlock text={doc} /><CopyButton text={doc} /></div>
+      ) : (
+        <p className="mt-4 text-sm text-zinc-500">{t("Enter the announcement topic above to generate talking points.", "Entrez le sujet de l'annonce pour g\u00e9n\u00e9rer les points de discussion.")}</p>
+      )}
+    </SectionCard>
+  );
+}
+
 function WorkforceTab({ t }) {
   return (
     <div className="space-y-6">
@@ -349,12 +535,22 @@ function PolicyTab({ t }) {
   );
 }
 
+function TownHallTab({ t }) {
+  return (
+    <div className="space-y-6">
+      <TownHallAgendaBuilder t={t} />
+      <TalkingPointsBuilder t={t} />
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: "workforce", icon: Users,       label: "Workforce Transitions", labelFr: "Transitions de main-d\u2019\u0153uvre" },
-  { id: "policy",    icon: BookOpen,    label: "Policy Communications", labelFr: "Communications de politique"          },
-  { id: "crisis",    icon: ShieldAlert, label: "Crisis Communications", labelFr: "Communications de crise"             },
+  { id: "workforce", icon: Users,       label: "Workforce Transitions", labelFr: "Transitions de main-d\u2019\u0153uvre"      },
+  { id: "policy",    icon: BookOpen,    label: "Policy Communications", labelFr: "Communications de politique"               },
+  { id: "crisis",    icon: ShieldAlert, label: "Crisis Communications", labelFr: "Communications de crise"                  },
+  { id: "town-hall", icon: Mic2,        label: "Town Hall Builder",     labelFr: "G\u00e9n\u00e9rateur d'assembl\u00e9es"    },
 ];
 
 export default function Communications() {
@@ -393,6 +589,7 @@ export default function Communications() {
       {activeTab === "workforce" && <WorkforceTab t={t} />}
       {activeTab === "policy"    && <PolicyTab t={t} />}
       {activeTab === "crisis"    && <CrisisGuide t={t} />}
+      {activeTab === "town-hall" && <TownHallTab t={t} />}
     </div>
   );
 }

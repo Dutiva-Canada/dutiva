@@ -618,15 +618,15 @@ export default function LandingPage() {
             </ul>
           </div>
 
-          {/* Coming Soon placeholder */}
-          <div className="premium-card-soft p-6 opacity-60">
+          {/* Town Hall & All-Hands Builder */}
+          <div className="premium-card-soft p-6">
             <div className="mb-4 flex items-center gap-3">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
-                <Users className="h-5 w-5" />
+                <Megaphone className="h-5 w-5" />
               </div>
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-                  {t("Coming soon", "À venir")}
+                  {t("Tool 4", "Outil 4")}
                 </div>
                 <div className="text-lg font-semibold text-zinc-100">
                   {t("Town Hall & All-Hands Builder", "Générateur d'assemblées générales")}
@@ -635,18 +635,26 @@ export default function LandingPage() {
             </div>
             <p className="mb-4 text-sm leading-6 text-zinc-400">
               {t(
-                "Structured town hall agendas, talking-point decks, and post-event FAQ documents — for company-wide change announcements.",
-                "Ordres du jour structurés, présentations de points de discussion et FAQ post-événement — pour les annonces de changements à l'échelle de l'entreprise."
+                "Structured town hall agendas with auto-timed segments and leadership talking points — for all-hands, department, leadership, and crisis meetings.",
+                "Ordres du jour structurés avec segments auto-minutés et points de discussion pour la direction — pour les assemblées générales, de département, de direction et de crise."
               )}
             </p>
             <ul className="grid gap-2">
               <li className="flex items-center gap-2 text-sm text-zinc-400">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
-                {t("Agenda builder with timed segments", "Générateur d'ordre du jour avec segments minutés")}
+                {t("4 meeting types (all-hands, dept, leadership, crisis)", "4 types de réunion (assemblée générale, département, direction, crise)")}
               </li>
               <li className="flex items-center gap-2 text-sm text-zinc-400">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
-                {t("Leadership talking-point generator", "Générateur de points de discussion pour la direction")}
+                {t("Agenda with opening, topics, Q&A, and closing auto-timed", "Ordre du jour avec ouverture, sujets, Q&R et clôture auto-minutés")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Leadership talking points with core message + 3 supports", "Points de discussion avec message clé + 3 appuis")}
+              </li>
+              <li className="flex items-center gap-2 text-sm text-zinc-400">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-300" />
+                {t("Tough Q&A anticipation framework", "Cadre d'anticipation des questions difficiles")}
               </li>
             </ul>
           </div>
