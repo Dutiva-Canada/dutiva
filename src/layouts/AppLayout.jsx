@@ -343,7 +343,7 @@ export default function AppLayout() {
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar />
           {/* pb-16 on mobile/tablet leaves room above the fixed bottom nav bar */}
-          <main className="flex-1 px-4 py-6 pb-16 md:px-6 xl:px-8 xl:pb-6">
+          <main className="flex-1 px-4 pt-6 pb-16 md:px-6 xl:px-8 xl:pb-6">
             <div className="mx-auto max-w-7xl">
               <Outlet />
             </div>
