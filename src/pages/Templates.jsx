@@ -248,7 +248,7 @@ export default function Templates() {
             Generate documents
           </h1>
           <p className="mt-3 max-w-2xl text-base text-zinc-400">
-            16 bilingual templates covering every Canadian province. Select a template, fill in your details, and export a compliant document in minutes.
+            16 bilingual templates covering Ontario, Quebec, Federal, and Remote (Federal) jurisdictions. Select a template, fill in your details, and export a compliant document in minutes.
           </p>
         </div>
 
@@ -282,7 +282,7 @@ export default function Templates() {
             Coverage
           </div>
           <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">
-            14
+            4
           </div>
           <div className="mt-1 text-sm text-zinc-400">Canadian jurisdictions supported</div>
         </div>
@@ -417,8 +417,8 @@ export default function Templates() {
           <SectionCard title="Compliance reference">
             <div className="space-y-3 text-sm">
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                <div className="font-medium text-zinc-100">14 jurisdictions covered</div>
-                <div className="mt-1 text-zinc-400">ON · QC · BC · AB · MB · SK · NS · NB · NL · PEI · NT · NU · YT · Federal</div>
+                <div className="font-medium text-zinc-100">4 jurisdictions covered</div>
+                <div className="mt-1 text-zinc-400">Ontario · Quebec · Federal · Remote (Federal)</div>
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                 <div className="font-medium text-zinc-100">English and French</div>

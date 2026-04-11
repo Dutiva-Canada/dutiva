@@ -42,38 +42,18 @@ const templateOptions = [
 ];
 
 const CANADIAN_JURISDICTIONS = [
-  "Alberta",
-  "British Columbia",
   "Federal",
-  "Manitoba",
-  "New Brunswick",
-  "Newfoundland and Labrador",
-  "Northwest Territories",
-  "Nova Scotia",
-  "Nunavut",
   "Ontario",
-  "Prince Edward Island",
   "Quebec",
-  "Saskatchewan",
-  "Yukon",
+  "Remote (Federal)",
 ];
 
 // ── ESA notice data ───────────────────────────────────────────────────────────
 const ESA_NOTICE = {
-  Ontario: [[0,1,0],[1,3,2],[3,4,3],[4,5,4],[5,6,5],[6,7,6],[7,8,7],[8,Infinity,8]],
-  "British Columbia": [[0,0.25,0],[0.25,1,1],[1,3,2],[3,4,3],[4,5,4],[5,6,5],[6,7,6],[7,8,7],[8,Infinity,8]],
-  Alberta: [[0,0.25,0],[0.25,2,1],[2,4,2],[4,6,4],[6,8,5],[8,10,6],[10,Infinity,8]],
-  Quebec: [[0,0.25,0],[0.25,1,1],[1,5,2],[5,10,4],[10,Infinity,8]],
-  Manitoba: [[0,0.08,0],[0.08,1,1],[1,3,2],[3,5,4],[5,10,6],[10,Infinity,8]],
-  Saskatchewan: [[0,0.25,0],[0.25,3,2],[3,5,4],[5,10,6],[10,Infinity,8]],
-  "Nova Scotia": [[0,0.25,0],[0.25,2,1],[2,5,2],[5,10,4],[10,Infinity,8]],
-  "New Brunswick": [[0,0.5,0],[0.5,5,2],[5,Infinity,4]],
-  Federal: [[0,0.25,0],[0.25,Infinity,2]],
-  "Newfoundland and Labrador": [[0,0.17,0],[0.17,2,1],[2,5,2],[5,15,3],[15,Infinity,4]],
-  "Prince Edward Island": [[0,0.17,0],[0.17,6,2],[6,Infinity,4]],
-  "Northwest Territories": [[0,0.17,0],[0.17,1,1],[1,3,2],[3,5,3],[5,10,4],[10,Infinity,6]],
-  Nunavut: [[0,0.17,0],[0.17,1,1],[1,3,2],[3,5,3],[5,10,4],[10,Infinity,6]],
-  Yukon: [[0,0.17,0],[0.17,1,1],[1,3,2],[3,5,3],[5,10,4],[10,Infinity,8]],
+  Ontario:           [[0,1,0],[1,3,2],[3,4,3],[4,5,4],[5,6,5],[6,7,6],[7,8,7],[8,Infinity,8]],
+  Quebec:            [[0,0.25,0],[0.25,1,1],[1,5,2],[5,10,4],[10,Infinity,8]],
+  Federal:           [[0,0.25,0],[0.25,Infinity,2]],
+  "Remote (Federal)":[[0,0.25,0],[0.25,Infinity,2]],
 };
 
 function getNoticeWeeks(province, years) {
@@ -620,16 +600,15 @@ function ESACalculator({ defaultProvince }) {
       } else if (y >= 5) {
         severanceNote = "May apply if payroll ≥ $2.5M \u2014 confirm above";
       }
-    } else if (province === "Federal") {
+    } else if (province === "Federal" || province === "Remote (Federal)") {
       if (y >= 1) severanceNote = "Canada Labour Code, s. 235 \u2014 contact legal counsel";
     }
     const severancePay = severanceWeeks * weeklyWage;
     const actMap = {
-      Ontario: "ESA, 2000, s. 57", "British Columbia": "Employment Standards Act, s. 63",
-      Alberta: "Employment Standards Code, s. 56", Quebec: "Act Respecting Labour Standards, s. 82",
-      Manitoba: "Employment Standards Code, s. 61", Saskatchewan: "Saskatchewan Employment Act, s. 2-60",
-      "Nova Scotia": "Labour Standards Code, s. 72", "New Brunswick": "Employment Standards Act, s. 30",
-      Federal: "Canada Labour Code, s. 230",
+      Ontario:           "ESA, 2000, s. 57",
+      Quebec:            "Act Respecting Labour Standards, s. 82",
+      Federal:           "Canada Labour Code, s. 230",
+      "Remote (Federal)":"Canada Labour Code, s. 230",
     };
     setResult({ noticeWeeks, payInLieu, weeklyWage, severanceWeeks, severancePay, severanceNote, actRef: actMap[province] || "applicable ESA" });
   };

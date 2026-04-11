@@ -3,20 +3,10 @@
 // Used by GeneratorPage.jsx via formatDocBody(template, form).
 
 const ACT_REF = {
-  Ontario: 'Employment Standards Act, 2000, S.O. 2000, c. 41 ("ESA")',
-  "British Columbia": 'Employment Standards Act, R.S.B.C. 1996, c. 113 ("ESA")',
-  Alberta: 'Employment Standards Code, R.S.A. 2000, c. E-9 ("ESC")',
-  Quebec: 'Act Respecting Labour Standards, CQLR c N-1.1 ("ARLS")',
-  Manitoba: 'Employment Standards Code, C.C.S.M. c. E110 ("ESC")',
-  Saskatchewan: 'Saskatchewan Employment Act, SS 2013, c S-15.1 ("SEA")',
-  "Nova Scotia": 'Labour Standards Code, R.S.N.S. 1989, c. 246 ("LSC")',
-  "New Brunswick": 'Employment Standards Act, SNB 1982, c E-7.2 ("ESA")',
-  Federal: 'Canada Labour Code, R.S.C., 1985, c. L-2 ("CLC")',
-  "Newfoundland and Labrador": 'Labour Standards Act, R.S.N.L. 1990, c. L-2 ("LSA")',
-  "Prince Edward Island": 'Employment Standards Act, R.S.P.E.I. 1988, c. E-6.2 ("ESA")',
-  "Northwest Territories": 'Employment Standards Act, S.N.W.T. 2007, c. 13 ("ESA")',
-  Nunavut: 'Labour Standards Act, R.S.N.W.T. 1988, c. L-1 ("LSA")',
-  Yukon: 'Employment Standards Act, R.S.Y. 2002, c. 72 ("ESA")',
+  Ontario:           'Employment Standards Act, 2000, S.O. 2000, c. 41 ("ESA")',
+  Quebec:            'Act Respecting Labour Standards, CQLR c N-1.1 ("ARLS")',
+  Federal:           'Canada Labour Code, R.S.C., 1985, c. L-2 ("CLC")',
+  "Remote (Federal)":'Canada Labour Code, R.S.C., 1985, c. L-2 ("CLC")',
 };
 
 function today() {

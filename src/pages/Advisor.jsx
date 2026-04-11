@@ -343,10 +343,21 @@ export default function Advisor() {
               <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
               <ShieldCheck className="h-4 w-4 text-emerald-300" />
             </div>
-            <div className="metric-value mt-2 text-[17px] font-bold tracking-tight text-zinc-50">
-              {province}
-            </div>
-            <div className="mt-1 text-[11px] text-zinc-500">14 Canadian jurisdictions</div>
+            <select
+              value={province}
+              onChange={(e) => setProvince(e.target.value)}
+              className="mt-2 w-full rounded-lg border border-white/10 bg-white/[0.06] px-2 py-1.5 text-[13px] font-bold text-zinc-50 outline-none focus:border-amber-400/30"
+            >
+              <option value="Federal">Federal</option>
+              <option value="Ontario">Ontario</option>
+              <option value="Quebec">Quebec</option>
+              <option value="Remote (Federal)">Remote (Federal)</option>
+            </select>
+            {province === "Remote (Federal)" ? (
+              <div className="mt-1.5 text-[11px] text-amber-300/80">Remote employees: uses Federal employment standards</div>
+            ) : (
+              <div className="mt-1 text-[11px] text-zinc-500">Active jurisdiction</div>
+            )}
           </div>
 
           {/* Compliance Sync */}
