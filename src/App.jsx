@@ -22,7 +22,9 @@ const DisclaimerPage    = lazy(() => import("./pages/DisclaimerPage.jsx"));
 const AccessibilityPage = lazy(() => import("./pages/AccessibilityPage.jsx"));
 const AITechPage        = lazy(() => import("./pages/AITechPage.jsx"));
 const CookiesPage       = lazy(() => import("./pages/CookiesPage.jsx"));
-const WellnessPage      = lazy(() => import("./pages/Wellness.jsx"));
+const WellnessPage       = lazy(() => import("./pages/Wellness.jsx"));
+const CommunicationsPage = lazy(() => import("./pages/Communications.jsx"));
+const CompensationPage   = lazy(() => import("./pages/Compensation.jsx"));
 
 function RouteLoader() {
   return (
@@ -70,7 +72,9 @@ export default function App() {
                 <Route path="advisor" element={withSuspense(<Advisor />)} />
                 <Route path="settings" element={withSuspense(<SettingsPage />)} />
                 <Route path="generator" element={withSuspense(<GeneratorPage />)} />
-                <Route path="wellness"  element={withSuspense(<WellnessPage />)} />
+                <Route path="wellness"       element={withSuspense(<WellnessPage />)} />
+                <Route path="communications" element={withSuspense(<CommunicationsPage />)} />
+                <Route path="compensation"   element={withSuspense(<CompensationPage />)} />
                 <Route path="*" element={<Navigate to="/app" replace />} />
               </Route>
             </Route>

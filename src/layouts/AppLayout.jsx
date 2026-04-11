@@ -13,6 +13,8 @@ import {
   Sun,
   Moon,
   Globe,
+  Megaphone,
+  DollarSign,
 } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
@@ -25,8 +27,10 @@ function useNavItems() {
     { to: "/app/templates",  label: t("Templates",  "Modèles"),         icon: FileText },
     { to: "/app/generator",  label: t("Generator",  "Générateur"),      icon: Wand2 },
     { to: "/app/advisor",    label: t("Advisor",    "Conseiller"),       icon: MessageSquare },
-    { to: "/app/wellness",   label: t("Wellness",   "Bien-être"),        icon: Heart },
-    { to: "/app/settings",   label: t("Settings",   "Paramètres"),      icon: Settings },
+    { to: "/app/wellness",        label: t("Wellness",        "Bien-être"),         icon: Heart },
+    { to: "/app/communications", label: t("Communications", "Communications"),    icon: Megaphone },
+    { to: "/app/compensation",   label: t("Compensation",   "R\u00e9mun\u00e9ration"), icon: DollarSign },
+    { to: "/app/settings",       label: t("Settings",       "Param\u00e8tres"),        icon: Settings },
   ];
 }
 
@@ -239,9 +243,21 @@ function TopBar() {
     };
     if (location.pathname.startsWith("/app/wellness")) return {
       badge: t("Wellness", "Bien-être"),
-      title: t("Accommodation frameworks & leave management", "Cadres d'adaptation et gestion des congés"),
-      ctaLabel: t("Generate document", "Générer un document"),
+      title: t("Accommodation frameworks & leave management", "Cadres d'adaptation et gestion des cong\u00e9s"),
+      ctaLabel: t("Generate document", "G\u00e9n\u00e9rer un document"),
       ctaTo: "/app/generator?template=Accommodation%20Request%20Form",
+    };
+    if (location.pathname.startsWith("/app/communications")) return {
+      badge: t("Communications", "Communications"),
+      title: t("Compliant scripts, memos & crisis protocols", "Scripts, m\u00e9mos et protocoles de crise conformes"),
+      ctaLabel: t("Generate document", "G\u00e9n\u00e9rer un document"),
+      ctaTo: "/app/generator?template=Offer%20Letter",
+    };
+    if (location.pathname.startsWith("/app/compensation")) return {
+      badge: t("Compensation", "R\u00e9mun\u00e9ration"),
+      title: t("Pay equity, benchmarking & financial literacy tools", "Outils d'\u00e9quit\u00e9 salariale, d'\u00e9talonnage et de litt\u00e9ratie financi\u00e8re"),
+      ctaLabel: t("Generate document", "G\u00e9n\u00e9rer un document"),
+      ctaTo: "/app/generator?template=Offer%20Letter",
     };
     return {
       badge: t("Dashboard", "Tableau de bord"),
