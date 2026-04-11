@@ -59,7 +59,7 @@ export default function App() {
             <Route path="/terms"         element={withSuspense(<TermsPage />)} />
             <Route path="/disclaimer"    element={withSuspense(<DisclaimerPage />)} />
             <Route path="/accessibility" element={withSuspense(<AccessibilityPage />)} />
-            <Route path="/ai-tech"       element={withSuspense(<AITechPage />)} />
+            <Route path="/ai-technology" element={withSuspense(<AITechPage />)} />
             <Route path="/cookies"       element={withSuspense(<CookiesPage />)} />
 
             <Route element={<ProtectedRoute />}>

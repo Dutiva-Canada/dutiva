@@ -131,7 +131,7 @@ function PolicyFooter() {
       <div style={{ maxWidth: 760, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, color: TEXT_SOFT }}>Duti<span style={{ color: GOLD }}>va</span> Canada Inc.</div>
         <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-          {[["/terms","Terms"],["/privacy","Privacy"],["/cookies","Cookies"],["/accessibility","Accessibility"],["/ai-tech","AI & Technology"],["/disclaimer","Disclaimer"]].map(([to, label]) => (
+          {[["/terms","Terms"],["/privacy","Privacy"],["/cookies","Cookies"],["/accessibility","Accessibility"],["/ai-technology","AI & Technology"],["/disclaimer","Disclaimer"]].map(([to, label]) => (
             <Link key={to} to={to} style={{ fontSize: 12, color: TEXT_SOFT, textDecoration: "underline", textUnderlineOffset: 3 }}>{label}</Link>
           ))}
         </div>
