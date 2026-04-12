@@ -225,7 +225,7 @@ export default function LandingPage() {
       {/* ── FEATURES ── */}
       <Section className="py-6 md:py-10">
         <div className="mb-8 max-w-3xl">
-          <Pill>{t("What makes Dutiva work", "Ce qui fait le succès de Dutiva")}</Pill>
+          <Pill>{t("Document Generator - Ring 1 fully live", "G\u00e9n\u00e9rateur de documents - Anneau 1 enti\u00e8rement disponible")}</Pill>
           <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
             {t("Everything you need to stay compliant.", "Tout ce qu'il vous faut pour rester conforme.")}
           </h2>
