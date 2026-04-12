@@ -33,6 +33,22 @@ export default function LandingPage() {
 
   return (
     <div className="marketing-shell min-h-screen">
+      {/* 🚀 LAUNCH ANNOUNCEMENT BANNER */}
+      <div className="border-b border-amber-400/10 bg-amber-400/[0.04]">
+        <div className="mx-auto flex max-w-7xl items-center justify-center gap-3 px-4 py-2.5 text-center md:px-6">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400">
+            {t("Launching September 2026", "Lancement septembre 2026")}
+          </span>
+          <span className="hidden text-amber-400/40 sm:inline">&middot;</span>
+          <Link
+            to="/beta"
+            className="hidden items-center gap-1 text-xs text-zinc-300 transition hover:text-amber-300 sm:inline-flex"
+          >
+            {t("Join the founding beta \u2192", "Rejoindre le b\u00eata fondateur \u2192")}
+          </Link>
+        </div>
+      </div>
+
       {/* ── HERO ── */}
       <Section className="grid gap-10 py-14 md:py-20 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
         <div className="space-y-6">
@@ -42,6 +58,7 @@ export default function LandingPage() {
               "Conçu pour les employeurs canadiens sans équipe RH"
             )}
           </Pill>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs text-zinc-400"><span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />{t("Official launch: September 2026", "Lancement officiel\u00a0: septembre 2026")}</div>
 
           <div className="space-y-4">
             <h1 className="metric-value max-w-4xl text-5xl font-semibold tracking-tight text-zinc-50 md:text-7xl">
