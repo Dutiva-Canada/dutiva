@@ -1018,6 +1018,108 @@ export default function LandingPage() {
         </div>
       </Section>
 
+      {/* 🔮 COMING SOON 🔮 */}
+      <Section className="py-8 md:py-12">
+        <div className="mb-8 max-w-3xl">
+          <Pill>{t("What's coming", "Ce qui s'en vient")}</Pill>
+          <h2 className="metric-value mt-4 text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+            {t("Built to grow with your practice.", "Conçu pour évoluer avec votre pratique.")}
+          </h2>
+          <p className="mt-3 text-base leading-7 text-zinc-400">
+            {t(
+              "Dutiva is expanding beyond documents and compliance tools — into personalized advisory, custom document workflows, and integrated PR services.",
+              "Dutiva s'étend au-delà des documents et des outils de conformité — vers des services-conseils personnalisés, des flux documentaires sur mesure et des services RP intégrés."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {/* Consultant Add-On */}
+          <div className="premium-card rounded-[28px] p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Users className="h-5 w-5" />
+              </div>
+              <span className="rounded-full border border-amber-400/20 bg-amber-400/8 px-3 py-1 text-xs font-semibold text-amber-300">
+                {t("Coming soon", "Bientôt disponible")}
+              </span>
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-zinc-100">
+              {t("Consultant Add-On", "Forfait consultant")}
+            </h3>
+            <p className="text-sm leading-6 text-zinc-400">
+              {t(
+                "Situation-specific HR advice when you're ready to share your policies and internal processes. Includes job-shadowing sessions for HR training — compliance guidance that knows your organization, not just the law.",
+                "Conseils RH adaptés à votre situation lorsque vous partagez vos politiques et processus internes. Inclut des séances d'observation pour la formation RH — des conseils de conformité qui connaissent votre organisation."
+              )}
+            </p>
+          </div>
+
+          {/* Custom Template Wording */}
+          <div className="premium-card rounded-[28px] p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <FileText className="h-5 w-5" />
+              </div>
+              <span className="rounded-full border border-amber-400/20 bg-amber-400/8 px-3 py-1 text-xs font-semibold text-amber-300">
+                {t("Coming soon", "Bientôt disponible")}
+              </span>
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-zinc-100">
+              {t("Custom Wording Integration", "Intégration de formulations personnalisées")}
+            </h3>
+            <p className="text-sm leading-6 text-zinc-400">
+              {t(
+                "Upload your own wording from a Word doc or PDF — Dutiva reads it, finds where it fits in the generated template, and polishes the language so the final document feels seamlessly yours.",
+                "Téléversez vos formulations depuis un document Word ou un PDF — Dutiva les lit, identifie où elles s'intègrent dans le modèle et peaufine le langage pour un résultat parfaitement personnalisé."
+              )}
+            </p>
+          </div>
+
+          {/* HR + PR Package */}
+          <div className="premium-card rounded-[28px] p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Megaphone className="h-5 w-5" />
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-zinc-400">
+                {t("On the horizon", "À l'horizon")}
+              </span>
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-zinc-100">
+              {t("HR + PR Package", "Forfait RH + RP")}
+            </h3>
+            <p className="text-sm leading-6 text-zinc-400">
+              {t(
+                "A combined offering pairing HR compliance with public relations and communications services — for organizations that need employment law precision and professional stakeholder messaging under one roof.",
+                "Une offre combinée qui associe la conformité RH aux relations publiques — pour les organisations qui ont besoin à la fois de la précision juridique et d'une communication professionnelle auprès de leurs parties prenantes."
+              )}
+            </p>
+          </div>
+
+          {/* PR-Only Package */}
+          <div className="premium-card rounded-[28px] p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
+                <Megaphone className="h-5 w-5" />
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-zinc-400">
+                {t("On the horizon", "À l'horizon")}
+              </span>
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-zinc-100">
+              {t("PR-Only Package", "Forfait RP seul")}
+            </h3>
+            <p className="text-sm leading-6 text-zinc-400">
+              {t(
+                "Public relations and communications services as a standalone offering — press releases, stakeholder messaging, crisis communications, and media strategy, independent of the HR compliance suite.",
+                "Services de relations publiques et de communications en offre autonome — communiqués de presse, messages aux parties prenantes, communications de crise et stratégie médias, indépendamment de la suite RH."
+              )}
+            </p>
+          </div>
+        </div>
+      </Section>
+
       {/* ── BOTTOM CTA ── */}
       <Section className="py-12 md:py-16">
         <div className="premium-card overflow-hidden rounded-[32px] p-8 md:p-10">
