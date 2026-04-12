@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Vercel Serverless function: /api/advisor-chat
  *
  * Flow:
@@ -23,9 +23,12 @@
 
 export const config = { maxDuration: 60 };
 
-const HF_MODEL    = "HuggingFaceH4/zephyr-7b-beta";
-const HF_MODEL_URL =
-  `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`;
+// Primary: Groq (free, fast, reliable — console.groq.com)
+const GROQ_MODEL   = "llama-3.3-70b-versatile";
+const GROQ_URL     = "https://api.groq.com/openai/v1/chat/completions";
+// Fallback: HF Inference Providers
+const HF_MODEL     = "HuggingFaceH4/zephyr-7b-beta";
+const HF_MODEL_URL = `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`;
 
 // ── Rate limiter (in-memory, resets per serverless instance) ─────────────────
 const RATE_WINDOW_MS = 60_000;
@@ -219,15 +222,19 @@ export default async function handler(req, res) {
   res.setHeader("X-RateLimit-Limit",     String(RATE_LIMIT));
   res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
 
-  // Token guard
-  const hfToken = process.env.HUGGINGFACE_API_KEY;
-  if (!hfToken) {
+  // Token guard — prefer Groq, fall back to HF
+  const groqToken = process.env.GROQ_API_KEY;
+  const hfToken   = process.env.HUGGINGFACE_API_KEY;
+  if (!groqToken && !hfToken) {
     res.status(503).json({
-      error: "HUGGINGFACE_API_KEY not configured — add it in Vercel project settings.",
+      error: "AI advisor not configured — add GROQ_API_KEY or HUGGINGFACE_API_KEY in Vercel project settings.",
     });
     return;
   }
-
+  const useGroq   = !!groqToken;
+  const apiToken  = useGroq ? groqToken : hfToken;
+  const modelUrl  = useGroq ? GROQ_URL   : HF_MODEL_URL;
+  const modelName = useGroq ? GROQ_MODEL : HF_MODEL;
   // Body
   let body;
   try {
@@ -283,14 +290,14 @@ export default async function handler(req, res) {
 
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const resp = await fetch(HF_MODEL_URL, {
+      const resp = await fetch(modelUrl, {
         method: "POST",
         headers: {
-          Authorization:  `Bearer ${hfToken}`,
+          Authorization:  `Bearer ${apiToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model:       HF_MODEL,
+          model:       modelName,
           messages:    chatMessages,
           max_tokens:  1024,
           temperature: 0.3,
@@ -300,7 +307,7 @@ export default async function handler(req, res) {
       });
 
       if (resp.status === 429 && attempt === 0) {
-        console.warn(`[${reqId}] HF 429 on attempt 0 — retrying in 2 s`);
+        console.warn(`[${reqId}] API 429 on attempt 0 - retrying in 2 s`);
         await sleep(2_000);
         continue;
       }
@@ -327,7 +334,7 @@ export default async function handler(req, res) {
 
   if (!hfResponse.ok) {
     const errBody = await hfResponse.text().catch(() => String(hfResponse.status));
-    console.error(`[${reqId}] HF API error ${hfResponse.status}:`, errBody);
+    console.error(`[${reqId}] AI API error ${hfResponse.status}:`, errBody);
 
     const statusMap = {
       429: "The AI service is busy right now. Please wait a few seconds and try again.",
