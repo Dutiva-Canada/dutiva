@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles, Scale, Calendar, Megaphone, Users, ShieldAlert, DollarSign, TrendingUp, BookOpen } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 
@@ -78,7 +78,7 @@ export default function LandingPage() {
           {/* Stats bar */}
           <div className="flex flex-wrap gap-6 pt-1">
             <div className="text-center">
-              <div className="font-serif text-2xl text-amber-400">16</div>
+              <div className="font-serif text-2xl text-amber-400">20</div>
               <div className="text-xs uppercase tracking-widest text-zinc-500">
                 {t("Templates", "Modèles")}
               </div>
@@ -188,7 +188,7 @@ export default function LandingPage() {
 
                   <div className="mb-3 flex items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
                     <span className="text-sm text-zinc-300">{t("New document", "Nouveau document")}</span>
-                    <strong className="text-sm text-zinc-100">{t("16 templates", "16 modèles")}</strong>
+                    <strong className="text-sm text-zinc-100">{t("20 templates", "20 modèles")}</strong>
                   </div>
 
                   <div className="mb-3 flex items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
@@ -241,7 +241,7 @@ export default function LandingPage() {
           <FeatureCard
             to="/app/generator?template=Employment%20Agreement"
             icon={<FileText className="h-5 w-5" />}
-            title={t("16 bilingual templates", "16 modèles bilingues")}
+            title={t("20 bilingual templates", "20 modèles bilingues")}
             desc={t(
               "Offer letters, terminations, PIPs, NDAs — filled in minutes from a guided conversation, not a blank page.",
               "Lettres d'offre, cessations, PIPs, ententes de confidentialité — remplis en quelques minutes, sans page blanche."
