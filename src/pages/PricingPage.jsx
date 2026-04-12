@@ -202,11 +202,12 @@ export default function PricingPage() {
           <PriceCard
             title="Starter"
             price="Free"
-            desc="Try the product, generate real documents, and validate Dutiva for your team."
+            desc="Try the product, generate real documents, and explore the full compliance suite."
             features={[
               "3 document generations per month",
-              "Access to all 16 template types",
+              "Access to all 20 bilingual template types",
               "AI-assisted form filling",
+              "Ring 1-4 compliance tools (read access)",
             ]}
             cta="Start free"
             to="/app/generator?template=Offer%20Letter"
@@ -224,7 +225,11 @@ export default function PricingPage() {
             }
             features={[
               "Unlimited document generation",
-              "AI Advisor with legislation citations",
+              "All 20 bilingual HR templates",
+              "AI Advisor — ESA, LNT & CLC citations",
+              "Ring 2: Wellness — accommodation, mental health & leave tools",
+              "Ring 3: Communications — layoff scripts, policy memos & crisis guides",
+              "Ring 4: Compensation — severance calculator, pay equity & salary bands",
               "ESA auto-calculator + e-signatures",
               billing === "annual"
                 ? "2 months free vs. monthly billing"
@@ -238,11 +243,12 @@ export default function PricingPage() {
           <PriceCard
             title="Advanced"
             price="Custom"
-            desc="For organizations that need multi-user access, dedicated setup, or custom templates."
+            desc="For organizations that need multi-user access, dedicated setup, or bespoke advisory."
             features={[
               "Everything in Growth",
               "Multi-user team workspace",
               "Priority support and custom templates",
+              "Consultant add-on access (coming soon)",
             ]}
             cta="Talk to us"
             onCheckout={handleContactSales}
