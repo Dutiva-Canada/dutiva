@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles, Scale, Calendar, Megaphone, Users, ShieldAlert, DollarSign, TrendingUp, BookOpen } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 
@@ -1163,8 +1163,8 @@ export default function LandingPage() {
                   t("Early feature access", "Acc\u00e8s anticip\u00e9 aux fonctionnalit\u00e9s"),
                 ].map((perk) => (
                   <span key={perk} className="flex items-center gap-1.5">
-                    <span className="text-amber-400">\u2713</span> {perk}
-                  </span>
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-amber-400" /> {perk}
                 ))}
               </div>
             </div>
