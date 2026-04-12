@@ -1,6 +1,7 @@
 ﻿import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles, Scale, Calendar, Megaphone, Users, ShieldAlert, DollarSign, TrendingUp, BookOpen } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
+import { Helmet } from 'react-helmet-async';
 
 function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-7xl px-4 md:px-6 ${className}`}>{children}</section>;
@@ -33,6 +34,14 @@ export default function LandingPage() {
 
   return (
     <div className="marketing-shell min-h-screen">
+      <Helmet>
+        <title>Dutiva — Employee Scheduling for Canadian SMBs</title>
+        <meta name="description" content="Dutiva helps Canadian small businesses schedule shifts, track time, and manage their team. Bilingual, built for Canada." />
+        <link rel="canonical" href="https://dutiva.ca/" />
+        <meta property="og:title" content="Dutiva — Employee Scheduling for Canadian SMBs" />
+        <meta property="og:description" content="Dutiva helps Canadian small businesses schedule shifts, track time, and manage their team. Bilingual, built for Canada." />
+        <meta property="og:url" content="https://dutiva.ca/" />
+      </Helmet>
       {/* 🚀 LAUNCH ANNOUNCEMENT BANNER */}
       <div className="border-b border-amber-400/10 bg-amber-400/[0.04]">
         <div className="mx-auto flex max-w-7xl items-center justify-center gap-3 px-4 py-2.5 text-center md:px-6">
