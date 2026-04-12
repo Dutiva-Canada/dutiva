@@ -277,7 +277,7 @@ export default function PricingPage() {
               Ontario, Quebec, federally regulated employers, and remote workers
               under federal jurisdiction — with current Employment Standards Act,
               Loi sur les normes du travail, and Canada Labour Code references.
-              Additional provinces rolling out through 2026.
+              Additional provinces rolling out through 2027.
             </div>
           </div>
           <div className="rounded-[20px] border border-white/6 bg-white/[0.02] p-5">
