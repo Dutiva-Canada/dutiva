@@ -39,6 +39,10 @@ const templateOptions = [
   "Resignation Acceptance Letter",
   "Layoff / WARN Notice",
   "Performance Improvement Plan (PIP)",
+  "Accommodation Request Form",
+  "Accommodation Plan Template",
+  "Leave Request Form",
+  "Sick Day Policy",
 ];
 
 const CANADIAN_JURISDICTIONS = [

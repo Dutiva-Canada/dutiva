@@ -575,7 +575,7 @@ export default function Dashboard() {
             to="/app/templates"
             className="flex items-center gap-1 text-xs text-zinc-400 transition hover:text-zinc-200"
           >
-            {t("All 16 templates", "16 modèles")}
+            {t("All 20 templates", "20 modèles")}
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -724,7 +724,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
                   <BookOpen className="h-4 w-4 shrink-0 text-amber-300" />
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-zinc-100">Browse all 16 templates</div>
+                    <div className="text-sm font-medium text-zinc-100">Browse all 20 templates</div>
                     <div className="mt-0.5 text-xs text-zinc-400">
                       Offer letters, PIPs, NDAs, policies, and more — all bilingual
                     </div>
