@@ -22,6 +22,7 @@ const DisclaimerPage    = lazy(() => import("./pages/DisclaimerPage.jsx"));
 const AccessibilityPage = lazy(() => import("./pages/AccessibilityPage.jsx"));
 const AITechPage        = lazy(() => import("./pages/AITechPage.jsx"));
 const CookiesPage       = lazy(() => import("./pages/CookiesPage.jsx"));
+const BetaPage          = lazy(() => import("./pages/BetaPage.jsx"));
 const WellnessPage       = lazy(() => import("./pages/Wellness.jsx"));
 const CommunicationsPage = lazy(() => import("./pages/Communications.jsx"));
 const CompensationPage   = lazy(() => import("./pages/Compensation.jsx"));
@@ -52,6 +53,7 @@ export default function App() {
 
             <Route element={withSuspense(<MarketingLayout />)}>
               <Route path="/pricing" element={withSuspense(<PricingPage />)} />
+              <Route path="/beta" element={withSuspense(<BetaPage />)} />
               <Route path="/payment-success" element={withSuspense(<PaymentSuccessPage />)} />
             </Route>
 

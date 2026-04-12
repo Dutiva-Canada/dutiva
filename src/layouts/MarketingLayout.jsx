@@ -77,6 +77,18 @@ export default function MarketingLayout() {
               {t('Home', 'Accueil')}
             </NavLink>
             <NavLink
+              to="/beta"
+              className={({ isActive }) =>
+                `rounded-xl px-4 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? 'bg-white/8 text-zinc-100'
+                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-100'
+                }`
+              }
+            >
+              {t('Beta', 'B\u00eata')}
+            </NavLink>
+            <NavLink
               to="/pricing"
               className={({ isActive }) =>
                 `rounded-xl px-4 py-2 text-sm font-medium transition ${

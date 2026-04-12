@@ -1120,6 +1120,59 @@ export default function LandingPage() {
         </div>
       </Section>
 
+
+      {/* 🧪 BETA WAITLIST */}
+      <Section className="py-8 md:py-12">
+        <div className="overflow-hidden rounded-[32px] border border-amber-400/15 bg-[linear-gradient(135deg,rgba(168,118,58,0.10)_0%,rgba(14,18,24,0.0)_60%)] p-8 md:p-12">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <Pill>{t("Founding Member Beta", "B\u00eata \u2014 Membres fondateurs")}</Pill>
+              <h2 className="metric-value mt-4 text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">
+                {t(
+                  "Get full access free. Help shape what gets built next.",
+                  "Acc\u00e8s complet gratuit. Aidez \u00e0 fa\u00e7onner ce qui sera construit."
+                )}
+              </h2>
+              <p className="mt-3 text-base leading-7 text-zinc-400">
+                {t(
+                  "We\u2019re inviting a small group of Canadian employers to use Dutiva free during our founding beta \u2014 all four rings, all 20 templates, no credit card. In return, we ask for honest feedback.",
+                  "Nous invitons un petit groupe d\u2019employeurs canadiens \u00e0 utiliser Dutiva gratuitement pendant notre b\u00eata fondateur \u2014 quatre anneaux, 20 mod\u00e8les, sans carte de cr\u00e9dit. En \u00e9change, nous demandons des retours honn\u00eates."
+                )}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-zinc-400">
+                {[
+                  t("Locked-in founding rate", "Tarif fondateur garanti"),
+                  t("Direct line to the founder", "Acc\u00e8s direct au fondateur"),
+                  t("Early feature access", "Acc\u00e8s anticip\u00e9 aux fonctionnalit\u00e9s"),
+                ].map((perk) => (
+                  <span key={perk} className="flex items-center gap-1.5">
+                    <span className="text-amber-400">\u2713</span> {perk}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-3 lg:items-end">
+              <Link
+                to="/beta"
+                className="gold-button inline-flex items-center gap-2 px-6 py-3.5 text-sm"
+              >
+                {t("Apply for founding access", "Demander l\u2019acc\u00e8s fondateur")}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="mailto:hello@dutiva.ca?subject=Founding%20Beta%20Request"
+                className="ghost-button inline-flex items-center gap-2 px-6 py-3.5 text-sm"
+              >
+                {t("Email Martin directly", "\u00c9crire directement \u00e0 Martin")}
+              </a>
+              <p className="text-xs text-zinc-500">
+                {t("No credit card \u00b7 No contract \u00b7 Spots limited", "Sans carte de cr\u00e9dit \u00b7 Sans contrat \u00b7 Places limit\u00e9es")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       {/* ── BOTTOM CTA ── */}
       <Section className="py-12 md:py-16">
         <div className="premium-card overflow-hidden rounded-[32px] p-8 md:p-10">
@@ -1151,6 +1204,7 @@ export default function LandingPage() {
               <Link to="/pricing" className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm">
                 {t("See pricing", "Voir les tarifs")}
               </Link>
+              <Link to="/beta" className="ghost-button inline-flex items-center gap-2 px-5 py-3 text-sm">{t("Join the founding beta", "Rejoindre le b\u00eata fondateur")}</Link>
             </div>
           </div>
         </div>
