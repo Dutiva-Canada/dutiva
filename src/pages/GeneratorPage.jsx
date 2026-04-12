@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -1193,20 +1193,20 @@ export default function GeneratorPage() {
 
           <div className="space-y-6">
             <SectionCard title="Preview">
-              <div className="rounded-[24px] border border-white/6 bg-[#0E1218] p-5">
+              <div className="rounded-[24px] border border-gray-200 bg-white p-5 dark:border-white/6 dark:bg-[#0E1218]">
                 <div className="mb-4 flex items-center gap-3">
                   <div className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
                     <FileText className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-base font-semibold text-zinc-100">{template}</div>
-                    <div className="text-sm text-zinc-400">
+                    <div className="text-base font-semibold text-zinc-800 dark:text-zinc-100">{template}</div>
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400">
                       {activeDocumentId ? "Editing saved document" : "Structured output preview"}
                     </div>
                   </div>
                 </div>
 
-                <pre className="whitespace-pre-wrap text-sm leading-7 text-zinc-300">
+                <pre className="whitespace-pre-wrap text-sm leading-7 text-zinc-800 dark:text-zinc-300">
                   {preview}
                 </pre>
               </div>
