@@ -1163,8 +1163,8 @@ export default function LandingPage() {
                   t("Early feature access", "Acc\u00e8s anticip\u00e9 aux fonctionnalit\u00e9s"),
                 ].map((perk) => (
                   <span key={perk} className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-amber-400" />
                     <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-amber-400" /> {perk}
+                  </span>
                 ))}
               </div>
             </div>
