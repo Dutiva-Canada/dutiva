@@ -289,7 +289,6 @@ export default function SettingsPage() {
                   <option value="Federal">Federal (Canada Labour Code)</option>
                   <option value="Remote (Federal)">Remote (Federal)</option>
                 </select>
-                  className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none" />
               </Field>
               <Field label={t("City", "Ville")} icon={<MapPin className="h-4 w-4" />}>
                 <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
