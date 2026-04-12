@@ -23,7 +23,7 @@
 
 export const config = { maxDuration: 60 };
 
-const HF_MODEL    = "meta-llama/Llama-3.1-8B-Instruct";
+const HF_MODEL    = "HuggingFaceH4/zephyr-7b-beta";
 const HF_MODEL_URL =
   `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`;
 
