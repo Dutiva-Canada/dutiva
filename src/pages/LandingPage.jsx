@@ -1160,8 +1160,8 @@ export default function LandingPage() {
         <div className="flex flex-col items-center gap-4 text-center">
           <p className="text-xs text-zinc-500">
             {t(
-              "\u00a9 2026 Dutiva Canada. Built in Ottawa \u00b7 PIPEDA-compliant",
-              "\u00a9 2026 Dutiva Canada. Con\u00e7u \u00e0 Ottawa \u00b7 Conforme LPRPDE"
+              "\u00a9 2026 Dutiva Canada Inc. Built in Ottawa \u00b7 PIPEDA-compliant",
+              "\u00a9 2026 Dutiva Canada Inc. Con\u00e7u \u00e0 Ottawa \u00b7 Conforme LPRPDE"
             )}
           </p>
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-zinc-500">
