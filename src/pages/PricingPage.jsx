@@ -3,6 +3,7 @@ import { Check, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { supabase } from "../lib/supabase";
+import { Helmet } from 'react-helmet-async';
 
 function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-7xl px-4 md:px-6 ${className}`}>{children}</section>;
@@ -141,6 +142,14 @@ export default function PricingPage() {
 
   return (
     <div className="marketing-shell min-h-screen">
+      <Helmet>
+        <title>Dutiva Pricing — Simple Plans for Canadian Teams</title>
+        <meta name="description" content="Transparent pricing for employee scheduling software. No hidden fees. Built for Canadian SMBs." />
+        <link rel="canonical" href="https://dutiva.ca/pricing" />
+        <meta property="og:title" content="Dutiva Pricing — Simple Plans for Canadian Teams" />
+        <meta property="og:description" content="Transparent pricing for employee scheduling software. No hidden fees. Built for Canadian SMBs." />
+        <meta property="og:url" content="https://dutiva.ca/pricing" />
+      </Helmet>
       <Section className="py-14 md:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <div className="flex justify-center">
