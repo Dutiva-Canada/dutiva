@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, MessageSquare, FileText, ShieldCheck, Sparkles, Scale, Calendar, Megaphone, Users, ShieldAlert, DollarSign, TrendingUp, BookOpen } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 
@@ -1052,6 +1052,38 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+
+      {/* LEGAL FOOTER */}
+      <Section className="py-8 border-t border-white/6">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <p className="text-xs text-zinc-500">
+            {t(
+              "\u00a9 2025 Dutiva Canada. Built in Ottawa \u00b7 PIPEDA-compliant",
+              "\u00a9 2025 Dutiva Canada. Con\u00e7u \u00e0 Ottawa \u00b7 Conforme LPRPDE"
+            )}
+          </p>
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-zinc-500">
+            <Link to="/privacy" className="hover:text-zinc-300 transition-colors">
+              {t("Privacy Policy", "Politique de confidentialit\u00e9")}
+            </Link>
+            <Link to="/terms" className="hover:text-zinc-300 transition-colors">
+              {t("Terms of Service", "Conditions d\u2019utilisation")}
+            </Link>
+            <Link to="/cookies" className="hover:text-zinc-300 transition-colors">
+              {t("Cookie Policy", "Politique sur les t\u00e9moins")}
+            </Link>
+            <Link to="/ai-technology" className="hover:text-zinc-300 transition-colors">
+              {t("AI & Tech Transparency", "Transparence IA & tech")}
+            </Link>
+            <Link to="/accessibility" className="hover:text-zinc-300 transition-colors">
+              {t("Accessibility", "Accessibilit\u00e9")}
+            </Link>
+            <Link to="/disclaimer" className="hover:text-zinc-300 transition-colors">
+              {t("Disclaimer", "Avertissement")}
+            </Link>
+          </nav>
+        </div>
+      </Section>
       </Section>
     </div>
   );

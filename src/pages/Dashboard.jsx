@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -780,6 +780,12 @@ export default function Dashboard() {
             </section>
           )}
         </div>
+      {/* AI transparency footer */}
+      <div className="mt-8 border-t border-white/6 pt-4 text-center">
+        <Link to="/ai-technology" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+          AI &amp; Technology Transparency Policy
+        </Link>
+      </div>
       </div>
     </div>
   );
