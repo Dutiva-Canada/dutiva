@@ -23,8 +23,9 @@
 
 export const config = { maxDuration: 60 };
 
+const HF_MODEL    = "meta-llama/Llama-3.1-8B-Instruct";
 const HF_MODEL_URL =
-  "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3";
+  `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`;
 
 // ── Rate limiter (in-memory, resets per serverless instance) ─────────────────
 const RATE_WINDOW_MS = 60_000;
@@ -143,34 +144,29 @@ TONE & RULES:
 }
 
 /**
- * Build a Mistral [INST] prompt from message history.
- * System prompt is prepended to the first user turn.
- * Web search context is appended to the last user turn.
+ * Build an OpenAI-compatible messages array from conversation history.
+ * System prompt is the first message; web search context is appended
+ * to the last user turn.
  */
-function buildMistralPrompt(systemPrompt, messages, webSearchContext) {
-  let prompt = "";
-  let isFirstUser = true;
+function buildChatMessages(systemPrompt, messages, webSearchContext) {
+  const chatMessages = [{ role: "system", content: systemPrompt }];
 
   for (let i = 0; i < messages.length; i++) {
     const m = messages[i];
     const isLast = i === messages.length - 1;
 
     if (m.role === "user") {
-      let text = m.text;
-      if (isFirstUser) {
-        text = `${systemPrompt}\n\n${text}`;
-        isFirstUser = false;
-      }
+      let content = m.text;
       if (isLast && webSearchContext) {
-        text = `${text}\n\nWEB SEARCH RESULTS (use these for current information):\n${webSearchContext}`;
+        content += `\n\nWEB SEARCH RESULTS (use these for current information):\n${webSearchContext}`;
       }
-      prompt += `<s>[INST] ${text} [/INST]`;
+      chatMessages.push({ role: "user", content });
     } else if (m.role === "assistant") {
-      prompt += ` ${m.text} </s>`;
+      chatMessages.push({ role: "assistant", content: m.text });
     }
   }
 
-  return prompt;
+  return chatMessages;
 }
 
 // ── Body reader (32 KB guard) ─────────────────────────────────────────────────
@@ -276,7 +272,7 @@ export default async function handler(req, res) {
 
   // Build prompt
   const systemPrompt  = buildSystemPrompt(province, lawUpdates);
-  const mistralPrompt = buildMistralPrompt(systemPrompt, messages, webSearchContext);
+  const chatMessages  = buildChatMessages(systemPrompt, messages, webSearchContext);
 
   // Call HF Inference API with retry on 429
   const controller = new AbortController();
@@ -294,12 +290,11 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: mistralPrompt,
-          parameters: {
-            max_new_tokens:  1024,
-            temperature:     0.3,
-            return_full_text: false,
-          },
+          model:       HF_MODEL,
+          messages:    chatMessages,
+          max_tokens:  1024,
+          temperature: 0.3,
+          stream:      false,
         }),
         signal: controller.signal,
       });
@@ -352,8 +347,8 @@ export default async function handler(req, res) {
     return;
   }
 
-  // HF inference API returns: [{ generated_text: "..." }]
-  const generated = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
+  // Chat completions returns: { choices: [{ message: { content: "..." } }] }
+  const generated = data?.choices?.[0]?.message?.content;
   if (!generated) {
     res.status(502).json({ error: "No response from AI service." });
     return;
