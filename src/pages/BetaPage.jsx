@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, MessageSquare, FileText, Heart, Megaphone, DollarSign, Sparkles, Users, Star } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
+import { Helmet } from 'react-helmet-async';
 
 function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-7xl px-4 md:px-6 ${className}`}>{children}</section>;
@@ -64,6 +65,14 @@ export default function BetaPage() {
   const { t } = useLang();
   return (
     <div className="marketing-shell min-h-screen">
+      <Helmet>
+        <title>Join the Dutiva Beta — Free for Early Teams</title>
+        <meta name="description" content="Get early access to Dutiva, Canada’s bilingual workforce scheduling platform. Limited beta spots available." />
+        <link rel="canonical" href="https://dutiva.ca/beta" />
+        <meta property="og:title" content="Join the Dutiva Beta — Free for Early Teams" />
+        <meta property="og:description" content="Get early access to Dutiva, Canada’s bilingual workforce scheduling platform. Limited beta spots available." />
+        <meta property="og:url" content="https://dutiva.ca/beta" />
+      </Helmet>
 
       {/* HERO */}
       <Section className="py-16 md:py-24">
