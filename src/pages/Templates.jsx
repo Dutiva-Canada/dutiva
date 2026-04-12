@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronRight,
   FileText,
@@ -277,7 +277,7 @@ export default function Templates() {
             Generate documents
           </h1>
           <p className="mt-3 max-w-2xl text-base text-zinc-400">
-            16 bilingual templates covering every Canadian province. Select a template, fill in your details, and export a compliant document in minutes.
+            20 bilingual templates covering every Canadian province. Select a template, fill in your details, and export a compliant document in minutes.
           </p>
         </div>
 
@@ -301,7 +301,7 @@ export default function Templates() {
             Templates
           </div>
           <div className="metric-value mt-3 text-3xl font-semibold tracking-tight text-zinc-100">
-            16
+            20
           </div>
           <div className="mt-1 text-sm text-zinc-400">Bilingual document templates</div>
         </div>
@@ -451,7 +451,7 @@ export default function Templates() {
               </div>
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
                 <div className="font-medium text-zinc-100">English and French</div>
-                <div className="mt-1 text-zinc-400">All 16 templates available in both official languages. Quebec templates reference the Charte de la langue française.</div>
+                <div className="mt-1 text-zinc-400">All 20 templates available in both official languages. Quebec templates reference the Charte de la langue française.</div>
               </div>
 
             </div>
