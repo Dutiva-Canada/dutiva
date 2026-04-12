@@ -178,6 +178,7 @@ function Sidebar() {
               { to: "/cookies",       label: t("Cookies", "Témoins") },
               { to: "/accessibility", label: t("Accessibility", "Accessibilité") },
               { to: "/disclaimer",    label: t("Disclaimer", "Avertissement") },
+              { to: "/ai-technology", label: t("AI Policy", "Politique IA") },
             ].map(({ to, label }) => (
               <Link
                 key={to}
