@@ -107,7 +107,7 @@ export default function BetaPage() {
           <Pill>{t("What\u2019s included", "Ce qui est inclus")}</Pill>
           <h2 className="metric-value mt-4 text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">
             {t("Full Growth access \u2014 all four rings \u2014 free for beta members.",
-               "Acc\u00e8s Growth complet \u2014 quatre anneaux \u2014 gratuit pour les membres b\u00eata.")}
+               "Acc\u00e8s Croissance complet \u2014 quatre anneaux \u2014 gratuit pour les membres b\u00eata.")}
           </h2>
           <p className="mt-3 text-base leading-7 text-zinc-400">
             {t("No feature gating. Everything that\u2019s live is yours to use for the duration of the beta.",
