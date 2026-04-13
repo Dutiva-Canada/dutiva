@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ── Dark theme (default) ──────────────────────────────────────────────────── */
+/* ── Dark theme (default) ────────────────────────────────────────── */
 :root {
   color-scheme: dark;
   --bg:           #0a0c11;
@@ -31,7 +31,7 @@
   --input-border: rgba(255,255,255,0.08);
 }
 
-/* ── Light theme ───────────────────────────────────────────────────────────── */
+/* ── Light theme ──────────────────────────────────────────────────────── */
 [data-theme="light"] {
   color-scheme: light;
   --bg:           #f4f6fb;
@@ -45,8 +45,8 @@
   --text-3:       #6b7280;
   --muted:        #5a6278;
   --muted-2:      #7d8596;
-  --gold:         #b45309; /* amber-700 — warm amber, readable on white */
-  --gold-strong:  #d97706; /* amber-600 — golden, not brown */
+  --gold:         #d97706; /* amber-600 — warm golden, not brown */
+  --gold-strong:  #f59e0b; /* amber-400/500 — brighter amber accent */
   --success:      #16a34a;
   --warning:      #ca8a04;
   --danger:       #dc2626;
@@ -60,7 +60,7 @@
   --input-border: rgba(0,0,0,0.10);
 }
 
-/* ── Light theme: body background ─────────────────────────────────────────── */
+/* ── Light theme: body background ────────────────────────────────────────── */
 [data-theme="light"] body {
   background:
     radial-gradient(circle at top left, rgba(196, 147, 85, 0.07), transparent 22%),
@@ -68,14 +68,14 @@
   color: var(--text);
 }
 
-/* ── Light theme: app shell ────────────────────────────────────────────────── */
+/* ── Light theme: app shell ─────────────────────────────────────────────── */
 [data-theme="light"] .app-shell {
   background:
     radial-gradient(circle at top left, rgba(196, 147, 85, 0.05), transparent 20%),
     linear-gradient(180deg, #f0f3fb 0%, #f4f7fd 100%);
 }
 
-/* ── Light theme: custom cards & panels ───────────────────────────────────── */
+/* ── Light theme: custom cards & panels ─────────────────────────────────────────── */
 [data-theme="light"] .premium-card {
   background: linear-gradient(180deg, var(--card-bg-1) 0%, var(--card-bg-2) 100%);
   border-color: var(--border);
@@ -94,7 +94,7 @@
   border-color: var(--border);
 }
 
-/* ── Light theme: ghost button ────────────────────────────────────────────── */
+/* ── Light theme: ghost button ─────────────────────────────────────────────────────── */
 [data-theme="light"] .ghost-button {
   background: rgba(0,0,0,0.03);
   border-color: var(--border);
@@ -106,7 +106,7 @@
   border-color: var(--border-strong);
 }
 
-/* ── Light theme: text color overrides (Tailwind zinc classes) ────────────── */
+/* ── Light theme: text color overrides (Tailwind zinc classes) ──────────────────────────── */
 [data-theme="light"] .text-zinc-50,
 [data-theme="light"] .text-zinc-100,
 [data-theme="light"] .text-zinc-200 {
@@ -125,7 +125,7 @@
   color: #6b7280 !important;
 }
 
-/* ── Light theme: amber/gold text overrides ───────────────────────────────── */
+/* ── Light theme: amber/gold text overrides ───────────────────────────────────────────────────── */
 /* Tailwind's amber-200/300/400 are pale yellows — unreadable on white.       */
 /* Remap to amber-600/700 which reads as warm gold, not brown.                */
 [data-theme="light"] .text-amber-200,
@@ -133,7 +133,7 @@
   color: #d97706 !important; /* amber-600 — warm golden */
 }
 [data-theme="light"] .text-amber-400 {
-  color: #b45309 !important; /* amber-700 — richer amber */
+  color: #d97706 !important; /* amber-600 — warm golden */
 }
 
 /* ── Light theme: amber background/border — boost opacity so they're visible ─ */
@@ -157,14 +157,14 @@
   border-color: rgba(180, 83, 9, 0.35) !important;
 }
 
-/* ── Light theme: border overrides ────────────────────────────────────────── */
+/* ── Light theme: border overrides ───────────────────────────────────────────────────────── */
 [data-theme="light"] .border-white\/6,
 [data-theme="light"] .border-white\/8,
 [data-theme="light"] .border-white\/10 {
   border-color: var(--border) !important;
 }
 
-/* ── Light theme: background overrides ────────────────────────────────────── */
+/* ── Light theme: background overrides ────────────────────────────────────────────────────── */
 [data-theme="light"] .bg-white\/\[0\.02\],
 [data-theme="light"] .bg-white\/\[0\.03\],
 [data-theme="light"] .bg-white\/\[0\.04\],
@@ -172,13 +172,13 @@
   background-color: rgba(0,0,0,0.025) !important;
 }
 
-/* ── Native select option: always inherit theme bg/text ───────────────────── */
+/* ── Native select option: always inherit theme bg/text ──────────────────────────────────── */
 option {
   background-color: var(--bg-elevated);
   color: var(--text);
 }
 
-/* ── Light theme: input fields ────────────────────────────────────────────── */
+/* ── Light theme: input fields ──────────────────────────────────────────────────────────── */
 [data-theme="light"] input,
 [data-theme="light"] textarea,
 [data-theme="light"] select {
@@ -192,7 +192,7 @@ option {
   color: var(--text);
 }
 
-/* ── Light theme: scrollbar ────────────────────────────────────────────────── */
+/* ── Light theme: scrollbar ───────────────────────────────────────────────────────────── */
 [data-theme="light"] .scroll-area::-webkit-scrollbar-thumb {
   background: rgba(0,0,0,0.15);
 }
@@ -201,7 +201,7 @@ option {
   background: rgba(0,0,0,0.22);
 }
 
-/* ── Light theme: emerald text (badges like "Active") ─────────────────────── */
+/* ── Light theme: emerald text (badges like "Active") ──────────────────────────────────── */
 [data-theme="light"] .text-emerald-300 {
   color: #065f46 !important; /* emerald-900 — readable on white */
 }
@@ -214,7 +214,7 @@ option {
   border-color: rgba(6, 95, 70, 0.20) !important;
 }
 
-/* ── Light theme: selection ────────────────────────────────────────────────── */
+/* ── Light theme: selection ────────────────────────────────────────────────────────────── */
 [data-theme="light"] ::selection {
   background: rgba(168, 118, 58, 0.2);
   color: #0f1117;
@@ -267,7 +267,7 @@ select {
 }
 
 button,
-a,
+a[role="button"],
 input,
 textarea,
 select {
@@ -304,7 +304,7 @@ textarea {
     linear-gradient(180deg, #07090d 0%, #090b10 45%, #0e1218 100%);
 }
 
-/* ── Light theme: marketing shell ─────────────────────────────────────────── */
+/* ── Light theme: marketing shell ──────────────────────────────────────────────────── */
 [data-theme="light"] .marketing-shell {
   background:
     radial-gradient(circle at top left, rgba(196, 147, 85, 0.07), transparent 22%),
