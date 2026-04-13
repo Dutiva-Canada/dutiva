@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext.jsx';
 function BrandLockup() {
   return (
     <div className="flex items-center gap-3">
-      <div className="grid h-9 w-9 place-items-center rounded-xl border border-amber-400/20 bg-[#0B0D12]">
+      <div className="grid h-9 w-9 place-items-center rounded-xl border border-amber-400/20" style={{ background: 'var(--bg-elevated)' }}>
         <div className="font-serif text-lg text-amber-400">D</div>
       </div>
       <div className="leading-none">
@@ -86,7 +86,7 @@ export default function MarketingLayout() {
                 }`
               }
             >
-              {t('Beta', 'B\u00eata')}
+              {t('Beta', 'Bêta')}
             </NavLink>
             <NavLink
               to="/pricing"
