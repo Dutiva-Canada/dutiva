@@ -38,8 +38,7 @@ export default function AccessibilityPage() {
   }, []);
 
   return (
-    <div style={{ backgroundColor: BG, color: TEXT, fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", lineHeight: 1.7 }}>
-      <PolicyNav />
+    <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", lineHeight: 1.7 }}>
       <main style={{ maxWidth: 760, margin: "0 auto", padding: "64px 24px 96px" }}>
         <div style={{ marginBottom: 48 }}>
           <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: GOLD, marginBottom: 14 }}>Legal</div>
@@ -114,17 +113,7 @@ export default function AccessibilityPage() {
   );
 }
 
-function PolicyNav() {
-  return (
-    <nav style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "rgba(17,17,17,0.95)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${BORDER}`, padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-      <Link to="/" style={{ textDecoration: "none", fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 500, color: TEXT }}>
-        Duti<span style={{ color: GOLD }}>va</span>
-        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD_BORDER}`, padding: "1px 5px", borderRadius: 2, marginLeft: 6 }}>Canada</span>
-      </Link>
-      <Link to="/" style={{ fontSize: 13, color: TEXT_SOFT, textDecoration: "none" }}>← Back to site</Link>
-    </nav>
-  );
-}
+
 
 function PolicySection({ title, children }) {
   return (
