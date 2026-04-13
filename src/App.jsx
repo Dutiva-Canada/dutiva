@@ -49,9 +49,8 @@ export default function App() {
       <LanguageProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={withSuspense(<LandingPage />)} />
-
             <Route element={withSuspense(<MarketingLayout />)}>
+              <Route index element={withSuspense(<LandingPage />)} />
               <Route path="/pricing" element={withSuspense(<PricingPage />)} />
               <Route path="/beta" element={withSuspense(<BetaPage />)} />
               <Route path="/payment-success" element={withSuspense(<PaymentSuccessPage />)} />
