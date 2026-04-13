@@ -162,7 +162,7 @@ export default function LandingPage() {
 
         {/* Advisor preview widget */}
         <div className="premium-card overflow-hidden rounded-[32px] p-0">
-          <div className="grid gap-5 bg-[linear-gradient(180deg,rgba(18,22,30,0.98)_0%,rgba(14,17,24,0.98)_100%)] p-6">
+          <div className="grid gap-5 p-6" style={{ background: 'linear-gradient(180deg, var(--card-bg-1) 0%, var(--card-bg-2) 100%)' }}>
             <div className="flex items-center justify-between border-b border-white/6 pb-4">
               <div className="flex items-center gap-3">
                 <div className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
@@ -201,7 +201,7 @@ export default function LandingPage() {
                   )}
                 </div>
 
-                <div className="rounded-[18px] border border-white/8 bg-[#0E1218] px-4 py-3 text-sm text-zinc-500">
+                <div className="rounded-[18px] border border-white/8 px-4 py-3 text-sm text-zinc-500" style={{ background: 'var(--input-bg)', color: 'var(--text-3)' }}>
                   {t("Ask a question or attach a document...", "Posez une question ou joignez un document...")}
                 </div>
               </div>
