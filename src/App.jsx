@@ -54,18 +54,16 @@ export default function App() {
               <Route path="/pricing" element={withSuspense(<PricingPage />)} />
               <Route path="/beta" element={withSuspense(<BetaPage />)} />
               <Route path="/payment-success" element={withSuspense(<PaymentSuccessPage />)} />
+                            <Route path="/privacy"       element={withSuspense(<PrivacyPage />)} />
+                                          <Route path="/terms"         element={withSuspense(<TermsPage />)} />
+                                                        <Route path="/disclaimer"    element={withSuspense(<DisclaimerPage />)} />
+                                                                      <Route path="/accessibility" element={withSuspense(<AccessibilityPage />)} />
+                                                                                    <Route path="/ai-technology" element={withSuspense(<AITechPage />)} />
+                                                                                                  <Route path="/cookies"       element={withSuspense(<CookiesPage />)} />
             </Route>
 
             <Route path="/auth" element={withSuspense(<AuthPage />)} />
             <Route path="/sign/:token" element={withSuspense(<ESignPage />)} />
-
-            {/* Policy pages — standalone, no auth required */}
-            <Route path="/privacy"       element={withSuspense(<PrivacyPage />)} />
-            <Route path="/terms"         element={withSuspense(<TermsPage />)} />
-            <Route path="/disclaimer"    element={withSuspense(<DisclaimerPage />)} />
-            <Route path="/accessibility" element={withSuspense(<AccessibilityPage />)} />
-            <Route path="/ai-technology" element={withSuspense(<AITechPage />)} />
-            <Route path="/cookies"       element={withSuspense(<CookiesPage />)} />
 
             <Route element={<ProtectedRoute />}>
               <Route path="/app" element={withSuspense(<AppLayout />)}>
