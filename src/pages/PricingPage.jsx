@@ -233,7 +233,7 @@ export default function PricingPage() {
             to="/app/generator?template=Offer%20Letter"
           />
           <PriceCard
-            title="Growth"
+            title={t("Growth", "Croissance")}
             price={growthPrice}
             suffix={growthSuffix}
             featured
@@ -290,7 +290,7 @@ export default function PricingPage() {
               "Pour les organisations nécessitant un accès multi-utilisateur, une configuration dédiée ou des conseils personnalisés."
             )}
             features={[
-              t("Everything in Growth", "Tout ce qu’inclut Growth"),
+              t("Everything in Growth", "Tout ce qu’inclut Croissance"),
               t("Multi-user team workspace", "Espace de travail d’équipe multi-utilisateur"),
               t("Priority support and custom templates", "Assistance prioritaire et modèles personnalisés"),
               t(
