@@ -1,14 +1,14 @@
-import { useEffect } from "react";
+himport { useEffect } from "react";
 import { Link } from "react-router-dom";
 
-const GOLD = "#c49a45";
+const GOLD = "var(--gold, #c49a45)";
 const GOLD_BORDER = "rgba(196,154,69,0.30)";
-const BG = "#111111";
-const TEXT = "#f0ece4";
-const TEXT_MID = "#a09880";
-const TEXT_SOFT = "#6b6660";
-const BORDER = "rgba(255,255,255,0.08)";
-const CARD = "#191919";
+const BG = "var(--bg, #111111)";
+const TEXT = "var(--text, #f0ece4)";
+const TEXT_MID = "var(--text-2, #a09880)";
+const TEXT_SOFT = "var(--text-3, #6b6660)";
+const BORDER = "var(--border, rgba(255,255,255,0.08))";
+const CARD = "var(--bg-elevated, #191919)";
 const LAST_UPDATED = "April 8, 2026";
 
 function setMeta(name, content) {
