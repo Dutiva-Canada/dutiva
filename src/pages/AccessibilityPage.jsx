@@ -1,4 +1,4 @@
-himport { useEffect } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const GOLD = "var(--gold, #c49a45)";
