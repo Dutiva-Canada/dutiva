@@ -253,6 +253,37 @@ export default function BetaPage() {
         </div>
       </Section>
 
+      {/* LEGAL FOOTER */}
+      <Section className="py-8 border-t border-white/6">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <p className="text-xs text-zinc-500">
+            {t(
+              "© 2026 Dutiva Canada Inc. Built in Ottawa · PIPEDA-compliant",
+              "© 2026 Dutiva Canada Inc. Conçu à Ottawa · Conforme LPRPDE"
+            )}
+          </p>
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-zinc-500">
+            <Link to="/privacy" className="hover:text-zinc-300 transition-colors">
+              {t("Privacy Policy", "Politique de confidentialité")}
+            </Link>
+            <Link to="/terms" className="hover:text-zinc-300 transition-colors">
+              {t("Terms of Service", "Conditions d’utilisation")}
+            </Link>
+            <Link to="/cookies" className="hover:text-zinc-300 transition-colors">
+              {t("Cookie Policy", "Politique sur les témoins")}
+            </Link>
+            <Link to="/ai-technology" className="hover:text-zinc-300 transition-colors">
+              {t("AI & Tech Transparency", "Transparence IA & tech")}
+            </Link>
+            <Link to="/accessibility" className="hover:text-zinc-300 transition-colors">
+              {t("Accessibility", "Accessibilité")}
+            </Link>
+            <Link to="/disclaimer" className="hover:text-zinc-300 transition-colors">
+              {t("Disclaimer", "Avertissement")}
+            </Link>
+          </nav>
+        </div>
+      </Section>
     </div>
   );
 }
