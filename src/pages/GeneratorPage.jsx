@@ -29,6 +29,8 @@ import ScenarioGallery from "../components/generator/ScenarioGallery.jsx";
 import IntakeWizard from "../components/generator/IntakeWizard.jsx";
 import EmployerProfileManager from "../components/generator/EmployerProfileManager.jsx";
 import ApprovalPanel from "../components/generator/ApprovalPanel.jsx";
+import ComplianceAlertBanner from "../components/generator/ComplianceAlertBanner.jsx";
+import { JURISDICTION_DATA_VERSION } from "../lib/complianceAlerts";
 import { getScenario } from "../lib/generator/scenarios.js";
 import { applyProfileDefaults, listEmployerProfiles } from "../lib/employerProfiles";
 
@@ -818,6 +820,11 @@ export default function GeneratorPage() {
         user_id: user.id,
         title: template,
         content: preview,
+        // Phase 4 — stamp with the jurisdiction_data version in force right
+        // now. ComplianceAlertBanner uses this to detect stale contracts.
+        jurisdiction_data_version: JURISDICTION_DATA_VERSION,
+        jurisdiction: form.jurisdiction || null,
+        employer_profile_id: activeProfile?.id || null,
       };
 
       if (activeDocumentId) {
@@ -1375,6 +1382,12 @@ export default function GeneratorPage() {
                     </div>
                   </div>
                 </div>
+
+                {activeDocument && (
+                  <div className="mb-4">
+                    <ComplianceAlertBanner document={activeDocument} form={form} />
+                  </div>
+                )}
 
                 {(guardrailFindings.blocks.length > 0 || guardrailFindings.warnings.length > 0) && (
                   <div className="mb-4 space-y-2">

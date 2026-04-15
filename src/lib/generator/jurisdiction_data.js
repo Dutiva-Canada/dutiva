@@ -442,4 +442,12 @@ const JURISDICTIONS = {
   },
 };
 
+// ─── Version stamp ─────────────────────────────────────────────────────────
+// Bump this string whenever the legal content of JURISDICTIONS changes.
+// Use YYYY-MM-DD format. Add a matching entry to src/lib/generator/changelog.js
+// so users are informed about what specifically changed. Documents saved
+// from this point forward are stamped with this version so the compliance
+// alert banner can flag stale contracts.
+export const JURISDICTION_DATA_VERSION = "2026-04-15";
+
 export default JURISDICTIONS;
