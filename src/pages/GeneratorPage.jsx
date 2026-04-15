@@ -27,6 +27,9 @@ import JURISDICTIONS from "../lib/generator/jurisdiction_data.js";
 import { JURISDICTION_CODE_BY_NAME } from "../lib/generator/index.js";
 import ScenarioGallery from "../components/generator/ScenarioGallery.jsx";
 import IntakeWizard from "../components/generator/IntakeWizard.jsx";
+import EmployerProfileManager from "../components/generator/EmployerProfileManager.jsx";
+import ApprovalPanel from "../components/generator/ApprovalPanel.jsx";
+import { profileToFormDefaults } from "../lib/generator/employerProfiles.js";
 
 const templateOptions = [
   "Employment Agreement",
@@ -652,6 +655,7 @@ export default function GeneratorPage() {
   const [documents, setDocuments] = useState([]);
   const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [activeDocumentId, setActiveDocumentId] = useState(null);
+  const [activeEmployerProfile, setActiveEmployerProfile] = useState(null);
   const [signatureMap, setSignatureMap] = useState({});
 
   // Phase 2 intake flow: gallery -> wizard -> closed (falls back to existing
@@ -1289,6 +1293,29 @@ export default function GeneratorPage() {
           </div>
 
           <div className="space-y-6">
+            <SectionCard title="Employer profile">
+              <EmployerProfileManager
+                userId={user?.id}
+                onApply={(profile) => {
+                  const defaults = profileToFormDefaults(profile);
+                  setForm((prev) => ({ ...prev, ...defaults }));
+                  setActiveEmployerProfile(profile);
+                  showStatus(`Applied ${profile.legal_name} defaults to the form.`);
+                }}
+              />
+            </SectionCard>
+
+            {activeDocumentId && activeEmployerProfile?.approval_required && (
+              <SectionCard title="Approval">
+                <ApprovalPanel
+                  documentId={activeDocumentId}
+                  userId={user?.id}
+                  employerProfileId={activeEmployerProfile?.id}
+                  onStageChange={(s) => showStatus(`Stage updated to ${s}.`)}
+                />
+              </SectionCard>
+            )}
+
             <SectionCard title="Preview">
               <div className="rounded-[24px] border p-5" style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}>
                 <div className="mb-4 flex items-center gap-3">
