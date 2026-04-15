@@ -25,6 +25,8 @@ import { renderTemplate } from "../lib/generator/index.js";
 import { evaluateGuardrails } from "../lib/generator/guardrails.js";
 import JURISDICTIONS from "../lib/generator/jurisdiction_data.js";
 import { JURISDICTION_CODE_BY_NAME } from "../lib/generator/index.js";
+import ScenarioGallery from "../components/generator/ScenarioGallery.jsx";
+import IntakeWizard from "../components/generator/IntakeWizard.jsx";
 
 const templateOptions = [
   "Employment Agreement",
@@ -652,6 +654,12 @@ export default function GeneratorPage() {
   const [activeDocumentId, setActiveDocumentId] = useState(null);
   const [signatureMap, setSignatureMap] = useState({});
 
+  // Phase 2 intake flow: gallery -> wizard -> closed (falls back to existing
+  // flat form below). Defaults to "closed" so existing users see no change;
+  // new users get a prominent "Guided intake" call-to-action at the top.
+  const [intakeView, setIntakeView] = useState("closed");
+  const [wizardScenario, setWizardScenario] = useState(null);
+
   useEffect(() => {
     const incomingTemplate = searchParams.get("template");
     if (incomingTemplate && templateOptions.includes(incomingTemplate) && !activeDocumentId) {
@@ -925,6 +933,75 @@ export default function GeneratorPage() {
 
         <StatusToast text={statusMessage} tone={statusTone} />
 
+        {/* Phase 2 — Guided intake (scenarios + branching wizard). Collapsed
+            by default so returning users aren't interrupted; a prominent
+            button opens the gallery. */}
+        {intakeView === "closed" && !activeDocumentId && (
+          <div
+            className="flex flex-col gap-3 rounded-2xl border p-5 md:flex-row md:items-center md:justify-between"
+            style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
+          >
+            <div>
+              <div className="text-sm font-semibold" style={{ color: "var(--text)" }}>
+                New here? Use the guided intake.
+              </div>
+              <div className="mt-1 text-xs" style={{ color: "var(--text-2)" }}>
+                Pick a scenario (first Quebec hire, Ontario remote worker, BC hybrid, Alberta sales, cross-province transfer) and we'll walk you through only the questions that matter.
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIntakeView("gallery")}
+              className="gold-button inline-flex items-center gap-2 px-4 py-2 text-sm"
+            >
+              Start guided intake
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {intakeView === "gallery" && (
+          <div
+            className="rounded-2xl border p-5"
+            style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
+          >
+            <ScenarioGallery
+              onPick={(id) => {
+                setWizardScenario(id);
+                setIntakeView("wizard");
+              }}
+              onSkip={() => setIntakeView("closed")}
+            />
+          </div>
+        )}
+
+        {intakeView === "wizard" && wizardScenario && (
+          <div
+            className="rounded-2xl border p-5"
+            style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
+          >
+            <IntakeWizard
+              scenarioId={wizardScenario}
+              onCancel={() => {
+                setIntakeView("gallery");
+                setWizardScenario(null);
+              }}
+              onComplete={(formFields, meta) => {
+                // Merge wizard-provided fields into the flat form. Keep any
+                // existing values the user set outside the wizard.
+                setForm((prev) => ({ ...prev, ...formFields }));
+                if (meta?.template && templateOptions.includes(meta.template)) {
+                  setTemplate(meta.template);
+                }
+                setIntakeView("closed");
+                setWizardScenario(null);
+                showStatus(
+                  `Intake complete — ${formFields.jurisdiction || "scenario"} defaults applied. Review below.`,
+                );
+              }}
+            />
+          </div>
+        )}
 
         {/* Next steps — step pills live inside this card */}
         <SectionCard title="Next steps">
@@ -1238,34 +1315,4 @@ export default function GeneratorPage() {
                     {guardrailFindings.warnings.map((f) => (
                       <div key={f.id} className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
                         <div className="font-semibold text-amber-300">⚠ Warning · {f.category}</div>
-                        <div className="mt-1" style={{ color: "var(--text)" }}>{f.message}</div>
-                        <div className="mt-1 text-xs" style={{ color: "var(--text-2)" }}>{f.citation}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <pre className="whitespace-pre-wrap text-sm leading-7" style={{ color: "var(--text)" }}>
-                  {preview}
-                </pre>
-              </div>
-            </SectionCard>
-          </div>
-        </div>
-      </div>
-
-      <ESignModal
-        activeDocumentId={activeDocumentId}
-        onClose={() => setShowESignModal(false)}
-        onExport={handleExport}
-        onSaveDraft={handleSaveFromModal}
-        onSaveFirst={handleSave}
-        onSignatureCreated={handleSignatureCreated}
-        open={showESignModal}
-        savingDraft={savingFromModal}
-        template={template}
-        user={user}
-      />
-    </>
-  );
-}
+                        <div className="mt-1" style={{ color
