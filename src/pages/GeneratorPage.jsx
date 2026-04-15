@@ -30,6 +30,11 @@ import IntakeWizard from "../components/generator/IntakeWizard.jsx";
 import EmployerProfileManager from "../components/generator/EmployerProfileManager.jsx";
 import ApprovalPanel from "../components/generator/ApprovalPanel.jsx";
 import { profileToFormDefaults } from "../lib/generator/employerProfiles.js";
+import {
+  evaluateDocumentCompliance,
+  createGenerationStamp,
+} from "../lib/generator/complianceAlerts.js";
+import ComplianceAlertPanel from "../components/generator/ComplianceAlertPanel.jsx";
 
 const templateOptions = [
   "Employment Agreement",
@@ -748,6 +753,21 @@ export default function GeneratorPage() {
     return evaluateGuardrails({ ...form, template }, j);
   }, [form, template]);
 
+  // Compliance alerts for the currently loaded (saved) document. Uses the
+  // provenance columns added by the Phase 4 migration. Returns null when we
+  // are editing an unsaved draft — nothing to compare against yet.
+  const activeDocumentCompliance = useMemo(() => {
+    if (!activeDocumentId) return null;
+    const doc = documents.find((d) => d.id === activeDocumentId);
+    if (!doc || !doc.generated_at) return null;
+    return evaluateDocumentCompliance({
+      jurisdictionCode: doc.jurisdiction_code,
+      template: doc.template_key || doc.title,
+      generatedAt: doc.generated_at,
+      dataVersion: doc.jurisdiction_data_version,
+    });
+  }, [activeDocumentId, documents]);
+
   const showStatus = useCallback((message, tone = "success", duration = 2500) => {
     setStatusTone(tone);
     setStatusMessage(message);
@@ -767,10 +787,15 @@ export default function GeneratorPage() {
         return null;
       }
 
+      const stamp = createGenerationStamp({
+        jurisdictionCode: JURISDICTION_CODE_BY_NAME[form.jurisdiction] || "ON",
+        template,
+      });
       const payload = {
         user_id: user.id,
         title: template,
         content: preview,
+        ...stamp,
       };
 
       if (activeDocumentId) {
@@ -1329,6 +1354,21 @@ export default function GeneratorPage() {
                     </div>
                   </div>
                 </div>
+
+                {activeDocumentCompliance && (
+                  <div className="mb-4">
+                    <ComplianceAlertPanel
+                      evaluation={activeDocumentCompliance}
+                      onRegenerate={() => {
+                        // Regenerate preserves the current form state but
+                        // produces a new stamp on the next save. Triggering
+                        // a save effectively re-stamps the document under
+                        // the current LAW_DATA_VERSION.
+                        handleSave();
+                      }}
+                    />
+                  </div>
+                )}
 
                 {(guardrailFindings.blocks.length > 0 || guardrailFindings.warnings.length > 0) && (
                   <div className="mb-4 space-y-2">
