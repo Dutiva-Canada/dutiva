@@ -21,6 +21,10 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext.jsx";
 import { getStoredSettings } from "../utils/workspaceSettings";
 import { formatDocBody } from "../utils/documentTemplates";
+import { renderTemplate } from "../lib/generator/index.js";
+import { evaluateGuardrails } from "../lib/generator/guardrails.js";
+import JURISDICTIONS from "../lib/generator/jurisdiction_data.js";
+import { JURISDICTION_CODE_BY_NAME } from "../lib/generator/index.js";
 
 const templateOptions = [
   "Employment Agreement",
@@ -46,9 +50,11 @@ const templateOptions = [
 ];
 
 const CANADIAN_JURISDICTIONS = [
-  "Federal",
   "Ontario",
   "Quebec",
+  "British Columbia",
+  "Alberta",
+  "Federal",
   "Remote (Federal)",
 ];
 
@@ -714,7 +720,21 @@ export default function GeneratorPage() {
     loadDocuments();
   }, [loadDocuments]);
 
-  const preview = useMemo(() => formatDocBody(template, form), [template, form]);
+  const preview = useMemo(() => {
+    // Prefer the consolidated src/lib/generator engine (richer clauses,
+    // Waksdale-compliant, French-first for Quebec). Fall back to the legacy
+    // string generator for templates not yet ported (handbook extras,
+    // accommodation / wellness forms).
+    const result = renderTemplate(template, form);
+    if (result.supported) return result.content;
+    return formatDocBody(template, form);
+  }, [template, form]);
+
+  const guardrailFindings = useMemo(() => {
+    const code = JURISDICTION_CODE_BY_NAME[form.jurisdiction] || "ON";
+    const j = JURISDICTIONS[code];
+    return evaluateGuardrails({ ...form, template }, j);
+  }, [form, template]);
 
   const showStatus = useCallback((message, tone = "success", duration = 2500) => {
     setStatusTone(tone);
@@ -1205,6 +1225,25 @@ export default function GeneratorPage() {
                     </div>
                   </div>
                 </div>
+
+                {(guardrailFindings.blocks.length > 0 || guardrailFindings.warnings.length > 0) && (
+                  <div className="mb-4 space-y-2">
+                    {guardrailFindings.blocks.map((f) => (
+                      <div key={f.id} className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm">
+                        <div className="font-semibold text-red-300">⛔ Compliance block · {f.category}</div>
+                        <div className="mt-1" style={{ color: "var(--text)" }}>{f.message}</div>
+                        <div className="mt-1 text-xs" style={{ color: "var(--text-2)" }}>{f.citation}</div>
+                      </div>
+                    ))}
+                    {guardrailFindings.warnings.map((f) => (
+                      <div key={f.id} className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+                        <div className="font-semibold text-amber-300">⚠ Warning · {f.category}</div>
+                        <div className="mt-1" style={{ color: "var(--text)" }}>{f.message}</div>
+                        <div className="mt-1 text-xs" style={{ color: "var(--text-2)" }}>{f.citation}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <pre className="whitespace-pre-wrap text-sm leading-7" style={{ color: "var(--text)" }}>
                   {preview}

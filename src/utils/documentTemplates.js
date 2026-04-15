@@ -1,6 +1,24 @@
 // documentTemplates.js
-// Generates real Canadian HR document bodies for all 16 Dutiva templates.
-// Used by GeneratorPage.jsx via formatDocBody(template, form).
+//
+// ⚠️ DEPRECATED as the primary template source.
+//
+// As of the Phase 1 consolidation, the canonical template engine lives in
+// src/lib/generator/ (ported from tools/templates-generator/). GeneratorPage
+// now calls renderTemplate() first and only falls through to this file when
+// a UI template name has no engine counterpart.
+//
+// Still used for:
+//   - Accommodation Request Form
+//   - Accommodation Plan Template
+//   - Leave Request Form
+//   - Sick Day Policy
+//   - Return-to-Work Plan (Mental Health)
+//   - Respectful Workplace Policy
+//   - Wellness Action Plan
+//
+// DO NOT add new legal language here. Port the template into
+// src/lib/generator/templates/ (as a function(j) -> { bodyEN, bodyFR }) and
+// register it in src/lib/generator/index.js.
 
 const ACT_REF = {
   Ontario: 'Employment Standards Act, 2000, S.O. 2000, c. 41 ("ESA")',
