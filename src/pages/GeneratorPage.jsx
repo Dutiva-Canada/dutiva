@@ -25,6 +25,9 @@ import { renderTemplate } from "../lib/generator/index.js";
 import { evaluateGuardrails } from "../lib/generator/guardrails.js";
 import JURISDICTIONS from "../lib/generator/jurisdiction_data.js";
 import { JURISDICTION_CODE_BY_NAME } from "../lib/generator/index.js";
+import ScenarioGallery from "../components/generator/ScenarioGallery.jsx";
+import IntakeWizard from "../components/generator/IntakeWizard.jsx";
+import { getScenario } from "../lib/generator/scenarios.js";
 
 const templateOptions = [
   "Employment Agreement",
@@ -643,6 +646,33 @@ export default function GeneratorPage() {
 
   const [template, setTemplate] = useState(() => savedDraft?.template || "Offer Letter");
   const [form, setForm] = useState(() => savedDraft?.form || enrichedDefaults);
+
+  // Phase 2 — Intake flow state. Gallery is the default for net-new generation;
+  // returning users with a saved draft or an editing session land directly on
+  // the classic flat form.
+  const [intakeMode, setIntakeMode] = useState(() =>
+    savedDraft?.form ? "form" : "gallery",
+  );
+  const [activeScenario, setActiveScenario] = useState(null);
+
+  const handlePickScenario = useCallback((scenario) => {
+    setActiveScenario(scenario);
+    setIntakeMode("wizard");
+  }, []);
+
+  const handleWizardComplete = useCallback(({ form: answersForm, template: suggested }) => {
+    setForm((prev) => ({ ...prev, ...answersForm }));
+    if (suggested) setTemplate(suggested);
+    setIntakeMode("form");
+    setActiveScenario(null);
+  }, []);
+
+  const handleSkipIntake = useCallback(() => setIntakeMode("form"), []);
+  const handleRestartIntake = useCallback(() => {
+    setIntakeMode("gallery");
+    setActiveScenario(null);
+  }, []);
+
   const [statusMessage, setStatusMessage] = useState("");
   const [statusTone, setStatusTone] = useState("success");
   const [showESignModal, setShowESignModal] = useState(false);
@@ -940,14 +970,37 @@ export default function GeneratorPage() {
           </div>
         </SectionCard>
 
+        {/* Phase 2 — Intake flow: scenario gallery or branching wizard. */}
+        {intakeMode === "gallery" && (
+          <ScenarioGallery onSelect={handlePickScenario} onSkip={handleSkipIntake} />
+        )}
+        {intakeMode === "wizard" && activeScenario && (
+          <IntakeWizard
+            scenario={activeScenario}
+            onComplete={handleWizardComplete}
+            onCancel={handleRestartIntake}
+          />
+        )}
+
         {/* Two-column layout: Builder + Saved docs (left) | Preview (right) */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
             <SectionCard
               title="Builder"
               action={
-                <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
-                  {activeDocumentId ? "Update mode" : "Create mode"}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRestartIntake}
+                    className="rounded-full border px-3 py-1 text-xs"
+                    style={{ borderColor: "var(--border)", color: "var(--text-2)" }}
+                    title="Restart intake with a scenario"
+                  >
+                    ⚡ Start with a scenario
+                  </button>
+                  <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
+                    {activeDocumentId ? "Update mode" : "Create mode"}
+                  </div>
                 </div>
               }
             >
