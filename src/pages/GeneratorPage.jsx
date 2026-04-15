@@ -21,6 +21,18 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext.jsx";
 import { getStoredSettings } from "../utils/workspaceSettings";
 import { formatDocBody } from "../utils/documentTemplates";
+import { renderTemplate } from "../lib/generator/index.js";
+import { evaluateGuardrails } from "../lib/generator/guardrails.js";
+import JURISDICTIONS from "../lib/generator/jurisdiction_data.js";
+import { JURISDICTION_CODE_BY_NAME } from "../lib/generator/index.js";
+import ScenarioGallery from "../components/generator/ScenarioGallery.jsx";
+import IntakeWizard from "../components/generator/IntakeWizard.jsx";
+import EmployerProfileManager from "../components/generator/EmployerProfileManager.jsx";
+import ApprovalPanel from "../components/generator/ApprovalPanel.jsx";
+import ComplianceAlertBanner from "../components/generator/ComplianceAlertBanner.jsx";
+import { JURISDICTION_DATA_VERSION } from "../lib/complianceAlerts";
+import { getScenario } from "../lib/generator/scenarios.js";
+import { applyProfileDefaults, listEmployerProfiles } from "../lib/employerProfiles";
 
 const templateOptions = [
   "Employment Agreement",
@@ -46,9 +58,11 @@ const templateOptions = [
 ];
 
 const CANADIAN_JURISDICTIONS = [
-  "Federal",
   "Ontario",
   "Quebec",
+  "British Columbia",
+  "Alberta",
+  "Federal",
   "Remote (Federal)",
 ];
 
@@ -637,6 +651,33 @@ export default function GeneratorPage() {
 
   const [template, setTemplate] = useState(() => savedDraft?.template || "Offer Letter");
   const [form, setForm] = useState(() => savedDraft?.form || enrichedDefaults);
+
+  // Phase 2 — Intake flow state. Gallery is the default for net-new generation;
+  // returning users with a saved draft or an editing session land directly on
+  // the classic flat form.
+  const [intakeMode, setIntakeMode] = useState(() =>
+    savedDraft?.form ? "form" : "gallery",
+  );
+  const [activeScenario, setActiveScenario] = useState(null);
+
+  const handlePickScenario = useCallback((scenario) => {
+    setActiveScenario(scenario);
+    setIntakeMode("wizard");
+  }, []);
+
+  const handleWizardComplete = useCallback(({ form: answersForm, template: suggested }) => {
+    setForm((prev) => ({ ...prev, ...answersForm }));
+    if (suggested) setTemplate(suggested);
+    setIntakeMode("form");
+    setActiveScenario(null);
+  }, []);
+
+  const handleSkipIntake = useCallback(() => setIntakeMode("form"), []);
+  const handleRestartIntake = useCallback(() => {
+    setIntakeMode("gallery");
+    setActiveScenario(null);
+  }, []);
+
   const [statusMessage, setStatusMessage] = useState("");
   const [statusTone, setStatusTone] = useState("success");
   const [showESignModal, setShowESignModal] = useState(false);
@@ -645,6 +686,12 @@ export default function GeneratorPage() {
   const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [activeDocumentId, setActiveDocumentId] = useState(null);
   const [signatureMap, setSignatureMap] = useState({});
+
+  // Phase 3 — employer profile + approval workflow state
+  const [employerProfiles, setEmployerProfiles] = useState([]);
+  const [activeProfile, setActiveProfile] = useState(null);
+  const [showProfileManager, setShowProfileManager] = useState(false);
+  const [activeDocument, setActiveDocument] = useState(null); // full document row
 
   useEffect(() => {
     const incomingTemplate = searchParams.get("template");
@@ -714,7 +761,41 @@ export default function GeneratorPage() {
     loadDocuments();
   }, [loadDocuments]);
 
-  const preview = useMemo(() => formatDocBody(template, form), [template, form]);
+  // Phase 3 — load employer profiles once the user is known
+  useEffect(() => {
+    if (!user) { setEmployerProfiles([]); return; }
+    listEmployerProfiles(user.id).then(setEmployerProfiles).catch(() => setEmployerProfiles([]));
+  }, [user]);
+
+  // Keep the "active document" object in sync with the selected id so the
+  // approval panel reflects the current workflow_state.
+  useEffect(() => {
+    if (!activeDocumentId) { setActiveDocument(null); return; }
+    const doc = documents.find((d) => d.id === activeDocumentId);
+    if (doc) setActiveDocument(doc);
+  }, [activeDocumentId, documents]);
+
+  const onPickProfile = useCallback((profile) => {
+    setActiveProfile(profile);
+    setForm((prev) => applyProfileDefaults(prev, profile));
+    setShowProfileManager(false);
+  }, []);
+
+  const preview = useMemo(() => {
+    // Prefer the consolidated src/lib/generator engine (richer clauses,
+    // Waksdale-compliant, French-first for Quebec). Fall back to the legacy
+    // string generator for templates not yet ported (handbook extras,
+    // accommodation / wellness forms).
+    const result = renderTemplate(template, form);
+    if (result.supported) return result.content;
+    return formatDocBody(template, form);
+  }, [template, form]);
+
+  const guardrailFindings = useMemo(() => {
+    const code = JURISDICTION_CODE_BY_NAME[form.jurisdiction] || "ON";
+    const j = JURISDICTIONS[code];
+    return evaluateGuardrails({ ...form, template }, j);
+  }, [form, template]);
 
   const showStatus = useCallback((message, tone = "success", duration = 2500) => {
     setStatusTone(tone);
@@ -739,6 +820,11 @@ export default function GeneratorPage() {
         user_id: user.id,
         title: template,
         content: preview,
+        // Phase 4 — stamp with the jurisdiction_data version in force right
+        // now. ComplianceAlertBanner uses this to detect stale contracts.
+        jurisdiction_data_version: JURISDICTION_DATA_VERSION,
+        jurisdiction: form.jurisdiction || null,
+        employer_profile_id: activeProfile?.id || null,
       };
 
       if (activeDocumentId) {
@@ -920,14 +1006,91 @@ export default function GeneratorPage() {
           </div>
         </SectionCard>
 
+        {/* Phase 2 — Intake flow: scenario gallery or branching wizard. */}
+        {intakeMode === "gallery" && (
+          <ScenarioGallery onSelect={handlePickScenario} onSkip={handleSkipIntake} />
+        )}
+        {intakeMode === "wizard" && activeScenario && (
+          <IntakeWizard
+            scenario={activeScenario}
+            onComplete={handleWizardComplete}
+            onCancel={handleRestartIntake}
+          />
+        )}
+
         {/* Two-column layout: Builder + Saved docs (left) | Preview (right) */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
+            {/* Phase 3 — Employer profile banner */}
+            {user && (
+              <div className="rounded-2xl border p-4" style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium" style={{ color: "var(--text)" }}>
+                      Employer profile: {activeProfile ? activeProfile.legal_name : "None selected"}
+                    </div>
+                    <div className="text-xs" style={{ color: "var(--text-2)" }}>
+                      {activeProfile
+                        ? `${activeProfile.default_jurisdiction} · ${activeProfile.combined_document ? "Combined offer" : "Two-step"} · ${activeProfile.approval_required ? "Approval required" : "No approval"}`
+                        : "Select or create a profile to auto-fill defaults for this employer."}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {employerProfiles.length > 0 && (
+                      <select
+                        value={activeProfile?.id || ""}
+                        onChange={(e) => {
+                          const p = employerProfiles.find((x) => x.id === e.target.value);
+                          if (p) onPickProfile(p); else setActiveProfile(null);
+                        }}
+                        className="rounded-xl border px-3 py-1.5 text-sm"
+                        style={{ background: "var(--bg-elevated)", borderColor: "var(--border)", color: "var(--text)" }}
+                      >
+                        <option value="">— none —</option>
+                        {employerProfiles.map((p) => (
+                          <option key={p.id} value={p.id}>{p.display_name || p.legal_name}</option>
+                        ))}
+                      </select>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowProfileManager((v) => !v)}
+                      className="rounded-xl border px-3 py-1.5 text-sm"
+                      style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                    >
+                      {showProfileManager ? "Hide manager" : "Manage profiles"}
+                    </button>
+                  </div>
+                </div>
+                {showProfileManager && (
+                  <div className="mt-4">
+                    <EmployerProfileManager
+                      user={user}
+                      activeProfileId={activeProfile?.id || null}
+                      onSelect={onPickProfile}
+                      onClose={() => setShowProfileManager(false)}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             <SectionCard
               title="Builder"
               action={
-                <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
-                  {activeDocumentId ? "Update mode" : "Create mode"}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRestartIntake}
+                    className="rounded-full border px-3 py-1 text-xs"
+                    style={{ borderColor: "var(--border)", color: "var(--text-2)" }}
+                    title="Restart intake with a scenario"
+                  >
+                    ⚡ Start with a scenario
+                  </button>
+                  <div className="rounded-full border border-amber-400/12 bg-amber-400/6 px-3 py-1 text-xs font-medium text-amber-300">
+                    {activeDocumentId ? "Update mode" : "Create mode"}
+                  </div>
                 </div>
               }
             >
@@ -1192,6 +1355,20 @@ export default function GeneratorPage() {
           </div>
 
           <div className="space-y-6">
+            {activeDocumentId && user && (
+              <SectionCard title="Approval">
+                <ApprovalPanel
+                  user={user}
+                  document={activeDocument}
+                  approvalRequired={activeProfile?.approval_required === true}
+                  onDocumentChanged={(d) => {
+                    setActiveDocument(d);
+                    setDocuments((prev) => prev.map((x) => (x.id === d.id ? d : x)));
+                  }}
+                />
+              </SectionCard>
+            )}
+
             <SectionCard title="Preview">
               <div className="rounded-[24px] border p-5" style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}>
                 <div className="mb-4 flex items-center gap-3">
@@ -1205,6 +1382,31 @@ export default function GeneratorPage() {
                     </div>
                   </div>
                 </div>
+
+                {activeDocument && (
+                  <div className="mb-4">
+                    <ComplianceAlertBanner document={activeDocument} form={form} />
+                  </div>
+                )}
+
+                {(guardrailFindings.blocks.length > 0 || guardrailFindings.warnings.length > 0) && (
+                  <div className="mb-4 space-y-2">
+                    {guardrailFindings.blocks.map((f) => (
+                      <div key={f.id} className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm">
+                        <div className="font-semibold text-red-300">⛔ Compliance block · {f.category}</div>
+                        <div className="mt-1" style={{ color: "var(--text)" }}>{f.message}</div>
+                        <div className="mt-1 text-xs" style={{ color: "var(--text-2)" }}>{f.citation}</div>
+                      </div>
+                    ))}
+                    {guardrailFindings.warnings.map((f) => (
+                      <div key={f.id} className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+                        <div className="font-semibold text-amber-300">⚠ Warning · {f.category}</div>
+                        <div className="mt-1" style={{ color: "var(--text)" }}>{f.message}</div>
+                        <div className="mt-1 text-xs" style={{ color: "var(--text-2)" }}>{f.citation}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <pre className="whitespace-pre-wrap text-sm leading-7" style={{ color: "var(--text)" }}>
                   {preview}
