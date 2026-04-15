@@ -27,7 +27,10 @@ import JURISDICTIONS from "../lib/generator/jurisdiction_data.js";
 import { JURISDICTION_CODE_BY_NAME } from "../lib/generator/index.js";
 import ScenarioGallery from "../components/generator/ScenarioGallery.jsx";
 import IntakeWizard from "../components/generator/IntakeWizard.jsx";
+import EmployerProfileManager from "../components/generator/EmployerProfileManager.jsx";
+import ApprovalPanel from "../components/generator/ApprovalPanel.jsx";
 import { getScenario } from "../lib/generator/scenarios.js";
+import { applyProfileDefaults, listEmployerProfiles } from "../lib/employerProfiles";
 
 const templateOptions = [
   "Employment Agreement",
@@ -682,6 +685,12 @@ export default function GeneratorPage() {
   const [activeDocumentId, setActiveDocumentId] = useState(null);
   const [signatureMap, setSignatureMap] = useState({});
 
+  // Phase 3 — employer profile + approval workflow state
+  const [employerProfiles, setEmployerProfiles] = useState([]);
+  const [activeProfile, setActiveProfile] = useState(null);
+  const [showProfileManager, setShowProfileManager] = useState(false);
+  const [activeDocument, setActiveDocument] = useState(null); // full document row
+
   useEffect(() => {
     const incomingTemplate = searchParams.get("template");
     if (incomingTemplate && templateOptions.includes(incomingTemplate) && !activeDocumentId) {
@@ -749,6 +758,26 @@ export default function GeneratorPage() {
   useEffect(() => {
     loadDocuments();
   }, [loadDocuments]);
+
+  // Phase 3 — load employer profiles once the user is known
+  useEffect(() => {
+    if (!user) { setEmployerProfiles([]); return; }
+    listEmployerProfiles(user.id).then(setEmployerProfiles).catch(() => setEmployerProfiles([]));
+  }, [user]);
+
+  // Keep the "active document" object in sync with the selected id so the
+  // approval panel reflects the current workflow_state.
+  useEffect(() => {
+    if (!activeDocumentId) { setActiveDocument(null); return; }
+    const doc = documents.find((d) => d.id === activeDocumentId);
+    if (doc) setActiveDocument(doc);
+  }, [activeDocumentId, documents]);
+
+  const onPickProfile = useCallback((profile) => {
+    setActiveProfile(profile);
+    setForm((prev) => applyProfileDefaults(prev, profile));
+    setShowProfileManager(false);
+  }, []);
 
   const preview = useMemo(() => {
     // Prefer the consolidated src/lib/generator engine (richer clauses,
@@ -985,6 +1014,60 @@ export default function GeneratorPage() {
         {/* Two-column layout: Builder + Saved docs (left) | Preview (right) */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
+            {/* Phase 3 — Employer profile banner */}
+            {user && (
+              <div className="rounded-2xl border p-4" style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium" style={{ color: "var(--text)" }}>
+                      Employer profile: {activeProfile ? activeProfile.legal_name : "None selected"}
+                    </div>
+                    <div className="text-xs" style={{ color: "var(--text-2)" }}>
+                      {activeProfile
+                        ? `${activeProfile.default_jurisdiction} · ${activeProfile.combined_document ? "Combined offer" : "Two-step"} · ${activeProfile.approval_required ? "Approval required" : "No approval"}`
+                        : "Select or create a profile to auto-fill defaults for this employer."}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {employerProfiles.length > 0 && (
+                      <select
+                        value={activeProfile?.id || ""}
+                        onChange={(e) => {
+                          const p = employerProfiles.find((x) => x.id === e.target.value);
+                          if (p) onPickProfile(p); else setActiveProfile(null);
+                        }}
+                        className="rounded-xl border px-3 py-1.5 text-sm"
+                        style={{ background: "var(--bg-elevated)", borderColor: "var(--border)", color: "var(--text)" }}
+                      >
+                        <option value="">— none —</option>
+                        {employerProfiles.map((p) => (
+                          <option key={p.id} value={p.id}>{p.display_name || p.legal_name}</option>
+                        ))}
+                      </select>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowProfileManager((v) => !v)}
+                      className="rounded-xl border px-3 py-1.5 text-sm"
+                      style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                    >
+                      {showProfileManager ? "Hide manager" : "Manage profiles"}
+                    </button>
+                  </div>
+                </div>
+                {showProfileManager && (
+                  <div className="mt-4">
+                    <EmployerProfileManager
+                      user={user}
+                      activeProfileId={activeProfile?.id || null}
+                      onSelect={onPickProfile}
+                      onClose={() => setShowProfileManager(false)}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             <SectionCard
               title="Builder"
               action={
@@ -1265,6 +1348,20 @@ export default function GeneratorPage() {
           </div>
 
           <div className="space-y-6">
+            {activeDocumentId && user && (
+              <SectionCard title="Approval">
+                <ApprovalPanel
+                  user={user}
+                  document={activeDocument}
+                  approvalRequired={activeProfile?.approval_required === true}
+                  onDocumentChanged={(d) => {
+                    setActiveDocument(d);
+                    setDocuments((prev) => prev.map((x) => (x.id === d.id ? d : x)));
+                  }}
+                />
+              </SectionCard>
+            )}
+
             <SectionCard title="Preview">
               <div className="rounded-[24px] border p-5" style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}>
                 <div className="mb-4 flex items-center gap-3">
