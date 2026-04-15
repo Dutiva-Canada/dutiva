@@ -1382,4 +1382,34 @@ export default function GeneratorPage() {
                     {guardrailFindings.warnings.map((f) => (
                       <div key={f.id} className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
                         <div className="font-semibold text-amber-300">⚠ Warning · {f.category}</div>
-                        <div className="mt-1" style={{ color
+                        <div className="mt-1" style={{ color: "var(--text)" }}>{f.message}</div>
+                        <div className="mt-1 text-xs" style={{ color: "var(--text-2)" }}>{f.citation}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <pre className="whitespace-pre-wrap text-sm leading-7" style={{ color: "var(--text)" }}>
+                  {preview}
+                </pre>
+              </div>
+            </SectionCard>
+          </div>
+        </div>
+      </div>
+
+      <ESignModal
+        activeDocumentId={activeDocumentId}
+        onClose={() => setShowESignModal(false)}
+        onExport={handleExport}
+        onSaveDraft={handleSaveFromModal}
+        onSaveFirst={handleSave}
+        onSignatureCreated={handleSignatureCreated}
+        open={showESignModal}
+        savingDraft={savingFromModal}
+        template={template}
+        user={user}
+      />
+    </>
+  );
+}
