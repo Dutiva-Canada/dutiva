@@ -14,7 +14,7 @@ export default function PricingPage() {
     { name: "Pro", price: "$79/mo", features: ["Advanced tools", "Priority support"] },
   ];
 
-  const handleCheckout = (plan) => {
+  const handleCheckout = async (plan) => {
     trackEvent("pricing_select", { plan });
 
     if (!user) {
@@ -22,7 +22,13 @@ export default function PricingPage() {
       return;
     }
 
-    alert("Checkout coming soon");
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      body: JSON.stringify({ plan }),
+    });
+
+    const { url } = await res.json();
+    window.location.href = url;
   };
 
   return (
