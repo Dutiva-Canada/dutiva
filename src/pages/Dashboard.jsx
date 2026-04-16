@@ -20,11 +20,11 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { usePlan } from "../context/PlanContext.jsx";
 import { supabase } from "../lib/supabase";
 import { getStoredSettings } from "../utils/workspaceSettings";
 import { useLang } from "../context/LanguageContext.jsx";
 
-// ── ESA notice period lookup (statutory minimums by province) ──────────────
 const ESA_NOTICE = {
   Ontario: [
     { years: "Under 1 year", notice: "1 week" },
@@ -55,7 +55,6 @@ const ESA_NOTICE = {
   ],
 };
 
-// ── Quick-launch document templates ───────────────────────────────────────
 const QUICK_TEMPLATES = [
   {
     label: "Offer Letter",
@@ -83,7 +82,6 @@ const QUICK_TEMPLATES = [
   },
 ];
 
-// ── Helper: document type badge colour ────────────────────────────────────
 function docBadgeClass(title = "") {
   const t = title.toLowerCase();
   if (t.includes("termination") || t.includes("dismissal")) return "text-red-300 border-red-400/15 bg-red-400/8";
@@ -121,8 +119,6 @@ function greeting(lang = "en") {
   if (h < 17) return "Good afternoon";
   return "Good evening";
 }
-
-// ── Sub-components ────────────────────────────────────────────────────────
 
 function StatCard({ title, value, sub, icon, tone = "default", to }) {
   const toneClass =
@@ -288,17 +284,13 @@ function ESACard({ province }) {
         ))}
       </div>
       <div className="mt-3 rounded-xl border border-white/6 bg-white/[0.02] px-3 py-2.5 text-xs text-zinc-500">
-        Statutory notice only. Common law and severance pay may apply.{" "}
-        <Link to="/app/advisor" className="text-amber-300 transition hover:text-amber-200">
-          Ask the Advisor →
-        </Link>
+        Statutory notice only. Common law and severance pay may apply. <Link to="/app/advisor" className="text-amber-300 transition hover:text-amber-200">Ask the Advisor →</Link>
       </div>
     </section>
   );
 }
 
 function ComplianceByProvinceCard({ documents, defaultProvince }) {
-  // Build province activity map from real documents
   const provinceActivity = {};
   documents.forEach((doc) => {
     const p = doc.province || doc.jurisdiction || defaultProvince || "Ontario";
@@ -311,15 +303,12 @@ function ComplianceByProvinceCard({ documents, defaultProvince }) {
     }
   });
 
-  // Always include the default province
   const defaultP = defaultProvince || "Ontario";
   if (!provinceActivity[defaultP]) {
     provinceActivity[defaultP] = { count: 0, latest: null };
   }
 
-  const entries = Object.entries(provinceActivity).sort(
-    ([, a], [, b]) => (b.count || 0) - (a.count || 0)
-  );
+  const entries = Object.entries(provinceActivity).sort(([, a], [, b]) => (b.count || 0) - (a.count || 0));
 
   return (
     <section className="premium-card p-6">
@@ -333,37 +322,21 @@ function ComplianceByProvinceCard({ documents, defaultProvince }) {
 
       <div className="space-y-2">
         {entries.map(([province, data]) => (
-          <div
-            key={province}
-            className="flex items-center justify-between gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3.5"
-          >
+          <div key={province} className="flex items-center justify-between gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3.5">
             <div>
               <div className="text-sm font-medium text-zinc-100">{province}</div>
               <div className="mt-0.5 text-xs text-zinc-500">
-                {data.count > 0
-                  ? `${data.count} document${data.count > 1 ? "s" : ""} · Last ${formatRelative(data.latest)}`
-                  : "No documents yet"}
+                {data.count > 0 ? `${data.count} document${data.count > 1 ? "s" : ""} · Last ${formatRelative(data.latest)}` : "No documents yet"}
               </div>
             </div>
-            <div
-              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${
-                data.count > 0
-                  ? "border-emerald-400/15 bg-emerald-400/8 text-emerald-300"
-                  : "border-white/8 bg-white/[0.03] text-zinc-400"
-              }`}
-            >
+            <div className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${data.count > 0 ? "border-emerald-400/15 bg-emerald-400/8 text-emerald-300" : "border-white/8 bg-white/[0.03] text-zinc-400"}`}>
               {data.count > 0 ? "Active" : "Not started"}
             </div>
           </div>
         ))}
       </div>
 
-      <Link
-        to="/app/generator"
-        className="ghost-button mt-4 block w-full px-4 py-3 text-center text-sm"
-      >
-        Generate for another province
-      </Link>
+      <Link to="/app/generator" className="ghost-button mt-4 block w-full px-4 py-3 text-center text-sm">Generate for another province</Link>
     </section>
   );
 }
@@ -394,57 +367,36 @@ function LawUpdatesCard({ updates }) {
           </div>
           <h2 className="text-base font-semibold text-zinc-100">Law updates</h2>
         </div>
-        <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-0.5 text-xs font-semibold text-amber-300">
-          {updates.length} new
-        </span>
+        <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-0.5 text-xs font-semibold text-amber-300">{updates.length} new</span>
       </div>
-      <p className="mb-4 text-xs text-zinc-500">
-        Detected changes in Canadian employment legislation · last 30 days
-      </p>
+      <p className="mb-4 text-xs text-zinc-500">Detected changes in Canadian employment legislation · last 30 days</p>
       <div className="space-y-2">
         {updates.slice(0, 5).map((u) => (
-          <div key={u.id}
-            className="rounded-2xl border border-amber-400/12 bg-amber-400/5 px-4 py-3.5">
+          <div key={u.id} className="rounded-2xl border border-amber-400/12 bg-amber-400/5 px-4 py-3.5">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-semibold text-amber-300">{u.jurisdiction}</span>
-                  {u.is_new && (
-                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
-                      First detected
-                    </span>
-                  )}
+                  {u.is_new && <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">First detected</span>}
                 </div>
                 <div className="mt-0.5 text-sm font-medium text-zinc-100">{u.law_name}</div>
-                {u.change_summary && (
-                  <p className="mt-1.5 text-xs leading-5 text-zinc-400 line-clamp-3">
-                    {u.change_summary}
-                  </p>
-                )}
+                {u.change_summary && <p className="mt-1.5 text-xs leading-5 text-zinc-400 line-clamp-3">{u.change_summary}</p>}
               </div>
-              {u.url && (
-                <a href={u.url} target="_blank" rel="noopener noreferrer"
-                  className="mt-0.5 shrink-0 text-zinc-500 transition hover:text-amber-300">
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              )}
+              {u.url && <a href={u.url} target="_blank" rel="noopener noreferrer" className="mt-0.5 shrink-0 text-zinc-500 transition hover:text-amber-300"><ExternalLink className="h-3.5 w-3.5" /></a>}
             </div>
             <div className="mt-2 text-[10px] text-zinc-600">{formatRelative(u.detected_at)}</div>
           </div>
         ))}
       </div>
-      <Link to="/app/advisor"
-        className="ghost-button mt-4 block w-full px-4 py-3 text-center text-sm">
-        Discuss changes with Advisor →
-      </Link>
+      <Link to="/app/advisor" className="ghost-button mt-4 block w-full px-4 py-3 text-center text-sm">Discuss changes with Advisor →</Link>
     </section>
   );
 }
 
-// ── Main Dashboard ─────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuth();
   const { t, lang } = useLang();
+  const { plan } = usePlan();
   const savedSettings = getStoredSettings();
   const companyName = savedSettings.companyName || null;
   const province = savedSettings.province || null;
@@ -458,27 +410,14 @@ export default function Dashboard() {
     async function load() {
       if (!user || !supabase) { setLoadingDocs(false); return; }
       try {
-        const { data: docs } = await supabase
-          .from("documents")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
+        const { data: docs } = await supabase.from("documents").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
         setDocuments(docs || []);
 
-        const { data: sigs } = await supabase
-          .from("signatures")
-          .select("status")
-          .eq("user_id", user.id);
+        const { data: sigs } = await supabase.from("signatures").select("status").eq("user_id", user.id);
         setPendingSignatures((sigs || []).filter((s) => s.status === "pending").length);
 
-        // Law updates — fetch most recent 10 from last 30 days
         const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-        const { data: updates } = await supabase
-          .from("law_updates")
-          .select("id, jurisdiction, law_name, change_summary, detected_at, url, is_new")
-          .gte("detected_at", since)
-          .order("detected_at", { ascending: false })
-          .limit(10);
+        const { data: updates } = await supabase.from("law_updates").select("id, jurisdiction, law_name, change_summary, detected_at, url, is_new").gte("detected_at", since).order("detected_at", { ascending: false }).limit(10);
         setLawUpdates(updates || []);
       } catch (e) {
         console.error("Dashboard load error:", e);
@@ -492,20 +431,13 @@ export default function Dashboard() {
   const documentCount = documents.length;
   const hasDocuments = documentCount > 0;
   const recentDocs = documents.slice(0, 5);
-
-  // Unique provinces from actual documents
-  const activeProvinces = [...new Set(
-    documents.map((d) => d.province || d.jurisdiction || province || "Ontario").filter(Boolean)
-  )].length;
-
-  const today = new Date().toLocaleDateString("en-CA", {
-    weekday: "long", month: "long", day: "numeric",
-  });
+  const activeProvinces = [...new Set(documents.map((d) => d.province || d.jurisdiction || province || "Ontario").filter(Boolean))].length;
+  const today = new Date().toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" });
+  const complianceIncomplete = !companyName || !province || !hasDocuments;
+  const freeLimitApproaching = plan === "free" && documentCount >= 2;
 
   return (
     <div className="space-y-8">
-
-      {/* ── Header ── */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-2 text-sm text-zinc-500">{today}</div>
@@ -530,262 +462,114 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Stat cards ── */}
+      {complianceIncomplete && (
+        <section className="premium-card p-6 border border-amber-400/20 bg-amber-400/5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-zinc-100">{t("Compliance status: Incomplete", "Statut de conformité : incomplet")}</div>
+              <div className="mt-1 text-sm text-zinc-400">
+                {!companyName || !province
+                  ? t("Complete your company and province settings to improve document accuracy and reduce compliance risk.", "Complétez vos paramètres d'entreprise et de province pour améliorer la précision des documents et réduire le risque de conformité.")
+                  : t("Generate your first document to complete your setup and start building your compliance workspace.", "Générez votre premier document pour compléter votre configuration et commencer à bâtir votre espace de conformité.")}
+              </div>
+            </div>
+            <Link to={!companyName || !province ? "/app/settings" : "/app/generator?template=Offer%20Letter"} className="gold-button inline-flex items-center justify-center px-4 py-3 text-sm">
+              {!companyName || !province ? t("Complete setup", "Compléter la configuration") : t("Generate first document", "Générer le premier document")}
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {freeLimitApproaching && (
+        <section className="premium-card p-6 border border-amber-400/20 bg-amber-400/5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-amber-300">{t("You’re approaching your free limit", "Vous approchez de votre limite gratuite")}</div>
+              <div className="mt-1 text-sm text-zinc-400">
+                {t("You’ve already created multiple documents. Most teams upgrade after 2–3 documents to unlock unlimited usage and all 4 compliance rings.", "Vous avez déjà créé plusieurs documents. La plupart des équipes passent à un forfait supérieur après 2 à 3 documents pour débloquer l'utilisation illimitée et les 4 anneaux de conformité.")}
+              </div>
+            </div>
+            <Link to="/pricing" className="gold-button inline-flex items-center justify-center px-4 py-3 text-sm">
+              {t("Upgrade now", "Passer à un forfait supérieur")}
+            </Link>
+          </div>
+        </section>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          title={t("Documents", "Documents")}
-          value={loadingDocs ? "—" : String(documentCount)}
-          sub={hasDocuments ? `${t("Last", "Dernier")} : ${formatRelative(documents[0]?.created_at)}` : t("None yet — start below", "Aucun encore — commencez ci-dessous")}
-          tone={hasDocuments ? "gold" : "default"}
-          icon={<FileText className="h-4 w-4" />}
-          to="/app/generator"
-        />
-        <StatCard
-          title={t("Provinces active", "Provinces actives")}
-          value={loadingDocs ? "—" : String(Math.max(activeProvinces, province ? 1 : 0))}
-          sub={province ? `${t("Primary", "Principale")} : ${province}` : t("Set province in Settings", "Définir la province dans Paramètres")}
-          tone={province ? "green" : "default"}
-          icon={<MapPin className="h-4 w-4" />}
-          to="/app/settings"
-        />
-        <StatCard
-          title={t("Pending signatures", "Signatures en attente")}
-          value={loadingDocs ? "—" : String(pendingSignatures)}
-          sub={pendingSignatures > 0 ? t("Awaiting review", "En attente de révision") : t("All signed or none pending", "Tout signé ou aucun en attente")}
-          tone={pendingSignatures > 0 ? "warning" : "default"}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          to="/app/generator"
-        />
-        <StatCard
-          title={t("Law updates", "Mises à jour législatives")}
-          value={loadingDocs ? "—" : String(lawUpdates.length)}
-          sub={lawUpdates.length > 0 ? t("Recent legislation changes detected", "Changements législatifs récents détectés") : t("No changes detected in 30 days", "Aucun changement détecté en 30 jours")}
-          tone={lawUpdates.length > 0 ? "warning" : "green"}
-          icon={<Bell className="h-4 w-4" />}
-        />
+        <StatCard title={t("Documents", "Documents")} value={loadingDocs ? "—" : String(documentCount)} sub={hasDocuments ? `${t("Last", "Dernier")} : ${formatRelative(documents[0]?.created_at)}` : t("None yet — start below", "Aucun encore — commencez ci-dessous")} tone={hasDocuments ? "gold" : "default"} icon={<FileText className="h-4 w-4" />} to="/app/generator" />
+        <StatCard title={t("Provinces active", "Provinces actives")} value={loadingDocs ? "—" : String(Math.max(activeProvinces, province ? 1 : 0))} sub={province ? `${t("Primary", "Principale")} : ${province}` : t("Set province in Settings", "Définir la province dans Paramètres")} tone={province ? "green" : "default"} icon={<MapPin className="h-4 w-4" />} to="/app/settings" />
+        <StatCard title={t("Pending signatures", "Signatures en attente")} value={loadingDocs ? "—" : String(pendingSignatures)} sub={pendingSignatures > 0 ? t("Awaiting review", "En attente de révision") : t("All signed or none pending", "Tout signé ou aucun en attente")} tone={pendingSignatures > 0 ? "warning" : "default"} icon={<AlertTriangle className="h-4 w-4" />} to="/app/generator" />
+        <StatCard title={t("Law updates", "Mises à jour législatives")} value={loadingDocs ? "—" : String(lawUpdates.length)} sub={lawUpdates.length > 0 ? t("Recent legislation changes detected", "Changements législatifs récents détectés") : t("No changes detected in 30 days", "Aucun changement détecté en 30 jours")} tone={lawUpdates.length > 0 ? "warning" : "green"} icon={<Bell className="h-4 w-4" />} />
       </div>
 
-      {/* ── Quick launch ── */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-zinc-400">
-            {t("Quick document launch", "Lancement rapide de documents")}
-          </h2>
-          <Link
-            to="/app/templates"
-            className="flex items-center gap-1 text-xs text-zinc-400 transition hover:text-zinc-200"
-          >
-            {t("All 20 templates", "20 modèles")}
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-zinc-400">{t("Quick document launch", "Lancement rapide de documents")}</h2>
+          <Link to="/app/templates" className="flex items-center gap-1 text-xs text-zinc-400 transition hover:text-zinc-200">{t("All 20 templates", "20 modèles")}<ArrowUpRight className="h-3.5 w-3.5" /></Link>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {QUICK_TEMPLATES.map((tpl) => (
-            <QuickLaunchCard key={tpl.label} {...tpl} />
-          ))}
+          {QUICK_TEMPLATES.map((tpl) => (<QuickLaunchCard key={tpl.label} {...tpl} />))}
         </div>
       </div>
 
-      {/* ── Main grid ── */}
       <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-
-        {/* Left column */}
         <div className="space-y-6">
-
-          {/* Recent documents */}
-          <SectionCard
-            title="Recent documents"
-            subtitle={hasDocuments ? `${documentCount} document${documentCount > 1 ? "s" : ""} in your workspace` : "No documents yet"}
-            action={
-              <Link
-                to="/app/generator"
-                className="flex items-center gap-1.5 text-sm text-amber-300 transition hover:text-amber-200"
-              >
-                New document
-                <ArrowUpRight className="h-4 w-4" />
-              </Link>
-            }
-          >
+          <SectionCard title="Recent documents" subtitle={hasDocuments ? `${documentCount} document${documentCount > 1 ? "s" : ""} in your workspace` : "No documents yet"} action={<Link to="/app/generator" className="flex items-center gap-1.5 text-sm text-amber-300 transition hover:text-amber-200">New document<ArrowUpRight className="h-4 w-4" /></Link>}>
             {loadingDocs ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-[60px] animate-pulse rounded-2xl border border-white/6 bg-white/[0.02]" />
-                ))}
-              </div>
+              <div className="space-y-3">{[1, 2, 3].map((i) => (<div key={i} className="h-[60px] animate-pulse rounded-2xl border border-white/6 bg-white/[0.02]" />))}</div>
             ) : hasDocuments ? (
-              <div className="space-y-2">
-                {recentDocs.map((doc) => (
-                  <DocRow
-                    key={doc.id}
-                    title={doc.title || "Untitled document"}
-                    meta={formatRelative(doc.created_at)}
-                    province={doc.province || doc.jurisdiction || province || "Ontario"}
-                    to="/app/generator"
-                  />
-                ))}
-              </div>
+              <div className="space-y-2">{recentDocs.map((doc) => (<DocRow key={doc.id} title={doc.title || "Untitled document"} meta={formatRelative(doc.created_at)} province={doc.province || doc.jurisdiction || province || "Ontario"} to="/app/generator" />))}</div>
             ) : (
               <div className="rounded-[20px] border border-white/6 bg-white/[0.02] px-5 py-8 text-center">
-                <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-amber-400/8 text-amber-300">
-                  <FileText className="h-6 w-6" />
-                </div>
+                <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-amber-400/8 text-amber-300"><FileText className="h-6 w-6" /></div>
                 <div className="text-sm font-medium text-zinc-100">No documents yet</div>
-                <div className="mt-1 text-sm text-zinc-500">
-                  Generate your first document — it takes under 5 minutes.
-                </div>
-                <Link
-                  to="/app/generator?template=Offer%20Letter"
-                  className="gold-button mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-sm"
-                >
-                  Start with an Offer Letter
-                </Link>
+                <div className="mt-1 text-sm text-zinc-500">Generate your first document — it takes under 5 minutes.</div>
+                <Link to="/app/generator?template=Offer%20Letter" className="gold-button mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-sm">Start with an Offer Letter</Link>
               </div>
             )}
           </SectionCard>
 
-          {/* What to do next */}
-          <SectionCard
-            title="Suggested next steps"
-            subtitle="Based on your workspace activity"
-          >
+          <SectionCard title="Suggested next steps" subtitle="Based on your workspace activity">
             <div className="space-y-2">
               {pendingSignatures > 0 && (
-                <Link to="/app/generator">
-                  <div className="flex items-center gap-3 rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-4 transition hover:border-yellow-400/25">
-                    <AlertTriangle className="h-4 w-4 shrink-0 text-yellow-300" />
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-zinc-100">
-                        {pendingSignatures} document{pendingSignatures > 1 ? "s" : ""} pending signature
-                      </div>
-                      <div className="mt-0.5 text-xs text-zinc-400">Review and collect signatures</div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
-                  </div>
-                </Link>
+                <Link to="/app/generator"><div className="flex items-center gap-3 rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-4 transition hover:border-yellow-400/25"><AlertTriangle className="h-4 w-4 shrink-0 text-yellow-300" /><div className="flex-1"><div className="text-sm font-medium text-zinc-100">{pendingSignatures} document{pendingSignatures > 1 ? "s" : ""} pending signature</div><div className="mt-0.5 text-xs text-zinc-400">Review and collect signatures</div></div><ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" /></div></Link>
               )}
-
               {lawUpdates.length > 0 && (
-                <Link to="/app/advisor">
-                  <div className="flex items-center gap-3 rounded-2xl border border-amber-400/15 bg-amber-400/6 px-4 py-4 transition hover:border-amber-400/25">
-                    <Bell className="h-4 w-4 shrink-0 text-amber-300" />
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-zinc-100">
-                        {lawUpdates.length} legislation change{lawUpdates.length > 1 ? "s" : ""} detected
-                      </div>
-                      <div className="mt-0.5 text-xs text-zinc-400">
-                        {lawUpdates[0]?.jurisdiction} · {lawUpdates[0]?.law_name} — ask the Advisor what it means for you
-                      </div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
-                  </div>
-                </Link>
+                <Link to="/app/advisor"><div className="flex items-center gap-3 rounded-2xl border border-amber-400/15 bg-amber-400/6 px-4 py-4 transition hover:border-amber-400/25"><Bell className="h-4 w-4 shrink-0 text-amber-300" /><div className="flex-1"><div className="text-sm font-medium text-zinc-100">{lawUpdates.length} legislation change{lawUpdates.length > 1 ? "s" : ""} detected</div><div className="mt-0.5 text-xs text-zinc-400">{lawUpdates[0]?.jurisdiction} · {lawUpdates[0]?.law_name} — ask the Advisor what it means for you</div></div><ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" /></div></Link>
               )}
-
               {!province && (
-                <Link to="/app/settings">
-                  <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
-                    <MapPin className="h-4 w-4 shrink-0 text-amber-300" />
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-zinc-100">Set your primary province</div>
-                      <div className="mt-0.5 text-xs text-zinc-400">Required for accurate ESA calculations</div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
-                  </div>
-                </Link>
+                <Link to="/app/settings"><div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20"><MapPin className="h-4 w-4 shrink-0 text-amber-300" /><div className="flex-1"><div className="text-sm font-medium text-zinc-100">Set your primary province</div><div className="mt-0.5 text-xs text-zinc-400">Required for accurate ESA calculations</div></div><ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" /></div></Link>
               )}
-
-              <Link to="/app/generator?template=Termination%20Letter">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
-                  <UserX className="h-4 w-4 shrink-0 text-amber-300" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-zinc-100">Generate a termination notice</div>
-                    <div className="mt-0.5 text-xs text-zinc-400">
-                      ESA-compliant for {province || "your province"} — notice periods auto-calculated
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
-                </div>
-              </Link>
-
-              <Link to="/app/advisor">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
-                  <MessageSquare className="h-4 w-4 shrink-0 text-amber-300" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-zinc-100">Ask the Advisor a compliance question</div>
-                    <div className="mt-0.5 text-xs text-zinc-400">
-                      Legislation-cited answers for {province || "any province"}
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
-                </div>
-              </Link>
-
-              <Link to="/app/templates">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20">
-                  <BookOpen className="h-4 w-4 shrink-0 text-amber-300" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-zinc-100">Browse all 20 templates</div>
-                    <div className="mt-0.5 text-xs text-zinc-400">
-                      Offer letters, PIPs, NDAs, policies, and more — all bilingual
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" />
-                </div>
-              </Link>
+              <Link to="/app/generator?template=Termination%20Letter"><div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20"><UserX className="h-4 w-4 shrink-0 text-amber-300" /><div className="flex-1"><div className="text-sm font-medium text-zinc-100">Handle a termination (ESA-compliant)</div><div className="mt-0.5 text-xs text-zinc-400">Notice periods auto-calculated for {province || "your province"}</div></div><ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" /></div></Link>
+              <Link to="/app/advisor"><div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20"><MessageSquare className="h-4 w-4 shrink-0 text-amber-300" /><div className="flex-1"><div className="text-sm font-medium text-zinc-100">Ask the Advisor a compliance question</div><div className="mt-0.5 text-xs text-zinc-400">Legislation-cited answers for {province || "any province"}</div></div><ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" /></div></Link>
+              <Link to="/app/rings"><div className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4 transition hover:border-amber-400/20"><Sparkles className="h-4 w-4 shrink-0 text-amber-300" /><div className="flex-1"><div className="text-sm font-medium text-zinc-100">Explore all 4 compliance rings</div><div className="mt-0.5 text-xs text-zinc-400">Documents, wellness, communications, and compensation</div></div><ChevronRight className="h-4 w-4 shrink-0 text-zinc-500" /></div></Link>
             </div>
           </SectionCard>
         </div>
 
-        {/* Right column */}
         <div className="space-y-6">
-
-          {/* Onboarding card (only if no documents yet) */}
-          {!hasDocuments && (
-            <OnboardingCard companyName={companyName} province={province} />
-          )}
-
-          {/* Law updates */}
+          {!hasDocuments && (<OnboardingCard companyName={companyName} province={province} />)}
           <LawUpdatesCard updates={lawUpdates} />
-
-          {/* Province activity */}
-          <ComplianceByProvinceCard
-            documents={documents}
-            defaultProvince={province || "Ontario"}
-          />
-
-          {/* ESA quick reference */}
+          <ComplianceByProvinceCard documents={documents} defaultProvince={province || "Ontario"} />
           <ESACard province={province || "Ontario"} />
-
-          {/* Advisor promo (only if has documents, replace onboarding) */}
           {hasDocuments && (
             <section className="premium-card p-6">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
-                  <Sparkles className="h-5 w-5" />
-                </div>
+                <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-400/10 text-amber-300"><Sparkles className="h-5 w-5" /></div>
                 <div>
                   <div className="text-sm font-semibold text-zinc-100">Have a compliance question?</div>
-                  <p className="mt-1.5 text-sm leading-6 text-zinc-400">
-                    The Advisor cites the exact ESA section, province, and effective date — not
-                    generic HR advice.
-                  </p>
+                  <p className="mt-1.5 text-sm leading-6 text-zinc-400">The Advisor cites the exact ESA section, province, and effective date — not generic HR advice.</p>
                 </div>
               </div>
-              <Link
-                to="/app/advisor"
-                className="gold-button mt-5 block w-full px-4 py-3 text-center text-sm"
-              >
-                Open Advisor
-              </Link>
+              <Link to="/app/advisor" className="gold-button mt-5 block w-full px-4 py-3 text-center text-sm">Open Advisor</Link>
             </section>
           )}
         </div>
-      {/* AI transparency footer */}
-      <div className="mt-8 border-t border-white/6 pt-4 text-center">
-        <Link to="/ai-technology" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
-          AI &amp; Technology Transparency Policy
-        </Link>
       </div>
+
+      <div className="mt-8 border-t border-white/6 pt-4 text-center">
+        <Link to="/ai-technology" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">AI &amp; Technology Transparency Policy</Link>
       </div>
     </div>
   );
