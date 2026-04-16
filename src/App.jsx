@@ -4,6 +4,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
 import AnalyticsTracker from "./components/AnalyticsTracker.jsx";
+import PlanGate from "./components/PlanGate.jsx";
+import RequireOnboarding from "./components/RequireOnboarding.jsx";
 
 const MarketingLayout   = lazy(() => import("./layouts/MarketingLayout.jsx"));
 const AppLayout         = lazy(() => import("./layouts/AppLayout.jsx"));
@@ -28,6 +30,7 @@ const WellnessPage       = lazy(() => import("./pages/Wellness.jsx"));
 const CommunicationsPage = lazy(() => import("./pages/Communications.jsx"));
 const CompensationPage   = lazy(() => import("./pages/Compensation.jsx"));
 const RingsHub           = lazy(() => import("./pages/RingsHub.jsx"));
+const OnboardingPage     = lazy(() => import("./pages/OnboardingPage.jsx"));
 
 function RouteLoader() {
   return (
@@ -69,14 +72,37 @@ export default function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route path="/app" element={withSuspense(<AppLayout />)}>
-                <Route index element={withSuspense(<Dashboard />)} />
+                <Route path="onboarding" element={withSuspense(<OnboardingPage />)} />
+
+                <Route index element={withSuspense(
+                  <RequireOnboarding>
+                    <Dashboard />
+                  </RequireOnboarding>
+                )} />
+
                 <Route path="templates" element={withSuspense(<Templates />)} />
                 <Route path="advisor" element={withSuspense(<Advisor />)} />
                 <Route path="settings" element={withSuspense(<SettingsPage />)} />
                 <Route path="generator" element={withSuspense(<GeneratorPage />)} />
-                <Route path="wellness" element={withSuspense(<WellnessPage />)} />
-                <Route path="communications" element={withSuspense(<CommunicationsPage />)} />
-                <Route path="compensation" element={withSuspense(<CompensationPage />)} />
+
+                <Route path="wellness" element={withSuspense(
+                  <PlanGate required="growth">
+                    <WellnessPage />
+                  </PlanGate>
+                )} />
+
+                <Route path="communications" element={withSuspense(
+                  <PlanGate required="growth">
+                    <CommunicationsPage />
+                  </PlanGate>
+                )} />
+
+                <Route path="compensation" element={withSuspense(
+                  <PlanGate required="pro">
+                    <CompensationPage />
+                  </PlanGate>
+                )} />
+
                 <Route path="rings" element={withSuspense(<RingsHub />)} />
                 <Route path="*" element={<Navigate to="/app" replace />} />
               </Route>
