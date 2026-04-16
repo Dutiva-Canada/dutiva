@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
+import AnalyticsTracker from "./components/AnalyticsTracker.jsx";
 
 const MarketingLayout   = lazy(() => import("./layouts/MarketingLayout.jsx"));
 const AppLayout         = lazy(() => import("./layouts/AppLayout.jsx"));
@@ -48,18 +49,19 @@ export default function App() {
     <ThemeProvider>
       <LanguageProvider>
         <BrowserRouter>
+          <AnalyticsTracker />
           <Routes>
             <Route element={withSuspense(<MarketingLayout />)}>
               <Route index element={withSuspense(<LandingPage />)} />
               <Route path="/pricing" element={withSuspense(<PricingPage />)} />
               <Route path="/beta" element={withSuspense(<BetaPage />)} />
               <Route path="/payment-success" element={withSuspense(<PaymentSuccessPage />)} />
-                            <Route path="/privacy"       element={withSuspense(<PrivacyPage />)} />
-                                          <Route path="/terms"         element={withSuspense(<TermsPage />)} />
-                                                        <Route path="/disclaimer"    element={withSuspense(<DisclaimerPage />)} />
-                                                                      <Route path="/accessibility" element={withSuspense(<AccessibilityPage />)} />
-                                                                                    <Route path="/ai-technology" element={withSuspense(<AITechPage />)} />
-                                                                                                  <Route path="/cookies"       element={withSuspense(<CookiesPage />)} />
+              <Route path="/privacy" element={withSuspense(<PrivacyPage />)} />
+              <Route path="/terms" element={withSuspense(<TermsPage />)} />
+              <Route path="/disclaimer" element={withSuspense(<DisclaimerPage />)} />
+              <Route path="/accessibility" element={withSuspense(<AccessibilityPage />)} />
+              <Route path="/ai-technology" element={withSuspense(<AITechPage />)} />
+              <Route path="/cookies" element={withSuspense(<CookiesPage />)} />
             </Route>
 
             <Route path="/auth" element={withSuspense(<AuthPage />)} />
@@ -72,10 +74,10 @@ export default function App() {
                 <Route path="advisor" element={withSuspense(<Advisor />)} />
                 <Route path="settings" element={withSuspense(<SettingsPage />)} />
                 <Route path="generator" element={withSuspense(<GeneratorPage />)} />
-                <Route path="wellness"       element={withSuspense(<WellnessPage />)} />
+                <Route path="wellness" element={withSuspense(<WellnessPage />)} />
                 <Route path="communications" element={withSuspense(<CommunicationsPage />)} />
-                <Route path="compensation"   element={withSuspense(<CompensationPage />)} />
-                <Route path="rings"         element={withSuspense(<RingsHub />)} />
+                <Route path="compensation" element={withSuspense(<CompensationPage />)} />
+                <Route path="rings" element={withSuspense(<RingsHub />)} />
                 <Route path="*" element={<Navigate to="/app" replace />} />
               </Route>
             </Route>
