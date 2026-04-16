@@ -5,138 +5,196 @@ import {
   Heart,
   Megaphone,
   Wand2,
+  Lock,
+  Sparkles,
 } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
+import { usePlan } from "../context/PlanContext.jsx";
+import { getStoredSettings } from "../utils/workspaceSettings";
 
 const RINGS = [
   {
     num: "1",
-    to:  "/app/generator",
+    to: "/app/generator",
     icon: Wand2,
     color: "text-amber-300",
     border: "border-amber-400/20",
     bg: "bg-amber-400/[0.06]",
-    title: { en: "Document Generator", fr: "G\u00e9n\u00e9rateur de documents" },
+    required: "free",
+    title: { en: "Documents", fr: "Documents" },
     desc: {
-      en: "Offer letters, NDAs, PIPs, termination letters, and more \u2014 bilingual and ESA-compliant.",
-      fr: "Lettres d\u2019offre, ANDs, PAP, lettres de licenciement et plus \u2014 bilingues et conformes \u00e0 la LNT.",
+      en: "Generate compliant HR documents, templates, and signatures.",
+      fr: "Générez des documents RH conformes, des modèles et des signatures.",
     },
-    tools: { en: "Offer Letter \u00b7 NDA \u00b7 PIP \u00b7 Termination", fr: "Lettre d\u2019offre \u00b7 AND \u00b7 PAP \u00b7 Licenciement" },
+    tools: { en: "Generator · Templates · Saved docs", fr: "Générateur · Modèles · Documents" },
   },
   {
     num: "2",
-    to:  "/app/wellness",
+    to: "/app/wellness",
     icon: Heart,
     color: "text-emerald-300",
     border: "border-emerald-400/20",
     bg: "bg-emerald-400/[0.06]",
-    title: { en: "Workplace Wellness", fr: "Bien-\u00eatre au travail" },
+    required: "growth",
+    title: { en: "Workplace Wellness", fr: "Bien-être au travail" },
     desc: {
-      en: "Accommodation workflows, mental health tools, and duty-to-accommodate checklists.",
-      fr: "Flux d\u2019adaptation, outils de sant\u00e9 mentale et listes de v\u00e9rification d\u2019obligation d\u2019accommodement.",
+      en: "Accommodation workflows, leave tools, and employee support workflows.",
+      fr: "Processus d'accommodement, outils de congés et flux de soutien aux employés.",
     },
-    tools: { en: "Accommodation \u00b7 Mental Health \u00b7 Leave", fr: "Accommodement \u00b7 Sant\u00e9 mentale \u00b7 Cong\u00e9" },
+    tools: { en: "Accommodation · Leave · Support", fr: "Accommodement · Congés · Soutien" },
   },
   {
     num: "3",
-    to:  "/app/communications",
+    to: "/app/communications",
     icon: Megaphone,
     color: "text-sky-300",
     border: "border-sky-400/20",
     bg: "bg-sky-400/[0.06]",
+    required: "growth",
     title: { en: "Communications", fr: "Communications" },
     desc: {
-      en: "Layoff scripts, policy memos, crisis guides, and Town Hall agenda builders.",
-      fr: "Scripts de licenciement, m\u00e9mos de politique, guides de crise et g\u00e9n\u00e9rateurs d\u2019ordre du jour.",
+      en: "Handle scripts, memos, sensitive messages, and internal policy communication.",
+      fr: "Gérez les scripts, mémos, messages sensibles et communications internes.",
     },
-    tools: { en: "Layoff Script \u00b7 Policy Memo \u00b7 Town Hall", fr: "Script \u00b7 M\u00e9mo \u00b7 Assembl\u00e9e" },
+    tools: { en: "Scripts · Memos · Crisis comms", fr: "Scripts · Mémos · Communication" },
   },
   {
     num: "4",
-    to:  "/app/compensation",
+    to: "/app/compensation",
     icon: DollarSign,
     color: "text-violet-300",
     border: "border-violet-400/20",
     bg: "bg-violet-400/[0.06]",
-    title: { en: "Compensation", fr: "R\u00e9mun\u00e9ration" },
+    required: "pro",
+    title: { en: "Compensation", fr: "Rémunération" },
     desc: {
-      en: "Severance calculator, pay equity checker, salary band builder, and financial literacy tools.",
-      fr: "Calculateur d\u2019indemnit\u00e9, v\u00e9rificateur d\u2019\u00e9quit\u00e9 salariale, constructeur de grilles et outils de litt\u00e9ratie financi\u00e8re.",
+      en: "Run severance, pay equity, salary banding, and compensation decisions with confidence.",
+      fr: "Gérez indemnités, équité salariale, bandes salariales et décisions de rémunération avec confiance.",
     },
-    tools: { en: "Severance \u00b7 Pay Equity \u00b7 Salary Bands", fr: "Indemnit\u00e9 \u00b7 \u00c9quit\u00e9 \u00b7 Grilles salariales" },
+    tools: { en: "Severance · Pay equity · Salary bands", fr: "Indemnité · Équité · Bandes salariales" },
   },
 ];
 
+const hierarchy = ["free", "growth", "pro"];
+
+function hasPlanAccess(currentPlan, requiredPlan) {
+  return hierarchy.indexOf(currentPlan) >= hierarchy.indexOf(requiredPlan);
+}
+
 export default function RingsHub() {
   const { t } = useLang();
+  const { plan } = usePlan();
+  const settings = getStoredSettings();
+  const companyName = settings.companyName || t("Your workspace", "Votre espace de travail");
+  const province = settings.province || "Ontario";
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-6 pb-8">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="mb-1 flex items-center gap-2">
-          <FileText className="h-4 w-4 text-amber-300/70" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-            {t("Compliance Rings", "Anneaux de conformit\u00e9")}
-          </span>
+    <div className="mx-auto max-w-5xl px-4 py-6 pb-8 space-y-6">
+      <section className="premium-card p-6 md:p-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-300/80" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                {t("Compliance system", "Système de conformité")}
+              </span>
+            </div>
+            <h1 className="text-3xl font-semibold text-zinc-100 md:text-4xl">
+              {t("The 4 Rings of Dutiva", "Les 4 anneaux de Dutiva")}
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
+              {t(
+                "Start with documents, then expand into wellness, communications, and compensation as your business grows.",
+                "Commencez par les documents, puis développez le bien-être, les communications et la rémunération à mesure que votre entreprise grandit.",
+              )}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-zinc-300">
+            <div className="font-medium text-zinc-100">{companyName}</div>
+            <div className="mt-1 text-zinc-400">{province} · {t("Plan", "Plan")} {plan}</div>
+          </div>
         </div>
-        <h1 className="text-2xl font-semibold text-zinc-100">
-          {t("All Rings", "Tous les anneaux")}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          {t(
-            "Ontario, Qu\u00e9bec & Federal \u2014 pick a ring to get started.",
-            "Ontario, Qu\u00e9bec et f\u00e9d\u00e9ral \u2014 choisissez un anneau pour commencer.",
-          )}
-        </p>
-      </div>
+      </section>
 
-      {/* Ring cards */}
-      <div className="grid gap-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {RINGS.map((ring) => {
           const Icon = ring.icon;
+          const unlocked = hasPlanAccess(plan, ring.required);
+          const destination = unlocked ? ring.to : "/pricing";
+
           return (
             <Link
               key={ring.num}
-              to={ring.to}
+              to={destination}
               className={[
-                "group flex items-start gap-4 rounded-2xl border p-4 transition-all",
-                "hover:bg-white/[0.04] active:scale-[0.98]",
+                "group rounded-3xl border p-6 transition-all",
+                "hover:bg-white/[0.04] active:scale-[0.99]",
                 ring.border,
                 ring.bg,
               ].join(" ")}
             >
-              {/* Icon + ring number */}
-              <div className="flex flex-col items-center gap-1 pt-0.5">
-                <div className={["rounded-xl border p-2.5", ring.border].join(" ")}>
-                  <Icon className={["h-5 w-5", ring.color].join(" ")} />
-                </div>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600">
-                  {t(`Ring ${ring.num}`, `Anneau ${ring.num}`)}
-                </span>
-              </div>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="flex flex-col items-center gap-1 pt-0.5">
+                    <div className={["rounded-2xl border p-3", ring.border].join(" ")}>
+                      <Icon className={["h-5 w-5", ring.color].join(" ")} />
+                    </div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600">
+                      {t(`Ring ${ring.num}`, `Anneau ${ring.num}`)}
+                    </span>
+                  </div>
 
-              {/* Text */}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[15px] font-semibold text-zinc-100 group-hover:text-white">
-                    {t(ring.title.en, ring.title.fr)}
-                  </span>
-                  <span className="shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-zinc-400">
-                    &rsaquo;
-                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-lg font-semibold text-zinc-100 group-hover:text-white">
+                      {t(ring.title.en, ring.title.fr)}
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-zinc-400">
+                      {t(ring.desc.en, ring.desc.fr)}
+                    </p>
+                    <div className={["mt-3 text-xs font-medium", ring.color, "opacity-85"].join(" ")}>
+                      {t(ring.tools.en, ring.tools.fr)}
+                    </div>
+                  </div>
                 </div>
-                <p className="mt-1 text-[13px] leading-relaxed text-zinc-400">
-                  {t(ring.desc.en, ring.desc.fr)}
-                </p>
-                <div className={["mt-2.5 text-[11px] font-medium", ring.color, "opacity-80"].join(" ")}>
-                  {t(ring.tools.en, ring.tools.fr)}
+
+                <div className="shrink-0">
+                  {unlocked ? (
+                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+                      {t("Active", "Actif")}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold text-amber-300">
+                      <Lock className="h-3 w-3" />
+                      {t(`Requires ${ring.required}`, `Nécessite ${ring.required}`)}
+                    </span>
+                  )}
                 </div>
               </div>
             </Link>
           );
         })}
       </div>
+
+      {plan === "free" && (
+        <section className="premium-card p-6 md:p-7">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-zinc-100">
+                {t("Unlock the full compliance system", "Débloquez le système de conformité complet")}
+              </div>
+              <p className="mt-1 text-sm text-zinc-400">
+                {t(
+                  "Upgrade to Growth to access Wellness and Communications, or choose Pro for Compensation and financial tools.",
+                  "Passez à Growth pour accéder au Bien-être et aux Communications, ou choisissez Pro pour la Rémunération et les outils financiers.",
+                )}
+              </p>
+            </div>
+            <Link to="/pricing" className="gold-button inline-flex items-center justify-center px-5 py-3 text-sm">
+              {t("View pricing", "Voir les tarifs")}
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
