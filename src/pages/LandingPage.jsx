@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { useLang } from "../context/LanguageContext.jsx";
 import { Helmet } from 'react-helmet-async';
+import { trackEvent } from "../lib/analytics";
 
 function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-6xl px-4 ${className}`}>{children}</section>;
@@ -20,7 +21,6 @@ export default function LandingPage() {
         />
       </Helmet>
 
-      {/* HERO */}
       <Section className="py-12 md:py-20">
         <div className="max-w-2xl space-y-6">
           <div className="text-xs uppercase tracking-[0.18em] text-amber-400">
@@ -42,10 +42,18 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/app/generator" className="gold-button px-5 py-3 text-sm">
+            <Link
+              to="/app/generator"
+              className="gold-button px-5 py-3 text-sm text-center"
+              onClick={() => trackEvent("generate_document_click", { location: "landing_hero" })}
+            >
               {t("Generate a document", "Générer un document")}
             </Link>
-            <Link to="/pricing" className="ghost-button px-5 py-3 text-sm">
+            <Link
+              to="/pricing"
+              className="ghost-button px-5 py-3 text-sm text-center"
+              onClick={() => trackEvent("pricing_click", { location: "landing_hero" })}
+            >
               {t("View pricing", "Voir les tarifs")}
             </Link>
           </div>
@@ -67,7 +75,6 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* VALUE */}
       <Section className="py-10">
         <div className="grid gap-6 md:grid-cols-3">
           {[
@@ -82,7 +89,6 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* CTA */}
       <Section className="py-14">
         <div className="premium-card p-8 text-center space-y-4">
           <h2 className="text-2xl md:text-3xl text-zinc-50">
@@ -94,7 +100,11 @@ export default function LandingPage() {
               "Générez votre premier document conforme en moins de 5 minutes."
             )}
           </p>
-          <Link to="/app" className="gold-button px-6 py-3 text-sm inline-block">
+          <Link
+            to="/app"
+            className="gold-button px-6 py-3 text-sm inline-block"
+            onClick={() => trackEvent("open_app_click", { location: "landing_bottom_cta" })}
+          >
             {t("Open the app", "Ouvrir l'application")}
           </Link>
         </div>
