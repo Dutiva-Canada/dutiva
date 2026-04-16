@@ -8,6 +8,166 @@ function Section({ children, className = "" }) {
   return <section className={`mx-auto w-full max-w-6xl px-4 ${className}`}>{children}</section>;
 }
 
+function RingsSection() {
+  const { t } = useLang();
+
+  const rings = [
+    {
+      title: t("Core Compliance", "Conformité de base"),
+      desc: t(
+        "Generate compliant HR documents across Canadian jurisdictions.",
+        "Générez des documents RH conformes selon les juridictions canadiennes."
+      ),
+    },
+    {
+      title: t("Workplace Wellness", "Bien-être au travail"),
+      desc: t(
+        "Support employees with structured, compliant wellness practices.",
+        "Soutenez les employés avec des pratiques de bien-être conformes."
+      ),
+    },
+    {
+      title: t("Internal Communications", "Communications internes"),
+      desc: t(
+        "Handle sensitive workplace situations with clarity and consistency.",
+        "Gérez les situations sensibles avec clarté et cohérence."
+      ),
+    },
+    {
+      title: t("Compensation & Financials", "Rémunération et finances"),
+      desc: t(
+        "Make informed decisions on pay, severance, and equity.",
+        "Prenez des décisions éclairées sur la rémunération et l'équité."
+      ),
+    },
+  ];
+
+  return (
+    <Section className="py-14 md:py-16">
+      <div className="max-w-2xl mb-10">
+        <h2 className="text-2xl md:text-4xl text-zinc-50 font-semibold">
+          {t(
+            "Start with compliance. Expand as you grow.",
+            "Commencez par la conformité. Développez avec votre entreprise."
+          )}
+        </h2>
+        <p className="text-zinc-400 mt-3 text-sm md:text-base">
+          {t(
+            "Dutiva is structured in layers, so you can start with the essentials and add more support as your business evolves.",
+            "Dutiva est structuré en couches pour vous permettre de commencer par l'essentiel et d'ajouter du soutien à mesure que votre entreprise évolue."
+          )}
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {rings.map((ring, i) => (
+          <div key={ring.title} className="premium-card p-6 relative overflow-hidden">
+            <div className="text-xs text-amber-400 uppercase tracking-wide mb-2">
+              {t("Layer", "Couche")} {i + 1}
+            </div>
+            <h3 className="text-lg text-zinc-100 font-semibold">{ring.title}</h3>
+            <p className="text-sm text-zinc-400 mt-2">{ring.desc}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function ProductProofSection() {
+  const { t } = useLang();
+
+  const proofs = [
+    {
+      title: t("Document generation", "Génération de documents"),
+      copy: t(
+        "Create offer letters, policies, and HR documents in minutes with guided inputs.",
+        "Créez des lettres d'offre, des politiques et des documents RH en quelques minutes avec des champs guidés."
+      ),
+      points: [
+        t("Guided form fields", "Champs guidés"),
+        t("Jurisdiction-aware output", "Sortie adaptée à la juridiction"),
+        t("English and French", "Anglais et français"),
+      ],
+    },
+    {
+      title: t("Compliance advisor", "Conseiller conformité"),
+      copy: t(
+        "Ask HR compliance questions and get answers grounded in Canadian legislation.",
+        "Posez des questions de conformité RH et obtenez des réponses fondées sur la législation canadienne."
+      ),
+      points: [
+        t("Legislation-backed guidance", "Conseils fondés sur la législation"),
+        t("Fast answers", "Réponses rapides"),
+        t("Built for SMB employers", "Conçu pour les PME"),
+      ],
+    },
+    {
+      title: t("Workspace settings", "Paramètres d'espace de travail"),
+      copy: t(
+        "Set your company, province, language, and defaults once, then use that context everywhere in the app.",
+        "Définissez votre entreprise, votre province, votre langue et vos paramètres une fois, puis utilisez ce contexte partout dans l'application."
+      ),
+      points: [
+        t("Province-aware defaults", "Paramètres selon la province"),
+        t("Theme and language", "Thème et langue"),
+        t("Reusable company context", "Contexte d'entreprise réutilisable"),
+      ],
+    },
+  ];
+
+  return (
+    <Section className="py-14 md:py-16">
+      <div className="max-w-2xl mb-10">
+        <h2 className="text-2xl md:text-4xl text-zinc-50 font-semibold">
+          {t("See what working in Dutiva looks like.", "Voyez à quoi ressemble le travail dans Dutiva.")}
+        </h2>
+        <p className="text-zinc-400 mt-3 text-sm md:text-base">
+          {t(
+            "Your visitors need proof, not just promises. Show them how the product helps them move faster and stay compliant.",
+            "Vos visiteurs ont besoin de preuves, pas seulement de promesses. Montrez-leur comment le produit les aide à aller plus vite et à rester conformes."
+          )}
+        </p>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {proofs.map((proof) => (
+          <div key={proof.title} className="premium-card p-6">
+            <div className="rounded-2xl border border-white/6 bg-white/[0.03] p-4 mb-5">
+              <div className="text-xs uppercase tracking-[0.18em] text-amber-400 mb-2">
+                {t("Preview", "Aperçu")}
+              </div>
+              <div className="rounded-xl border border-white/6 bg-black/20 p-4">
+                <div className="h-2 w-16 rounded-full bg-amber-400/60 mb-3" />
+                <div className="space-y-2">
+                  <div className="h-2 rounded-full bg-white/12 w-full" />
+                  <div className="h-2 rounded-full bg-white/12 w-5/6" />
+                  <div className="h-2 rounded-full bg-white/12 w-3/4" />
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="h-10 rounded-lg bg-white/8" />
+                  <div className="h-10 rounded-lg bg-white/8" />
+                </div>
+              </div>
+            </div>
+
+            <h3 className="text-lg text-zinc-100 font-semibold">{proof.title}</h3>
+            <p className="text-sm text-zinc-400 mt-2">{proof.copy}</p>
+            <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+              {proof.points.map((point) => (
+                <li key={point} className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-amber-400" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 export default function LandingPage() {
   const { t } = useLang();
 
@@ -88,6 +248,9 @@ export default function LandingPage() {
           ))}
         </div>
       </Section>
+
+      <RingsSection />
+      <ProductProofSection />
 
       <Section className="py-14">
         <div className="premium-card p-8 text-center space-y-4">
