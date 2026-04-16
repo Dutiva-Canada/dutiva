@@ -1,38 +1,72 @@
-// UPDATED METADATA ONLY
-import { useState } from "react";
-import { Check, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLang } from "../context/LanguageContext.jsx";
-import { supabase } from "../lib/supabase";
 import { Helmet } from 'react-helmet-async';
-
-// ...rest unchanged except metadata
+import { trackEvent } from "../lib/analytics";
 
 export default function PricingPage() {
   const { user } = useAuth();
   const { t } = useLang();
-  const [checkingOut, setCheckingOut] = useState(null);
-  const [checkoutError, setCheckoutError] = useState(null);
-  const [billing, setBilling] = useState("monthly");
+
+  const plans = [
+    { name: "Starter", price: "$0", features: ["5 docs/month", "Basic templates"] },
+    { name: "Growth", price: "$29/mo", highlight: true, features: ["Unlimited docs", "All templates"] },
+    { name: "Pro", price: "$79/mo", features: ["Advanced tools", "Priority support"] },
+  ];
+
+  const handleCheckout = (plan) => {
+    trackEvent("pricing_select", { plan });
+
+    if (!user) {
+      window.location.href = "/auth";
+      return;
+    }
+
+    alert("Checkout coming soon");
+  };
 
   return (
-    <div className="marketing-shell min-h-screen">
+    <div className="marketing-shell min-h-screen px-4 py-12">
       <Helmet>
-        <title>Dutiva Pricing — HR Compliance for Canadian SMBs</title>
-        <meta
-          name="description"
-          content="Simple, transparent pricing for HR compliance, document generation, and AI-powered guidance built for Canadian small businesses."
-        />
-        <link rel="canonical" href="https://dutiva.ca/pricing" />
-        <meta property="og:title" content="Dutiva Pricing — HR Compliance for Canadian SMBs" />
-        <meta
-          property="og:description"
-          content="HR compliance tools, document generation, and AI advisor pricing for Canadian SMBs."
-        />
-        <meta property="og:url" content="https://dutiva.ca/pricing" />
+        <title>Dutiva Pricing</title>
       </Helmet>
-      {/* rest of original file unchanged */}
+
+      <div className="text-center mb-10">
+        <h1 className="text-4xl text-zinc-50 font-semibold">Pricing</h1>
+        <p className="text-zinc-400 mt-2">Simple, transparent pricing</p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
+        {plans.map((plan) => (
+          <div key={plan.name} className={`premium-card p-6 ${plan.highlight ? "border-amber-400" : ""}`}>
+            <h3 className="text-lg text-zinc-100 font-semibold">{plan.name}</h3>
+            <div className="text-2xl text-amber-400 mt-2">{plan.price}</div>
+
+            <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+              {plan.features.map((f) => (
+                <li key={f}>• {f}</li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => handleCheckout(plan.name)}
+              className="gold-button w-full mt-6 py-3 text-sm"
+            >
+              Get started
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="text-center mt-10">
+        <Link
+          to="/app"
+          className="ghost-button px-5 py-3 text-sm"
+          onClick={() => trackEvent("open_app_click", { location: "pricing" })}
+        >
+          Explore app
+        </Link>
+      </div>
     </div>
   );
 }
