@@ -13,28 +13,28 @@ function RingsSection() {
 
   const rings = [
     {
-      title: t("Core Compliance", "Conformité de base"),
+      title: t("Ring 1 · Documents", "Anneau 1 · Documents"),
       desc: t(
         "Generate compliant HR documents across Canadian jurisdictions.",
         "Générez des documents RH conformes selon les juridictions canadiennes."
       ),
     },
     {
-      title: t("Workplace Wellness", "Bien-être au travail"),
+      title: t("Ring 2 · Workplace Wellness", "Anneau 2 · Bien-être au travail"),
       desc: t(
         "Support employees with structured, compliant wellness practices.",
         "Soutenez les employés avec des pratiques de bien-être conformes."
       ),
     },
     {
-      title: t("Internal Communications", "Communications internes"),
+      title: t("Ring 3 · Communications", "Anneau 3 · Communications"),
       desc: t(
         "Handle sensitive workplace situations with clarity and consistency.",
         "Gérez les situations sensibles avec clarté et cohérence."
       ),
     },
     {
-      title: t("Compensation & Financials", "Rémunération et finances"),
+      title: t("Ring 4 · Compensation", "Anneau 4 · Rémunération"),
       desc: t(
         "Make informed decisions on pay, severance, and equity.",
         "Prenez des décisions éclairées sur la rémunération et l'équité."
@@ -47,24 +47,21 @@ function RingsSection() {
       <div className="max-w-2xl mb-10">
         <h2 className="text-2xl md:text-4xl text-zinc-50 font-semibold">
           {t(
-            "Start with compliance. Expand as you grow.",
-            "Commencez par la conformité. Développez avec votre entreprise."
+            "Everything you need to stay compliant — in one system.",
+            "Tout ce qu'il vous faut pour rester conforme — dans un seul système."
           )}
         </h2>
         <p className="text-zinc-400 mt-3 text-sm md:text-base">
           {t(
-            "Dutiva is structured in layers, so you can start with the essentials and add more support as your business evolves.",
-            "Dutiva est structuré en couches pour vous permettre de commencer par l'essentiel et d'ajouter du soutien à mesure que votre entreprise évolue."
+            "Most tools stop at documents. Dutiva helps Canadian employers manage the full HR compliance lifecycle.",
+            "La plupart des outils s'arrêtent aux documents. Dutiva aide les employeurs canadiens à gérer l'ensemble du cycle de conformité RH."
           )}
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {rings.map((ring, i) => (
+        {rings.map((ring) => (
           <div key={ring.title} className="premium-card p-6 relative overflow-hidden">
-            <div className="text-xs text-amber-400 uppercase tracking-wide mb-2">
-              {t("Layer", "Couche")} {i + 1}
-            </div>
             <h3 className="text-lg text-zinc-100 font-semibold">{ring.title}</h3>
             <p className="text-sm text-zinc-400 mt-2">{ring.desc}</p>
           </div>
@@ -120,12 +117,12 @@ function ProductProofSection() {
     <Section className="py-14 md:py-16">
       <div className="max-w-2xl mb-10">
         <h2 className="text-2xl md:text-4xl text-zinc-50 font-semibold">
-          {t("See what working in Dutiva looks like.", "Voyez à quoi ressemble le travail dans Dutiva.")}
+          {t("See how Dutiva works in practice.", "Voyez comment Dutiva fonctionne en pratique.")}
         </h2>
         <p className="text-zinc-400 mt-3 text-sm md:text-base">
           {t(
-            "Your visitors need proof, not just promises. Show them how the product helps them move faster and stay compliant.",
-            "Vos visiteurs ont besoin de preuves, pas seulement de promesses. Montrez-leur comment le produit les aide à aller plus vite et à rester conformes."
+            "Your visitors need proof, not just promises. Show them how the product helps them move faster and stay protected.",
+            "Vos visiteurs ont besoin de preuves, pas seulement de promesses. Montrez-leur comment le produit les aide à aller plus vite et à rester protégés."
           )}
         </p>
       </div>
@@ -174,30 +171,34 @@ export default function LandingPage() {
   return (
     <div className="marketing-shell min-h-screen">
       <Helmet>
-        <title>Dutiva — HR Compliance for Canadian SMBs</title>
+        <title>Dutiva — HR Compliance Software for Canadian Small Businesses</title>
         <meta
           name="description"
-          content="Generate compliant HR documents, get legislation-backed guidance, and manage compliance without hiring an HR team. Built for Canadian SMBs."
+          content="HR compliance software for Canadian small businesses. Generate compliant HR documents, get legislation-backed guidance, and manage employee issues without hiring an HR team."
         />
+        <link rel="canonical" href="https://dutiva.ca/" />
+        <meta property="og:title" content="Dutiva — HR Compliance Software for Canadian Small Businesses" />
+        <meta property="og:description" content="Generate compliant HR documents, get legislation-backed guidance, and manage employee issues across Canada." />
+        <meta property="og:url" content="https://dutiva.ca/" />
       </Helmet>
 
       <Section className="py-12 md:py-20">
-        <div className="max-w-2xl space-y-6">
+        <div className="max-w-3xl space-y-6">
           <div className="text-xs uppercase tracking-[0.18em] text-amber-400">
-            {t("Built for Canadian employers", "Conçu pour les employeurs canadiens")}
+            {t("Built for Canadian small businesses", "Conçu pour les petites entreprises canadiennes")}
           </div>
 
           <h1 className="text-4xl font-semibold leading-tight md:text-6xl text-zinc-50">
             {t(
-              "HR compliance — without hiring an HR team.",
-              "La conformité RH — sans embaucher une équipe RH."
+              "Run HR compliance in Canada — without hiring an HR team.",
+              "Gérez la conformité RH au Canada — sans embaucher une équipe RH."
             )}
           </h1>
 
-          <p className="text-base md:text-lg text-zinc-400">
+          <p className="text-base md:text-lg text-zinc-400 max-w-2xl">
             {t(
-              "Generate bilingual HR documents, get legislation-backed answers, and stay compliant across Canadian jurisdictions.",
-              "Générez des documents RH bilingues, obtenez des réponses fondées sur la législation et restez conforme dans les juridictions canadiennes."
+              "Generate compliant HR documents, manage employee issues, and get legislation-backed guidance across Ontario, Quebec, and federally regulated workplaces.",
+              "Générez des documents RH conformes, gérez les situations employé et obtenez des conseils fondés sur la législation pour l'Ontario, le Québec et les milieux fédéraux."
             )}
           </p>
 
@@ -207,29 +208,29 @@ export default function LandingPage() {
               className="gold-button px-5 py-3 text-sm text-center"
               onClick={() => trackEvent("generate_document_click", { location: "landing_hero" })}
             >
-              {t("Generate a document", "Générer un document")}
+              {t("Start free", "Commencer gratuitement")}
             </Link>
             <Link
               to="/pricing"
               className="ghost-button px-5 py-3 text-sm text-center"
               onClick={() => trackEvent("pricing_click", { location: "landing_hero" })}
             >
-              {t("View pricing", "Voir les tarifs")}
+              {t("See how it works", "Voir comment ça fonctionne")}
             </Link>
           </div>
 
           <div className="grid gap-2 text-sm text-zinc-400">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-amber-400" />
-              {t("20+ templates", "20+ modèles")}
+              {t("Built for Canadian employers", "Conçu pour les employeurs canadiens")}
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-amber-400" />
-              {t("Ontario, Quebec & Federal", "Ontario, Québec et fédéral")}
+              {t("Ontario, Quebec and federal ready", "Prêt pour l'Ontario, le Québec et le fédéral")}
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-amber-400" />
-              {t("English & French", "Anglais et français")}
+              {t("English and French workflows", "Flux de travail en anglais et en français")}
             </div>
           </div>
         </div>
@@ -238,9 +239,9 @@ export default function LandingPage() {
       <Section className="py-10">
         <div className="grid gap-6 md:grid-cols-3">
           {[
-            t("Generate documents in minutes", "Générez des documents en minutes"),
-            t("Legislation-backed answers", "Réponses basées sur la loi"),
-            t("Built for Canadian law", "Conçu pour le droit canadien"),
+            t("Generate compliant documents in minutes", "Générez des documents conformes en quelques minutes"),
+            t("Get legislation-backed answers fast", "Obtenez rapidement des réponses fondées sur la loi"),
+            t("Reduce risk before it becomes a problem", "Réduisez le risque avant qu'il ne devienne un problème"),
           ].map((text) => (
             <div key={text} className="premium-card p-5 text-sm text-zinc-300">
               {text}
@@ -255,12 +256,12 @@ export default function LandingPage() {
       <Section className="py-14">
         <div className="premium-card p-8 text-center space-y-4">
           <h2 className="text-2xl md:text-3xl text-zinc-50">
-            {t("Start free. No setup.", "Commencez gratuitement. Sans configuration.")}
+            {t("Start protecting your business today.", "Commencez à protéger votre entreprise dès aujourd'hui.")}
           </h2>
           <p className="text-sm text-zinc-400">
             {t(
-              "Generate your first compliant document in under 5 minutes.",
-              "Générez votre premier document conforme en moins de 5 minutes."
+              "Start free with no credit card and generate your first compliant document in under 5 minutes.",
+              "Commencez gratuitement sans carte de crédit et générez votre premier document conforme en moins de 5 minutes."
             )}
           </p>
           <Link
@@ -268,7 +269,7 @@ export default function LandingPage() {
             className="gold-button px-6 py-3 text-sm inline-block"
             onClick={() => trackEvent("open_app_click", { location: "landing_bottom_cta" })}
           >
-            {t("Open the app", "Ouvrir l'application")}
+            {t("Start free — no credit card", "Commencer gratuitement — sans carte")}
           </Link>
         </div>
       </Section>
