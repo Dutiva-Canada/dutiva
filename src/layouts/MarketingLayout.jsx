@@ -1,5 +1,5 @@
 import { Outlet, Link, NavLink } from 'react-router-dom';
-import { Sun, Moon, Globe } from 'lucide-react';
+import { Sun, Moon, Globe, Laptop } from 'lucide-react';
 import { useLang } from '../context/LanguageContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 
@@ -19,30 +19,37 @@ function BrandLockup() {
 }
 
 function ThemeLangToggles() {
-  const { resolved, setTheme } = useTheme();
-  const { lang, setLanguage, t } = useLang();
+  const { themeDefault, setTheme } = useTheme();
+  const { lang, setLanguage } = useLang();
 
-  const toggleTheme = () => setTheme(resolved === 'Light' ? 'Dark' : 'Light');
-  const toggleLang  = () => setLanguage(lang === 'en' ? 'French' : 'English');
+  const cycleTheme = () => {
+    if (themeDefault === 'Dark') return setTheme('Light');
+    if (themeDefault === 'Light') return setTheme('System');
+    return setTheme('Dark');
+  };
+
+  const themeIcon = themeDefault === 'Dark'
+    ? <Moon className="h-4 w-4" />
+    : themeDefault === 'Light'
+    ? <Sun className="h-4 w-4" />
+    : <Laptop className="h-4 w-4" />;
+
+  const toggleLang = () => setLanguage(lang === 'en' ? 'French' : 'English');
 
   return (
     <div className="flex items-center gap-1">
       <button
         onClick={toggleLang}
-        title={lang === 'en' ? 'Passer en français' : 'Switch to English'}
         className="ghost-button inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold tracking-wide"
-        style={{ minHeight: '36px' }}
       >
         <Globe className="h-3.5 w-3.5" />
         {lang === 'en' ? 'FR' : 'EN'}
       </button>
       <button
-        onClick={toggleTheme}
-        title={resolved === 'Light' ? t('Switch to dark mode', 'Passer en mode sombre') : t('Switch to light mode', 'Passer en mode clair')}
+        onClick={cycleTheme}
         className="ghost-button inline-flex items-center justify-center px-3 py-2"
-        style={{ minHeight: '36px' }}
       >
-        {resolved === 'Light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+        {themeIcon}
       </button>
     </div>
   );
@@ -63,49 +70,17 @@ export default function MarketingLayout() {
           </Link>
 
           <nav className="flex items-center gap-2">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-sm font-medium transition ${
-                  isActive
-                    ? 'bg-white/8 text-zinc-100'
-                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-100'
-                }`
-              }
-            >
+            <NavLink to="/" end className="rounded-xl px-4 py-2 text-sm font-medium">
               {t('Home', 'Accueil')}
             </NavLink>
-            <NavLink
-              to="/beta"
-              className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-sm font-medium transition ${
-                  isActive
-                    ? 'bg-white/8 text-zinc-100'
-                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-100'
-                }`
-              }
-            >
+            <NavLink to="/beta" className="rounded-xl px-4 py-2 text-sm font-medium">
               {t('Beta', 'Bêta')}
             </NavLink>
-            <NavLink
-              to="/pricing"
-              className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-sm font-medium transition ${
-                  isActive
-                    ? 'bg-white/8 text-zinc-100'
-                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-100'
-                }`
-              }
-            >
+            <NavLink to="/pricing" className="rounded-xl px-4 py-2 text-sm font-medium">
               {t('Pricing', 'Tarifs')}
             </NavLink>
-            <div className="mx-1 h-5 w-px hidden sm:block" style={{ backgroundColor: 'var(--border)' }} />
             <ThemeLangToggles />
-            <Link
-              to="/app"
-              className="gold-button ml-1 px-4 py-2 text-sm"
-            >
+            <Link to="/app" className="gold-button ml-1 px-4 py-2 text-sm">
               {t('Open app', "Ouvrir l'app")}
             </Link>
           </nav>
