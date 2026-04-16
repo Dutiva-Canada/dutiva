@@ -3,30 +3,38 @@
  *
  * • Reads initial value from workspaceSettings (languageDefault).
  * • Writes the chosen language back to workspaceSettings on every change.
- * • Sets document.documentElement.lang ("en" | "fr").
- * • Exposes t(en, fr) helper — bilingual defaults to French.
+ * • Sets document.documentElement.lang.
+ * • Exposes t(en, fr) helper.
+ * • In bilingual mode, returns both strings in a compact combined format.
  */
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getStoredSettings, SETTINGS_STORAGE_KEY } from "../utils/workspaceSettings";
 import { saveToStorage } from "../utils/storage";
 
 const LanguageContext = createContext(null);
 
-/** "English" → "en", "French" → "fr", "Bilingual" → "fr" */
 function toLangCode(languageDefault) {
-  if (languageDefault === "French" || languageDefault === "Bilingual") return "fr";
+  if (languageDefault === "French") return "fr";
+  if (languageDefault === "Bilingual") return "en-CA";
   return "en";
 }
 
+function formatBilingual(en, fr) {
+  if (!en && !fr) return "";
+  if (!en) return fr;
+  if (!fr) return en;
+  if (en === fr) return en;
+  return `${en} / ${fr}`;
+}
+
 export function LanguageProvider({ children }) {
-  // languageDefault: "English" | "French" | "Bilingual"  (stored value)
   const [languageDefault, setLanguageDefaultState] = useState(() => {
     return getStoredSettings().languageDefault || "English";
   });
 
-  const lang = toLangCode(languageDefault); // "en" | "fr"
+  const lang = toLangCode(languageDefault);
+  const isBilingual = languageDefault === "Bilingual";
 
-  // Apply HTML lang attribute immediately
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
@@ -37,26 +45,23 @@ export function LanguageProvider({ children }) {
     saveToStorage(SETTINGS_STORAGE_KEY, { ...current, languageDefault: value });
   }, []);
 
-  /**
-   * t(en, fr) — returns the string for the current language.
-   * Usage:  t("Settings", "Paramètres")
-   */
   const t = useCallback(
-    (en, fr) => (lang === "fr" ? fr : en),
-    [lang]
+    (en, fr) => {
+      if (languageDefault === "French") return fr ?? en ?? "";
+      if (languageDefault === "Bilingual") return formatBilingual(en, fr);
+      return en ?? fr ?? "";
+    },
+    [languageDefault]
   );
 
-  return (
-    <LanguageContext.Provider value={{ languageDefault, lang, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
+  const value = useMemo(
+    () => ({ languageDefault, lang, isBilingual, setLanguage, t }),
+    [languageDefault, lang, isBilingual, setLanguage, t]
   );
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
-/** Returns { languageDefault, lang, setLanguage, t }
- *  lang → "en" | "fr"
- *  t(en, fr) → string
- */
 export function useLang() {
   const ctx = useContext(LanguageContext);
   if (!ctx) throw new Error("useLang must be used inside <LanguageProvider>");
