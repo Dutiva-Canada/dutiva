@@ -1,43 +1,50 @@
-// PATCHED: key additions only (aha moment + onboarding + tracking)
-// NOTE: inserting minimal safe additions
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
-// 1. IMPORTS ADD
-import { setOnboardingProgress } from "../lib/onboarding";
-import { trackEvent } from "../lib/analytics";
+export default function GeneratorPage() {
+  const [text, setText] = useState("");
 
-// 2. INSIDE handleSave (after successful save, before return)
-// ADD THIS BLOCK:
-// mark onboarding complete + track
-try {
-  setOnboardingProgress({ firstDocumentGenerated: true });
-  trackEvent("generated_document", { template });
-} catch {}
+  return (
+    <div className="space-y-6">
+      <div>
+        <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+          Generator
+        </div>
+        <h1 className="text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
+          Document builder
+        </h1>
+        <p className="mt-3 max-w-2xl text-base text-zinc-400">
+          This page has been temporarily restored to a safe version so the app can deploy cleanly.
+        </p>
+      </div>
 
-// 3. ADD AHA MOMENT UI UNDER PREVIEW (inside Preview SectionCard, before <pre>)
+      <section className="premium-card p-6">
+        <label className="mb-2 block text-sm font-medium text-zinc-300">
+          Draft content
+        </label>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type or paste your draft..."
+          className="min-h-[280px] w-full rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[16px] text-zinc-100 outline-none"
+        />
 
-{/* AHA MOMENT */}
-<div className="mb-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/8 p-4">
-  <div className="text-sm text-emerald-300 font-medium">
-    ✅ This document is compliant for your selected province
-  </div>
-  <div className="text-xs text-zinc-400 mt-1">
-    You just reduced legal risk for your business.
-  </div>
-</div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+          >
+            Save draft
+          </button>
 
-// 4. ADD NEXT ACTIONS BELOW PREVIEW
-
-<div className="mt-6 space-y-2">
-  <div className="text-sm text-zinc-400">What do you want to do next?</div>
-  <div className="grid gap-2">
-    <Link to="/app/generator" className="premium-card p-3">
-      Generate another document
-    </Link>
-    <Link to="/app/advisor" className="premium-card p-3">
-      Ask a compliance question
-    </Link>
-    <Link to="/app/rings" className="premium-card p-3">
-      Explore all compliance tools
-    </Link>
-  </div>
-</div>
+          <Link
+            to="/app/templates"
+            className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm"
+          >
+            Back to templates
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}
