@@ -6,7 +6,7 @@ import {
   CATEGORY_ORDER,
   getTemplatesForCategory,
   TEMPLATE_META,
-} from "@/lib/generatorSchema";
+} from "../../lib/generatorSchema.js";
 
 export default function TemplatePicker() {
   const [activeCategory, setActiveCategory] = useState("All Templates");
@@ -46,7 +46,6 @@ export default function TemplatePicker() {
 
   return (
     <div className="space-y-8">
-      {/* MOST USED */}
       <section>
         <h2 className="text-lg font-semibold text-zinc-100 mb-3">
           Most commonly used
@@ -56,7 +55,6 @@ export default function TemplatePicker() {
         </div>
       </section>
 
-      {/* QUICK ACTIONS */}
       <section>
         <h3 className="text-sm uppercase tracking-wide text-zinc-400 mb-2">
           Quick actions
@@ -66,7 +64,6 @@ export default function TemplatePicker() {
         </div>
       </section>
 
-      {/* SEARCH */}
       <input
         type="text"
         placeholder="Search templates..."
@@ -75,7 +72,6 @@ export default function TemplatePicker() {
         className="w-full p-3 rounded-lg bg-black/30 border border-white/10 text-sm text-zinc-100"
       />
 
-      {/* TABS */}
       <div className="flex gap-2 flex-wrap">
         {CATEGORY_ORDER.map((cat) => (
           <button
@@ -92,7 +88,6 @@ export default function TemplatePicker() {
         ))}
       </div>
 
-      {/* GRID */}
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {templates.map(renderCard)}
       </div>
