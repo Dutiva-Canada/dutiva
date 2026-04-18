@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ChevronRight,
   FileText,
   Paperclip,
   Send,
@@ -27,7 +26,7 @@ function createInitialMessages() {
     {
       id: "seed-assistant",
       role: "assistant",
-      text: "Yes \u2014 it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.",
+      text: "Yes — it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.",
       createdAt: new Date(now - 60_000).toISOString(),
     },
   ];
@@ -41,7 +40,9 @@ function createId(prefix) {
 function formatMessageTime(value) {
   try {
     return new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  } catch { return "Just now"; }
+  } catch {
+    return "Just now";
+  }
 }
 
 async function callAdvisorAPI(messagesForModel, province, lawUpdates = []) {
@@ -58,37 +59,30 @@ async function callAdvisorAPI(messagesForModel, province, lawUpdates = []) {
   }
 
   return {
-    reply:   data.response || "Unable to generate a response.",
+    reply: data.response || "Unable to generate a response.",
     sources: Array.isArray(data.sources) ? data.sources : [],
   };
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-function SectionCard({ title, children, action }) {
-  return (
-    <section className="premium-card p-6 overflow-hidden">
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold text-zinc-100">{title}</h2>
-        {action ? <div>{action}</div> : null}
-      </div>
-      {children}
-    </section>
-  );
 }
 
 function MessageBubble({ role, text }) {
   const isUser = role === "user";
   return (
-    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`} style={{ maxWidth: '100%' }}>
-      <div className={[
-        "min-w-0 overflow-hidden break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
-        isUser
-          ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
-          : "border border-white/6 bg-white/[0.03] text-zinc-200",
-      ].join(" ")} style={{ wordBreak: "break-word", overflowWrap: "anywhere", maxWidth: '85%' }}>
+    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={[
+          "min-w-0 max-w-[85%] overflow-hidden break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
+          isUser
+            ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
+            : "border border-white/6 bg-white/[0.03] text-zinc-200",
+        ].join(" ")}
+        style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
+      >
         {isUser ? (
           text.split("\n").map((line, i, arr) => (
-            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+            <span key={i}>
+              {line}
+              {i < arr.length - 1 && <br />}
+            </span>
           ))
         ) : (
           <MarkdownText text={text} />
@@ -111,7 +105,7 @@ function MarkdownText({ text }) {
     while ((m = re.exec(str)) !== null) {
       if (m.index > last) parts.push(str.slice(last, m.index));
       if (m[1]) parts.push(<strong key={m.index} className="font-semibold text-zinc-50">{m[1]}</strong>);
-      else       parts.push(<em     key={m.index} className="italic text-zinc-300">{m[2]}</em>);
+      else parts.push(<em key={m.index} className="italic text-zinc-300">{m[2]}</em>);
       last = re.lastIndex;
     }
     if (last < str.length) parts.push(str.slice(last));
@@ -138,7 +132,10 @@ function MarkdownText({ text }) {
     return (
       <p key={i} className={i > 0 ? "mt-2" : ""}>
         {lines.map((line, j) => (
-          <span key={j}>{parseInline(line)}{j < lines.length - 1 && <br />}</span>
+          <span key={j}>
+            {parseInline(line)}
+            {j < lines.length - 1 && <br />}
+          </span>
         ))}
       </p>
     );
@@ -149,14 +146,51 @@ function MarkdownText({ text }) {
 
 function SuggestionButton({ children, onClick }) {
   return (
-    <button type="button" onClick={onClick}
-      className="shrink-0 whitespace-nowrap rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/[0.05] hover:text-zinc-100">
+    <button
+      type="button"
+      onClick={onClick}
+      className="shrink-0 whitespace-nowrap rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/[0.05] hover:text-zinc-100"
+    >
       {children}
     </button>
   );
 }
 
-// ── Main Advisor page ─────────────────────────────────────────────────────────
+function AdvisorStatusBar({ province, setProvince, advisorReady, hasLawUpdates, lawUpdatesCount }) {
+  return (
+    <div className="flex flex-col gap-3 border-b border-white/8 px-5 py-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">Advisor</div>
+        <div className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50 md:text-3xl">Compliance copilot</div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-300">
+          <span className="mr-2 text-zinc-500">Province</span>
+          <select
+            value={province}
+            onChange={(e) => setProvince(e.target.value)}
+            className="bg-transparent text-zinc-100 outline-none"
+          >
+            <option value="Federal">Federal</option>
+            <option value="Ontario">Ontario</option>
+            <option value="Quebec">Quebec</option>
+            <option value="Remote (Federal)">Remote (Federal)</option>
+          </select>
+        </div>
+
+        <div className={`rounded-full border px-3 py-1.5 text-xs ${advisorReady === false ? "border-red-400/20 bg-red-400/8 text-red-300" : "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"}`}>
+          AI {advisorReady === false ? "Config required" : "Live"}
+        </div>
+
+        <div className={`rounded-full border px-3 py-1.5 text-xs ${hasLawUpdates ? "border-amber-400/20 bg-amber-400/10 text-amber-300" : "border-white/8 bg-white/[0.03] text-zinc-400"}`}>
+          Law updates {hasLawUpdates ? `${lawUpdatesCount} new` : "Monitoring"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Advisor() {
   const { user } = useAuth();
   const { t } = useLang();
@@ -183,7 +217,9 @@ export default function Advisor() {
         if (profile?.province) setProvince(profile.province);
         const { data: updates } = await supabase.from("law_updates").select("*").order("detected_at", { ascending: false }).limit(10);
         if (updates) setLawUpdates(updates);
-      } catch { /* ignore */ }
+      } catch {
+        // ignore
+      }
     }
     load();
   }, [user]);
@@ -242,315 +278,211 @@ export default function Advisor() {
     try {
       const { reply, sources } = await callAdvisorAPI(modelHistory, province, lawUpdates);
       setAdvisorReady(true);
-      setMessages((prev) => prev.map((m) => m.id === loadingId ? { ...m, text: reply, sources, streaming: false } : m));
+      setMessages((prev) => prev.map((m) => (m.id === loadingId ? { ...m, text: reply, sources, streaming: false } : m)));
     } catch (err) {
       console.error("Advisor error:", err);
       const isConfig = err.message?.includes("HUGGINGFACE_API_KEY not configured");
       if (isConfig) setAdvisorReady(false);
       const msg = isConfig
-        ? "The AI advisor isn't configured yet \u2014 add HUGGINGFACE_API_KEY to your Vercel project environment variables."
+        ? "The AI advisor isn't configured yet — add HUGGINGFACE_API_KEY to your Vercel project environment variables."
         : err.message || "Could not reach the advisor. Please check your connection and try again.";
       setAdvisorError(msg);
-      setMessages((prev) => prev.map((m) => m.id === loadingId ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false } : m));
+      setMessages((prev) => prev.map((m) => (m.id === loadingId ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false } : m)));
     } finally {
       setLoading(false);
     }
-  }, [attachments, input, loading, messages, province, lawUpdates, setRateLimitWarning]);
+  }, [attachments, input, loading, messages, province, lawUpdates]);
 
   const hasLawUpdates = lawUpdates.length > 0;
 
   return (
-    <div className="space-y-6" style={{ paddingBottom: "120px" }}>
+    <div className="space-y-4" style={{ paddingBottom: "120px" }}>
+      <section className="premium-card overflow-hidden p-0">
+        <AdvisorStatusBar
+          province={province}
+          setProvince={setProvince}
+          advisorReady={advisorReady}
+          hasLawUpdates={hasLawUpdates}
+          lawUpdatesCount={lawUpdates.length}
+        />
 
-      {/* Header — contained in a card */}
-      <div className="premium-card p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-              Advisor
-            </div>
-            <h1 className="metric-value text-4xl font-semibold tracking-tight text-zinc-50 md:text-5xl">
-              Compliance copilot
-            </h1>
-            <p className="mt-3 max-w-2xl text-base text-zinc-400 hidden xl:block">
-              Ask any Canadian HR compliance question. Province-aware and always current with the latest legislative changes.
-            </p>
-          </div>
-          <div className="hidden xl:flex flex-wrap gap-3">
-            <Link to="/app/generator?template=Employment%20Agreement" className="ghost-button inline-flex items-center gap-2 px-4 py-3 text-sm">
-              Open generator
-            </Link>
-            <Link to="/app/generator?template=Employment%20Agreement" className="gold-button inline-flex items-center gap-2 px-5 py-3 text-sm">
-              <Wand2 className="h-4 w-4" />
-              Start from guidance
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Status cards — 1-col on mobile, 3-col on md+ */}
-      <section className="premium-card p-6">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-zinc-100">Compliance status</h2>
-        </div>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          {/* AI Engine */}
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">AI Engine</div>
-              <Sparkles className="h-4 w-4 text-amber-300" />
-            </div>
-            <div
-              className="metric-value mt-2 text-[17px] font-bold tracking-tight"
-              style={{ color: advisorReady === false ? "rgb(248 113 113)" : advisorReady ? "rgb(252 211 77)" : "rgb(250 250 250)" }}
-            >
-              {advisorReady === false ? "Error" : advisorReady ? "Mistral 7B" : "Ready"}
-            </div>
-            <div className="mt-1 text-[11px] text-zinc-500">
-              {advisorReady === false ? "Check HUGGINGFACE_API_KEY in Vercel" : advisorReady ? "Mistral + Brave Search \u2014 live" : "AI advisor ready"}
-            </div>
-          </div>
-
-          {/* Jurisdiction */}
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Jurisdiction</div>
-              <ShieldCheck className="h-4 w-4 text-emerald-300" />
-            </div>
-            <select
-              value={province}
-              onChange={(e) => setProvince(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-white/10 bg-white/[0.06] px-2 py-1.5 text-[13px] font-bold text-zinc-50 outline-none focus:border-amber-400/30"
-            >
-              <option value="Federal">Federal</option>
-              <option value="Ontario">Ontario</option>
-              <option value="Quebec">Quebec</option>
-              <option value="Remote (Federal)">Remote (Federal)</option>
-            </select>
-            {province === "Remote (Federal)" ? (
-              <div className="mt-1.5 text-[11px] text-amber-300/80">Remote employees: uses Federal employment standards</div>
-            ) : (
-              <div className="mt-1 text-[11px] text-zinc-500">Active jurisdiction</div>
-            )}
-          </div>
-
-          {/* Compliance Sync */}
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Law Updates</div>
-              <FileText className="h-4 w-4 text-zinc-300" />
-            </div>
-            <div
-              className="metric-value mt-2 text-[17px] font-bold tracking-tight"
-              style={{ color: hasLawUpdates ? "rgb(110 231 183)" : "rgb(113 113 122)" }}
-            >
-              {hasLawUpdates ? `${lawUpdates.length} new` : "Monitoring"}
-            </div>
-            <div className="mt-1 text-[11px] text-zinc-500">
-              {hasLawUpdates ? "Legislative changes detected" : "Govt websites watched daily"}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Law updates banner */}
-      {hasLawUpdates && (
-        <section className="premium-card p-6">
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-zinc-100">Law updates</h2>
-          </div>
-          <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/6 px-5 py-4">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-              <div>
-                <div className="text-sm font-semibold text-emerald-200">Legislative changes detected \u2014 advisor context updated</div>
-                <div className="mt-1 text-xs text-emerald-300/70">
-                  {lawUpdates.slice(0, 2).map((u) => u.change_description).join(" \u00b7 ")}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Main content grid */}
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-
-        {/* Left: Chat */}
-        <SectionCard
-          title="Conversation"
-          action={
-            <div className={`rounded-full border px-3 py-1 text-xs font-medium ${advisorReady === false ? "border-red-400/20 bg-red-400/8 text-red-300" : "border-amber-400/12 bg-amber-400/6 text-amber-300"}`}>
-              {advisorReady === false ? "Config required" : `${province} \u00b7 Live`}
-            </div>
-          }
+        <div
+          ref={chatScrollRef}
+          className="w-full min-w-0 max-h-[calc(100vh-290px)] space-y-4 overflow-y-auto overflow-x-hidden px-5 py-5 md:px-6"
+          style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box" }}
         >
-          {/* Message list */}
-          <div
-            ref={chatScrollRef}
-            className="w-full min-w-0 max-h-[560px] space-y-4 overflow-y-auto overflow-x-hidden rounded-[24px] border border-white/6 bg-white/[0.02] p-4"
-            style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
-          >
-            {messages.length === 0 && (
-              <div className="py-8 text-center text-sm text-white/30">
-                Ask a question to get started
-              </div>
-            )}
-            {messages.map((msg) => (
-              <div key={msg.id} className="space-y-1.5 min-w-0 w-full">
-                <MessageBubble role={msg.role} text={msg.text} />
-                {msg.role === "assistant" && msg.sources?.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 px-1">
-                    {msg.sources.map((s, i) => (
-                      <a
-                        key={i}
-                        href={s.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-[10px] text-zinc-400 transition hover:text-zinc-200 hover:border-white/15"
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
-                        {s.title.length > 40 ? s.title.slice(0, 40) + "…" : s.title}
-                      </a>
-                    ))}
-                  </div>
-                )}
-                <div className={`px-2 text-xs text-zinc-500 ${msg.role === "user" ? "text-right" : "text-left"}`}>
-                  {formatMessageTime(msg.createdAt)}
+          {messages.length === 0 && (
+            <div className="py-12 text-center">
+              <div className="mx-auto max-w-2xl">
+                <div className="text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">Ask any Canadian HR compliance question</div>
+                <div className="mt-3 text-sm leading-7 text-zinc-400 md:text-base">
+                  Province-aware guidance, legislation-backed answers, and a faster path from question to action.
+                </div>
+                <div className="mt-6 flex flex-wrap justify-center gap-2">
+                  <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
+                    {province} notice · 4yr
+                  </SuggestionButton>
+                  <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
+                    Probation clause
+                  </SuggestionButton>
+                  <SuggestionButton onClick={() => setInput("When is severance pay required vs. notice pay?")}>
+                    Severance vs. notice
+                  </SuggestionButton>
+                  <SuggestionButton onClick={() => setInput(`What should an employment offer letter include to be compliant in ${province}?`)}>
+                    Offer letter checklist
+                  </SuggestionButton>
                 </div>
               </div>
-            ))}
-            {loading && messages[messages.length - 1]?.text === "" && (
-              <div className="flex justify-start">
-                <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-500">
-                  <span className="inline-flex gap-1">
-                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>&middot;</span>
-                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>&middot;</span>
-                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>&middot;</span>
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Error / warning banners */}
-          {advisorError && (
-            <div className="mt-4 rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
-              {advisorError}
-            </div>
-          )}
-          {rateLimitWarning && (
-            <div className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-400/8 px-4 py-3 text-sm text-amber-300">
-              {rateLimitWarning}
-            </div>
-          )}
-          {advisorReady === false && (
-            <div className="mt-4 rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-3 text-sm text-yellow-200">
-              <strong>Setup required:</strong> Add <code className="rounded bg-black/30 px-1">HUGGINGFACE_API_KEY</code> to your Vercel project environment variables, then redeploy.
             </div>
           )}
 
-          {/* Suggestion chips — horizontally scrollable on mobile */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
-              {province} notice · 4yr
-            </SuggestionButton>
-            <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
-              Probation clause
-            </SuggestionButton>
-            <SuggestionButton onClick={() => setInput("When is severance pay required vs. notice pay?")}>
-              Severance vs. notice
-            </SuggestionButton>
-            <SuggestionButton onClick={() => setInput(`What should an employment offer letter include to be compliant in ${province}?`)}>
-              Offer letter checklist
-            </SuggestionButton>
-          </div>
-
-          {/* Desktop input — hidden on mobile (uses fixed bar below) */}
-          <div className="hidden xl:block">
-            <div className="mt-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-3 shadow-sm">
-              <input ref={fileInputRef} type="file" multiple onChange={handleAttachmentChange} className="hidden" />
-              {attachments.length > 0 && (
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {attachments.map((a) => (
-                    <button key={a.id} type="button" onClick={() => setAttachments((c) => c.filter((x) => x.id !== a.id))}
-                      className="inline-flex items-center gap-1 rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs text-amber-300">
-                      {a.name} <X className="h-3 w-3" />
-                    </button>
+          {messages.map((msg) => (
+            <div key={msg.id} className="space-y-1.5 min-w-0 w-full">
+              <MessageBubble role={msg.role} text={msg.text} />
+              {msg.role === "assistant" && msg.sources?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 px-1">
+                  {msg.sources.map((s, i) => (
+                    <a
+                      key={i}
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-[10px] text-zinc-400 transition hover:text-zinc-200 hover:border-white/15"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
+                      {s.title.length > 40 ? `${s.title.slice(0, 40)}…` : s.title}
+                    </a>
                   ))}
                 </div>
               )}
-              <div className="flex items-end gap-2">
-                <button type="button" onClick={() => fileInputRef.current?.click()}
-                  className="ghost-button shrink-0 px-3 py-2.5 text-zinc-400 hover:text-zinc-200">
-                  <Paperclip className="h-4 w-4" />
-                </button>
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
-                  placeholder="Ask a question…"
-                  autoComplete="off"
-                  className="text-[16px] flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all"
-                />
-                <button type="button" onClick={sendMessage} disabled={loading || !input.trim()}
-                  className="gold-button shrink-0 px-4 py-3 disabled:opacity-40 transition-opacity">
-                  <Send className="h-4 w-4" />
-                </button>
+              <div className={`px-2 text-xs text-zinc-500 ${msg.role === "user" ? "text-right" : "text-left"}`}>
+                {formatMessageTime(msg.createdAt)}
               </div>
             </div>
+          ))}
 
-            {/* AI disclosure */}
-            <div className="mt-3 flex items-start gap-2 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
-              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500" />
-              <div className="min-w-0">
-                <p className="text-[11px] leading-5 text-zinc-500">
-                  {t(
-                    "AI-generated responses can contain errors. Always verify important HR and legal decisions with a qualified professional before acting.",
-                    "Les r\u00e9ponses g\u00e9n\u00e9r\u00e9es par IA peuvent contenir des erreurs. V\u00e9rifiez toujours les d\u00e9cisions RH et juridiques importantes avec un professionnel qualifi\u00e9 avant d'agir."
-                  )}
-                </p>
-                <p className="mt-1 text-[10px] text-zinc-600">
-                  Powered by Mistral 7B (HF Inference) + Brave Search
-                </p>
+          {loading && messages[messages.length - 1]?.text === "" && (
+            <div className="flex justify-start">
+              <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-500">
+                <span className="inline-flex gap-1">
+                  <span className="animate-bounce" style={{ animationDelay: "0ms" }}>&middot;</span>
+                  <span className="animate-bounce" style={{ animationDelay: "150ms" }}>&middot;</span>
+                  <span className="animate-bounce" style={{ animationDelay: "300ms" }}>&middot;</span>
+                </span>
               </div>
             </div>
-          </div>
-        </SectionCard>
+          )}
+        </div>
+      </section>
 
-        {/* Right: Guidance history — desktop only */}
-        <div className="hidden xl:block space-y-6">
-          <SectionCard
-            title="Guidance history"
-            action={<div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-xs font-medium text-zinc-300">Recent</div>}
-          >
-            <div className="space-y-3">
-              {messages.slice(-5).map((msg) => (
-                <div key={`h-${msg.id}`} className="rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-medium text-zinc-100">{msg.role === "user" ? "You" : "Advisor"}</div>
-                    <div className="text-xs text-zinc-500">{formatMessageTime(msg.createdAt)}</div>
-                  </div>
-                  <div className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-400">{msg.text}</div>
-                </div>
+      {advisorError && (
+        <div className="rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
+          {advisorError}
+        </div>
+      )}
+      {rateLimitWarning && (
+        <div className="rounded-2xl border border-amber-400/20 bg-amber-400/8 px-4 py-3 text-sm text-amber-300">
+          {rateLimitWarning}
+        </div>
+      )}
+      {advisorReady === false && (
+        <div className="rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-3 text-sm text-yellow-200">
+          <strong>Setup required:</strong> Add <code className="rounded bg-black/30 px-1">HUGGINGFACE_API_KEY</code> to your Vercel project environment variables, then redeploy.
+        </div>
+      )}
+
+      <div className="hidden xl:block">
+        <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-3 shadow-sm">
+          <input ref={fileInputRef} type="file" multiple onChange={handleAttachmentChange} className="hidden" />
+          {attachments.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {attachments.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => setAttachments((c) => c.filter((x) => x.id !== a.id))}
+                  className="inline-flex items-center gap-1 rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1.5 text-xs text-amber-300"
+                >
+                  {a.name} <X className="h-3 w-3" />
+                </button>
               ))}
             </div>
-          </SectionCard>
+          )}
+          <div className="flex items-end gap-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="ghost-button shrink-0 px-3 py-2.5 text-zinc-400 hover:text-zinc-200"
+            >
+              <Paperclip className="h-4 w-4" />
+            </button>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
+              placeholder="Ask a question…"
+              autoComplete="off"
+              className="text-[16px] flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all"
+            />
+            <button
+              type="button"
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              className="gold-button shrink-0 px-4 py-3 disabled:opacity-40 transition-opacity"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
+            {province} notice · 4yr
+          </SuggestionButton>
+          <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
+            Probation clause
+          </SuggestionButton>
+          <SuggestionButton onClick={() => setInput("When is severance pay required vs. notice pay?")}>
+            Severance vs. notice
+          </SuggestionButton>
+          <SuggestionButton onClick={() => setInput(`What should an employment offer letter include to be compliant in ${province}?`)}>
+            Offer letter checklist
+          </SuggestionButton>
+          <Link to="/app/generator?template=Employment%20Agreement" className="ghost-button inline-flex items-center gap-2 px-4 py-2 text-sm">
+            <FileText className="h-4 w-4" />
+            Open generator
+          </Link>
+          <Link to="/app/generator?template=Employment%20Agreement" className="gold-button inline-flex items-center gap-2 px-4 py-2 text-sm">
+            <Wand2 className="h-4 w-4" />
+            Start from guidance
+          </Link>
+        </div>
+
+        <div className="mt-3 flex items-start gap-2 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
+          <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500" />
+          <div className="min-w-0">
+            <p className="text-[11px] leading-5 text-zinc-500">
+              {t(
+                "AI-generated responses can contain errors. Always verify important HR and legal decisions with a qualified professional before acting.",
+                "Les réponses générées par IA peuvent contenir des erreurs. Vérifiez toujours les décisions RH et juridiques importantes avec un professionnel qualifié avant d'agir."
+              )}
+            </p>
+            <p className="mt-1 text-[10px] text-zinc-600">Powered by Mistral 7B (HF Inference) + Brave Search</p>
+          </div>
         </div>
       </div>
 
-      {/* Mobile fixed chat input — sits above the 64px bottom nav */}
-      <MobileChatInputBar
-        value={input}
-        onChange={setInput}
-        onSend={sendMessage}
-      />
+      <MobileChatInputBar value={input} onChange={setInput} onSend={sendMessage} />
     </div>
   );
 }
 
-// Exported so Advisor can render this outside its scroll context on mobile
 export function MobileChatInputBar({ value, onChange, onSend }) {
   return (
     <div
@@ -569,7 +501,9 @@ export function MobileChatInputBar({ value, onChange, onSend }) {
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && value.trim()) onSend(); }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && value.trim()) onSend();
+          }}
           placeholder="Ask a question…"
           autoComplete="off"
           className="text-[16px]"
@@ -584,7 +518,9 @@ export function MobileChatInputBar({ value, onChange, onSend }) {
           }}
         />
         <button
-          onClick={() => { if (value.trim()) onSend(); }}
+          onClick={() => {
+            if (value.trim()) onSend();
+          }}
           style={{
             width: "44px",
             height: "44px",
