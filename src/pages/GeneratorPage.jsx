@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import TemplatePicker from "../components/generator/TemplatePicker.jsx";
 import GeneratorForm from "../components/generator/GeneratorForm.jsx";
 import DocumentPreview from "../components/generator/DocumentPreview.jsx";
@@ -6,6 +7,12 @@ import DocumentPreview from "../components/generator/DocumentPreview.jsx";
 export default function GeneratorPage() {
   const [params] = useSearchParams();
   const template = params.get("template");
+
+  const [formData, setFormData] = useState({});
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="space-y-6">
@@ -25,8 +32,12 @@ export default function GeneratorPage() {
 
       {template && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <GeneratorForm template={template} />
-          <DocumentPreview template={template} data={{}} />
+          <GeneratorForm
+            template={template}
+            formData={formData}
+            onChange={handleChange}
+          />
+          <DocumentPreview template={template} data={formData} />
         </div>
       )}
     </div>
