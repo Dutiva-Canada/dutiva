@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { supabase } from "../lib/supabase";
+import { isInternalAdminEmail } from "../lib/admin";
 
 const PlanContext = createContext({ plan: "free", subscriptionStatus: "inactive", loading: true });
-const FOUNDER_EMAILS = ["martin.constantineau@dutiva.ca"];
 
 export function PlanProvider({ children }) {
   const { user } = useAuth();
@@ -18,11 +18,9 @@ export function PlanProvider({ children }) {
         return;
       }
 
-      const isFounder = Boolean(
-        user?.email && FOUNDER_EMAILS.includes(user.email.toLowerCase())
-      );
+      const isAdmin = isInternalAdminEmail(user?.email);
 
-      if (isFounder) {
+      if (isAdmin) {
         setPlan("pro");
         setSubscriptionStatus("active");
         setLoading(false);
