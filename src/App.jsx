@@ -16,6 +16,8 @@ const Templates         = lazy(() => import("./pages/Templates.jsx"));
 const Advisor           = lazy(() => import("./pages/Advisor.jsx"));
 const SettingsPage      = lazy(() => import("./pages/SettingsPage.jsx"));
 const GeneratorPage     = lazy(() => import("./pages/GeneratorPage.jsx"));
+const DocumentsPage     = lazy(() => import("./pages/DocumentsPage.jsx"));
+const AdminPage         = lazy(() => import("./pages/AdminPage.jsx"));
 const AuthPage          = lazy(() => import("./pages/AuthPage.jsx"));
 const ESignPage         = lazy(() => import("./pages/ESignPage.jsx"));
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage.jsx"));
@@ -84,6 +86,8 @@ export default function App() {
                 <Route path="advisor" element={withSuspense(<Advisor />)} />
                 <Route path="settings" element={withSuspense(<SettingsPage />)} />
                 <Route path="generator" element={withSuspense(<GeneratorPage />)} />
+                <Route path="documents" element={withSuspense(<DocumentsPage />)} />
+                <Route path="admin" element={withSuspense(<AdminPage />)} />
 
                 <Route path="wellness" element={withSuspense(
                   <PlanGate required="growth">
