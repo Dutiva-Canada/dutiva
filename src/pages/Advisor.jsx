@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Download,
+  FilePlus2,
   FileText,
   Paperclip,
+  Save,
   Send,
   ShieldCheck,
-  Sparkles,
   Wand2,
   X,
 } from "lucide-react";
@@ -13,6 +15,8 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLang } from "../context/LanguageContext.jsx";
 import { getStoredSettings } from "../utils/workspaceSettings";
+import { renderTemplate } from "../lib/generator/index.js";
+import { exportDocumentAsText, saveDocument } from "../lib/documents.js";
 
 function createInitialMessages() {
   const now = Date.now();
@@ -20,13 +24,13 @@ function createInitialMessages() {
     {
       id: "seed-user",
       role: "user",
-      text: "Do I need a probation clause in Ontario?",
+      text: "I need a termination letter for an Ontario employee without cause.",
       createdAt: new Date(now - 120_000).toISOString(),
     },
     {
       id: "seed-assistant",
       role: "assistant",
-      text: "Yes — it is strongly recommended. In Ontario, the Employment Standards Act, 2000, s. 57 exempts employers from the statutory notice requirement for employees with less than 3 months of service. Without a clearly written probation clause, you lose that protection and may face common-law reasonable notice claims from day one.\n\nBest practice: state the probation period (typically 3 months), explain the termination standard during probation, and include it in a signed employment agreement before the start date.",
+      text: "I can help with that. I’ll prepare a termination letter draft and flag the main notice and workflow points to review before sending it.",
       createdAt: new Date(now - 60_000).toISOString(),
     },
   ];
@@ -64,35 +68,30 @@ async function callAdvisorAPI(messagesForModel, province, lawUpdates = []) {
   };
 }
 
-function MessageBubble({ role, text }) {
-  const isUser = role === "user";
-  return (
-    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={[
-          "min-w-0 max-w-[85%] overflow-hidden break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
-          isUser
-            ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
-            : "border border-white/6 bg-white/[0.03] text-zinc-200",
-        ].join(" ")}
-        style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
-      >
-        {isUser ? (
-          text.split("\n").map((line, i, arr) => (
-            <span key={i}>
-              {line}
-              {i < arr.length - 1 && <br />}
-            </span>
-          ))
-        ) : (
-          <MarkdownText text={text} />
-        )}
-      </div>
-    </div>
-  );
-}
-
 const DISCLAIMER_RE = /[\n\s]*(?:note[:\s]+)?this is (?:general guidance[,.]?\s*(?:and\s+)?not legal advice|meant? for informational purposes[^.]*)\s*\.?\s*(?:consult[^.]*\.)?/gi;
+
+const WORKFLOW_SUGGESTIONS = [
+  {
+    label: "Ontario termination",
+    prompt: "Generate an Ontario termination letter for an employee without cause and outline the notice items I should review.",
+  },
+  {
+    label: "Employment agreement",
+    prompt: "Create a compliant employment agreement for a new full-time Ontario hire.",
+  },
+  {
+    label: "Offer letter",
+    prompt: "Draft an offer letter for a Canadian small business hiring a full-time employee in Ontario.",
+  },
+  {
+    label: "Independent contractor",
+    prompt: "Prepare an independent contractor agreement for a Canadian consultant engagement.",
+  },
+  {
+    label: "PIP",
+    prompt: "Build a performance improvement plan for an employee who is missing deadlines and quality expectations.",
+  },
+];
 
 function MarkdownText({ text }) {
   const cleaned = text.replace(DISCLAIMER_RE, "").trim();
@@ -144,6 +143,34 @@ function MarkdownText({ text }) {
   return <div className="leading-7">{blocks.map(renderBlock)}</div>;
 }
 
+function MessageBubble({ role, text }) {
+  const isUser = role === "user";
+  return (
+    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={[
+          "min-w-0 max-w-[85%] overflow-hidden break-words rounded-[22px] px-4 py-4 text-sm shadow-sm",
+          isUser
+            ? "bg-[linear-gradient(180deg,var(--gold-strong)_0%,var(--gold)_100%)] text-black font-medium leading-7"
+            : "border border-white/6 bg-white/[0.03] text-zinc-200",
+        ].join(" ")}
+        style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
+      >
+        {isUser ? (
+          text.split("\n").map((line, i, arr) => (
+            <span key={i}>
+              {line}
+              {i < arr.length - 1 && <br />}
+            </span>
+          ))
+        ) : (
+          <MarkdownText text={text} />
+        )}
+      </div>
+    </div>
+  );
+}
+
 function SuggestionButton({ children, onClick }) {
   return (
     <button
@@ -191,6 +218,199 @@ function AdvisorStatusBar({ province, setProvince, advisorReady, hasLawUpdates, 
   );
 }
 
+function inferTemplateFromPrompt(prompt) {
+  const text = String(prompt || "").toLowerCase();
+  if (text.includes("termination")) return "Termination Letter";
+  if (text.includes("offer letter") || (text.includes("offer") && text.includes("hire"))) return "Offer Letter";
+  if (text.includes("employment agreement") || (text.includes("employment") && text.includes("agreement"))) return "Employment Agreement";
+  if (text.includes("contractor")) return "Independent Contractor Agreement";
+  if (text.includes("performance improvement") || text.includes("pip")) return "Performance Improvement Plan (PIP)";
+  return null;
+}
+
+function buildFormDataFromPrompt(prompt, province) {
+  const text = String(prompt || "");
+  const lower = text.toLowerCase();
+  const companyName = "Dutiva Canada";
+  const common = {
+    jurisdiction: province,
+    companyName,
+    employeeName: "Jordan Smith",
+    jobTitle: "Operations Coordinator",
+    manager: "Martin",
+    managerTitle: "Founder & CEO",
+    workLocation: province,
+    startDate: "2026-05-01",
+    employmentType: "full-time, permanent",
+    salary: "$62,000",
+    payFrequency: "bi-weekly",
+    vacationWeeks: "2",
+    probationLength: "three (3) months",
+    employeeNoticePeriod: "two (2) weeks",
+    employerWithoutCauseNotice: "the minimum notice required by the applicable employment standards legislation",
+    hrContactName: "Martin",
+    hrContactEmail: "hello@dutiva.ca",
+    signerName: "Martin",
+    signerTitle: "Founder & CEO",
+    contractRate: "$85/hour",
+    scopeOfWork: "Project-based consulting services as outlined in a mutually agreed statement of work.",
+    performanceGoals: "Improve deadline consistency, reduce rework, and meet expected quality standards over the review period.",
+    reviewDate: "2026-06-30",
+    notes: "Prepared from the Advisor workspace.",
+  };
+
+  if (lower.includes("without cause")) {
+    common.notes = "Prepared for a without-cause termination workflow review.";
+  }
+  if (lower.includes("contractor")) {
+    common.jobTitle = "Independent Consultant";
+    common.scopeOfWork = "Provide strategic consulting and project execution support on an independent contractor basis.";
+  }
+  if (lower.includes("offer")) {
+    common.jobTitle = "Client Success Manager";
+    common.salary = "$68,000";
+  }
+  if (lower.includes("performance") || lower.includes("pip")) {
+    common.jobTitle = "Account Manager";
+    common.performanceGoals = "Meet response-time standards, improve documentation quality, and consistently achieve weekly deliverables.";
+  }
+
+  return common;
+}
+
+function createDraftFromPrompt(prompt, province) {
+  const template = inferTemplateFromPrompt(prompt);
+  if (!template) return null;
+  const formData = buildFormDataFromPrompt(prompt, province);
+  const rendered = renderTemplate(template, formData);
+  if (!rendered?.content) return null;
+
+  const checklist = [];
+  if (template === "Termination Letter") {
+    checklist.push("Confirm service length and termination date.");
+    checklist.push("Review statutory notice, severance, and any contractual notice terms.");
+    checklist.push("Coordinate final pay, benefits continuation, and return-of-property steps.");
+  } else if (template === "Employment Agreement") {
+    checklist.push("Review probation, compensation, and termination language before issuing.");
+    checklist.push("Ensure the agreement is signed before the employee starts work.");
+  } else if (template === "Offer Letter") {
+    checklist.push("Confirm position title, compensation, and start date details.");
+    checklist.push("Make sure the candidate signs before the offer expiry date.");
+  } else if (template === "Independent Contractor Agreement") {
+    checklist.push("Check scope, rate, and payment timing.");
+    checklist.push("Confirm the relationship is appropriately structured for contractor status.");
+  } else if (template === "Performance Improvement Plan (PIP)") {
+    checklist.push("Define measurable goals and a review timeline.");
+    checklist.push("Keep records of coaching, feedback, and follow-up meetings.");
+  }
+
+  return {
+    template,
+    title: template,
+    content: rendered.content,
+    formData,
+    checklist,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackAdvisorReply(prompt, province, draft) {
+  if (draft?.template === "Termination Letter") {
+    return `I prepared a **${province} termination letter** draft in the panel beside the chat. Before sending it, confirm the employee’s service length, the termination date, and whether any contractual terms require more than minimum statutory notice.`;
+  }
+  if (draft?.template === "Employment Agreement") {
+    return `I generated an **employment agreement draft** for ${province}. Review compensation, probation, and termination language before sending it for signature.`;
+  }
+  if (draft?.template === "Offer Letter") {
+    return `I generated an **offer letter draft** for ${province}. You can review it, export it, or send it into the generator for further edits.`;
+  }
+  if (draft?.template === "Independent Contractor Agreement") {
+    return `I prepared an **independent contractor agreement** draft. Review the scope, payment terms, and contractor classification points before issuing it.`;
+  }
+  if (draft?.template === "Performance Improvement Plan (PIP)") {
+    return `I generated a **performance improvement plan** draft. Review the goals, timelines, and manager follow-up checkpoints before using it.`;
+  }
+
+  return `I can help with that. Ask me about hiring, contracts, policies, discipline, or termination workflows for ${province}.`;
+}
+
+function DocumentDraftPanel({ draft, onSave, onExport, saveState, province }) {
+  if (!draft) {
+    return (
+      <div className="premium-card p-5">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">Generated document</div>
+        <div className="mt-3 text-lg font-semibold text-zinc-50">No draft yet</div>
+        <p className="mt-2 text-sm leading-7 text-zinc-400">
+          Ask the advisor for a termination letter, employment agreement, offer letter, contractor agreement, or PIP. When a supported workflow is detected, a live draft will appear here.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {WORKFLOW_SUGGESTIONS.slice(0, 3).map((item) => (
+            <div key={item.label} className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-300">
+              {item.label}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="premium-card overflow-hidden p-0">
+      <div className="border-b border-white/8 px-5 py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">Generated document</div>
+            <div className="mt-1 text-xl font-semibold tracking-tight text-zinc-50">{draft.title}</div>
+            <div className="mt-1 text-xs text-zinc-500">{province} workflow · Generated {formatMessageTime(draft.generatedAt)}</div>
+          </div>
+          <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-300">
+            Draft ready
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4 p-5">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={onSave} className="gold-button inline-flex items-center gap-2 px-4 py-2 text-sm">
+            <Save className="h-4 w-4" />
+            {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : "Save document"}
+          </button>
+          <button onClick={onExport} className="ghost-button inline-flex items-center gap-2 px-4 py-2 text-sm">
+            <Download className="h-4 w-4" />
+            Export as .txt
+          </button>
+          <Link to={`/app/generator?template=${encodeURIComponent(draft.template)}`} className="ghost-button inline-flex items-center gap-2 px-4 py-2 text-sm">
+            <Wand2 className="h-4 w-4" />
+            Open in generator
+          </Link>
+        </div>
+
+        {draft.checklist?.length > 0 && (
+          <div className="rounded-2xl border border-amber-400/20 bg-amber-400/8 p-4">
+            <div className="text-sm font-medium text-amber-300">Review checklist</div>
+            <ul className="mt-2 space-y-2 text-sm text-zinc-300">
+              {draft.checklist.map((item, index) => (
+                <li key={`${item}-${index}`} className="flex items-start gap-2">
+                  <span className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-amber-300" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="overflow-hidden rounded-3xl border border-white/8 bg-[#0b0b0c]">
+          <div className="max-h-[720px] overflow-auto px-6 py-6">
+            <div className="mx-auto max-w-[720px] bg-white px-6 py-8 text-[13px] leading-7 text-zinc-900">
+              <pre className="whitespace-pre-wrap font-sans">{draft.content}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Advisor() {
   const { user } = useAuth();
   const { t } = useLang();
@@ -204,6 +424,8 @@ export default function Advisor() {
   const [attachments, setAttachments] = useState([]);
   const [lawUpdates, setLawUpdates] = useState([]);
   const [rateLimitWarning, setRateLimitWarning] = useState(null);
+  const [draft, setDraft] = useState(() => createDraftFromPrompt("termination letter ontario without cause", settings.province || "Ontario"));
+  const [saveState, setSaveState] = useState("idle");
   const fileInputRef = useRef(null);
   const chatScrollRef = useRef(null);
   const prevMsgCountRef = useRef(0);
@@ -241,6 +463,33 @@ export default function Advisor() {
     e.target.value = "";
   };
 
+  const handleSaveDraft = useCallback(async () => {
+    if (!draft || !user?.id) {
+      setSaveState("error");
+      return;
+    }
+    setSaveState("saving");
+    try {
+      await saveDocument({
+        userId: user.id,
+        title: draft.title,
+        template: draft.template,
+        content: draft.content,
+        formData: draft.formData,
+      });
+      setSaveState("saved");
+      window.setTimeout(() => setSaveState("idle"), 1800);
+    } catch {
+      setSaveState("error");
+      window.setTimeout(() => setSaveState("idle"), 2200);
+    }
+  }, [draft, user]);
+
+  const handleExportDraft = useCallback(() => {
+    if (!draft) return;
+    exportDocumentAsText(draft.title, draft.content);
+  }, [draft]);
+
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
@@ -257,6 +506,12 @@ export default function Advisor() {
     }
     msgTimestampsRef.current.push(now);
     setRateLimitWarning(null);
+
+    const nextDraft = createDraftFromPrompt(trimmed, province);
+    if (nextDraft) {
+      setDraft(nextDraft);
+      setSaveState("idle");
+    }
 
     const attachmentSummary = attachments.length > 0 ? `\n\nAttachments: ${attachments.map((a) => a.name).join(", ")}` : "";
     const userMsg = { id: createId("user"), role: "user", text: trimmed, createdAt: new Date().toISOString() };
@@ -281,99 +536,134 @@ export default function Advisor() {
       setMessages((prev) => prev.map((m) => (m.id === loadingId ? { ...m, text: reply, sources, streaming: false } : m)));
     } catch (err) {
       console.error("Advisor error:", err);
-      const isConfig = err.message?.includes("HUGGINGFACE_API_KEY not configured");
+      const isConfig = err.message?.includes("not configured");
       if (isConfig) setAdvisorReady(false);
       const msg = isConfig
-        ? "The AI advisor isn't configured yet — add HUGGINGFACE_API_KEY to your Vercel project environment variables."
+        ? "The AI advisor isn't configured yet — add GROQ_API_KEY or HUGGINGFACE_API_KEY to your Vercel project environment variables."
         : err.message || "Could not reach the advisor. Please check your connection and try again.";
       setAdvisorError(msg);
-      setMessages((prev) => prev.map((m) => (m.id === loadingId ? { ...m, text: "I'm unable to respond right now. Please try again in a moment.", streaming: false } : m)));
+      const fallback = fallbackAdvisorReply(trimmed, province, nextDraft);
+      setMessages((prev) => prev.map((m) => (m.id === loadingId ? { ...m, text: fallback, streaming: false } : m)));
     } finally {
       setLoading(false);
     }
   }, [attachments, input, loading, messages, province, lawUpdates]);
 
   const hasLawUpdates = lawUpdates.length > 0;
+  const starterSuggestions = useMemo(() => WORKFLOW_SUGGESTIONS, []);
 
   return (
     <div className="space-y-4" style={{ paddingBottom: "120px" }}>
-      <section className="premium-card overflow-hidden p-0">
-        <AdvisorStatusBar
-          province={province}
-          setProvince={setProvince}
-          advisorReady={advisorReady}
-          hasLawUpdates={hasLawUpdates}
-          lawUpdatesCount={lawUpdates.length}
-        />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_430px]">
+        <section className="premium-card overflow-hidden p-0 min-w-0">
+          <AdvisorStatusBar
+            province={province}
+            setProvince={setProvince}
+            advisorReady={advisorReady}
+            hasLawUpdates={hasLawUpdates}
+            lawUpdatesCount={lawUpdates.length}
+          />
 
-        <div
-          ref={chatScrollRef}
-          className="w-full min-w-0 max-h-[calc(100vh-290px)] space-y-4 overflow-y-auto overflow-x-hidden px-5 py-5 md:px-6"
-          style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box" }}
-        >
-          {messages.length === 0 && (
-            <div className="py-12 text-center">
-              <div className="mx-auto max-w-2xl">
-                <div className="text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">Ask any Canadian HR compliance question</div>
-                <div className="mt-3 text-sm leading-7 text-zinc-400 md:text-base">
-                  Province-aware guidance, legislation-backed answers, and a faster path from question to action.
+          <div
+            ref={chatScrollRef}
+            className="w-full min-w-0 max-h-[calc(100vh-290px)] space-y-4 overflow-y-auto overflow-x-hidden px-5 py-5 md:px-6"
+            style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box" }}
+          >
+            {messages.length === 0 && (
+              <div className="py-12 text-center">
+                <div className="mx-auto max-w-2xl">
+                  <div className="text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">Ask any Canadian HR compliance question</div>
+                  <div className="mt-3 text-sm leading-7 text-zinc-400 md:text-base">
+                    Province-aware guidance, legislation-backed answers, and a faster path from question to action.
+                  </div>
                 </div>
-                <div className="mt-6 flex flex-wrap justify-center gap-2">
-                  <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
-                    {province} notice · 4yr
-                  </SuggestionButton>
-                  <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
-                    Probation clause
-                  </SuggestionButton>
-                  <SuggestionButton onClick={() => setInput("When is severance pay required vs. notice pay?")}>
-                    Severance vs. notice
-                  </SuggestionButton>
-                  <SuggestionButton onClick={() => setInput(`What should an employment offer letter include to be compliant in ${province}?`)}>
-                    Offer letter checklist
-                  </SuggestionButton>
+              </div>
+            )}
+
+            <div className="rounded-[22px] border border-white/6 bg-white/[0.03] p-4 md:p-5">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 rounded-2xl border border-amber-400/15 bg-amber-400/8 p-2.5 text-amber-300">
+                  <FilePlus2 className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-zinc-100">Start with a real workflow</div>
+                  <div className="mt-1 text-sm leading-7 text-zinc-400">
+                    Ask a question, generate a draft, then export or save it from the panel beside the conversation.
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {starterSuggestions.map((item) => (
+                      <SuggestionButton key={item.label} onClick={() => setInput(item.prompt)}>
+                        {item.label}
+                      </SuggestionButton>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          )}
 
-          {messages.map((msg) => (
-            <div key={msg.id} className="space-y-1.5 min-w-0 w-full">
-              <MessageBubble role={msg.role} text={msg.text} />
-              {msg.role === "assistant" && msg.sources?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 px-1">
-                  {msg.sources.map((s, i) => (
-                    <a
-                      key={i}
-                      href={s.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-[10px] text-zinc-400 transition hover:text-zinc-200 hover:border-white/15"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
-                      {s.title.length > 40 ? `${s.title.slice(0, 40)}…` : s.title}
-                    </a>
-                  ))}
+            {messages.map((msg) => (
+              <div key={msg.id} className="space-y-1.5 min-w-0 w-full">
+                <MessageBubble role={msg.role} text={msg.text} />
+                {msg.role === "assistant" && msg.sources?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 px-1">
+                    {msg.sources.map((s, i) => (
+                      <a
+                        key={i}
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-[10px] text-zinc-400 transition hover:text-zinc-200 hover:border-white/15"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
+                        {s.title.length > 40 ? `${s.title.slice(0, 40)}…` : s.title}
+                      </a>
+                    ))}
+                  </div>
+                )}
+                <div className={`px-2 text-xs text-zinc-500 ${msg.role === "user" ? "text-right" : "text-left"}`}>
+                  {formatMessageTime(msg.createdAt)}
                 </div>
-              )}
-              <div className={`px-2 text-xs text-zinc-500 ${msg.role === "user" ? "text-right" : "text-left"}`}>
-                {formatMessageTime(msg.createdAt)}
               </div>
-            </div>
-          ))}
+            ))}
 
-          {loading && messages[messages.length - 1]?.text === "" && (
-            <div className="flex justify-start">
-              <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-500">
-                <span className="inline-flex gap-1">
-                  <span className="animate-bounce" style={{ animationDelay: "0ms" }}>&middot;</span>
-                  <span className="animate-bounce" style={{ animationDelay: "150ms" }}>&middot;</span>
-                  <span className="animate-bounce" style={{ animationDelay: "300ms" }}>&middot;</span>
-                </span>
+            {loading && messages[messages.length - 1]?.text === "" && (
+              <div className="flex justify-start">
+                <div className="rounded-[22px] border border-white/6 bg-white/[0.03] px-4 py-4 text-sm text-zinc-500">
+                  <span className="inline-flex gap-1">
+                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>&middot;</span>
+                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>&middot;</span>
+                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>&middot;</span>
+                  </span>
+                </div>
               </div>
+            )}
+          </div>
+        </section>
+
+        <div className="space-y-4 xl:sticky xl:top-6 xl:self-start">
+          <DocumentDraftPanel
+            draft={draft}
+            onSave={handleSaveDraft}
+            onExport={handleExportDraft}
+            saveState={saveState}
+            province={province}
+          />
+
+          <div className="premium-card p-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">Workflow shortcuts</div>
+            <div className="mt-3 grid gap-2">
+              <Link to="/app/generator?template=Termination%20Letter" className="ghost-button inline-flex items-center gap-2 px-4 py-2 text-sm">
+                <FileText className="h-4 w-4" />
+                Open termination letter generator
+              </Link>
+              <Link to="/app/documents" className="ghost-button inline-flex items-center gap-2 px-4 py-2 text-sm">
+                <Save className="h-4 w-4" />
+                View saved documents
+              </Link>
             </div>
-          )}
+          </div>
         </div>
-      </section>
+      </div>
 
       {advisorError && (
         <div className="rounded-2xl border border-red-400/15 bg-red-400/8 px-4 py-3 text-sm text-red-300">
@@ -387,7 +677,7 @@ export default function Advisor() {
       )}
       {advisorReady === false && (
         <div className="rounded-2xl border border-yellow-400/15 bg-yellow-400/6 px-4 py-3 text-sm text-yellow-200">
-          <strong>Setup required:</strong> Add <code className="rounded bg-black/30 px-1">HUGGINGFACE_API_KEY</code> to your Vercel project environment variables, then redeploy.
+          <strong>Setup required:</strong> Add <code className="rounded bg-black/30 px-1">GROQ_API_KEY</code> or <code className="rounded bg-black/30 px-1">HUGGINGFACE_API_KEY</code> to your Vercel project environment variables, then redeploy.
         </div>
       )}
 
@@ -426,7 +716,7 @@ export default function Advisor() {
                   sendMessage();
                 }
               }}
-              placeholder="Ask a question…"
+              placeholder="Ask a question or request a document…"
               autoComplete="off"
               className="text-[16px] flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all"
             />
@@ -441,29 +731,6 @@ export default function Advisor() {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          <SuggestionButton onClick={() => setInput(`What is the minimum notice period for a 4-year employee in ${province}?`)}>
-            {province} notice · 4yr
-          </SuggestionButton>
-          <SuggestionButton onClick={() => setInput(`What are the probation clause requirements in ${province}?`)}>
-            Probation clause
-          </SuggestionButton>
-          <SuggestionButton onClick={() => setInput("When is severance pay required vs. notice pay?")}>
-            Severance vs. notice
-          </SuggestionButton>
-          <SuggestionButton onClick={() => setInput(`What should an employment offer letter include to be compliant in ${province}?`)}>
-            Offer letter checklist
-          </SuggestionButton>
-          <Link to="/app/generator?template=Employment%20Agreement" className="ghost-button inline-flex items-center gap-2 px-4 py-2 text-sm">
-            <FileText className="h-4 w-4" />
-            Open generator
-          </Link>
-          <Link to="/app/generator?template=Employment%20Agreement" className="gold-button inline-flex items-center gap-2 px-4 py-2 text-sm">
-            <Wand2 className="h-4 w-4" />
-            Start from guidance
-          </Link>
-        </div>
-
         <div className="mt-3 flex items-start gap-2 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3">
           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500" />
           <div className="min-w-0">
@@ -473,7 +740,7 @@ export default function Advisor() {
                 "Les réponses générées par IA peuvent contenir des erreurs. Vérifiez toujours les décisions RH et juridiques importantes avec un professionnel qualifié avant d'agir."
               )}
             </p>
-            <p className="mt-1 text-[10px] text-zinc-600">Powered by Mistral 7B (HF Inference) + Brave Search</p>
+            <p className="mt-1 text-[10px] text-zinc-600">Advisor + document preview workflow</p>
           </div>
         </div>
       </div>
@@ -504,7 +771,7 @@ export function MobileChatInputBar({ value, onChange, onSend }) {
           onKeyDown={(e) => {
             if (e.key === "Enter" && value.trim()) onSend();
           }}
-          placeholder="Ask a question…"
+          placeholder="Ask a question or request a document…"
           autoComplete="off"
           className="text-[16px]"
           style={{
