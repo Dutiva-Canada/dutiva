@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { usePlan } from "../context/PlanContext.jsx";
 import { supabase } from "../lib/supabase";
+
+const FREE_DOCUMENT_LIMIT = 5;
 
 export default function DocumentsPage() {
   const { user } = useAuth();
+  const { plan } = usePlan();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,6 +38,10 @@ export default function DocumentsPage() {
     loadDocuments();
   }, [user]);
 
+  const count = documents.length;
+  const approachingLimit = plan === "free" && count >= 2;
+  const atLimit = plan === "free" && count >= FREE_DOCUMENT_LIMIT;
+
   return (
     <div className="space-y-6">
       <div>
@@ -47,6 +55,26 @@ export default function DocumentsPage() {
           Review saved drafts and reopen them when needed.
         </p>
       </div>
+
+      {plan === "free" && (
+        <div className="premium-card p-5">
+          <div className="text-sm font-semibold text-zinc-100">
+            Free plan usage: {count}/{FREE_DOCUMENT_LIMIT} documents
+          </div>
+          <div className="mt-1 text-sm text-zinc-400">
+            {atLimit
+              ? "You’ve reached your free document limit. Upgrade to keep saving new drafts."
+              : approachingLimit
+                ? "You’re approaching your free limit. Most teams upgrade after 2–3 documents."
+                : "You can save up to 5 documents on the free plan."}
+          </div>
+          {(approachingLimit || atLimit) && (
+            <Link to="/pricing" className="gold-button mt-4 inline-flex px-4 py-2 text-sm">
+              Upgrade now
+            </Link>
+          )}
+        </div>
+      )}
 
       {loading && <div className="text-sm text-zinc-400">Loading documents...</div>}
       {error && <div className="text-sm text-red-400">{error}</div>}
