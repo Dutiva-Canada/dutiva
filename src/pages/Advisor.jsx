@@ -4,6 +4,7 @@ import {
   FilePlus2,
   FileText,
   Paperclip,
+  RotateCcw,
   Save,
   Send,
   ShieldCheck,
@@ -17,6 +18,9 @@ import { useLang } from "../context/LanguageContext.jsx";
 import { getStoredSettings } from "../utils/workspaceSettings";
 import { renderTemplate } from "../lib/generator/index.js";
 import { exportDocumentAsText, saveDocument } from "../lib/documents.js";
+
+const ADVISOR_STORAGE_KEY = "dutiva-advisor-session-v1";
+const MAX_PERSISTED_MESSAGES = 30;
 
 function createInitialMessages() {
   const now = Date.now();
@@ -46,6 +50,37 @@ function formatMessageTime(value) {
     return new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   } catch {
     return "Just now";
+  }
+}
+
+function loadPersistedAdvisorState() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(ADVISOR_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function persistAdvisorState(state) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(ADVISOR_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // ignore storage failures
+  }
+}
+
+function clearPersistedAdvisorState() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(ADVISOR_STORAGE_KEY);
+  } catch {
+    // ignore storage failures
   }
 }
 
@@ -183,7 +218,7 @@ function SuggestionButton({ children, onClick }) {
   );
 }
 
-function AdvisorStatusBar({ province, setProvince, advisorReady, hasLawUpdates, lawUpdatesCount }) {
+function AdvisorStatusBar({ province, setProvince, advisorReady, hasLawUpdates, lawUpdatesCount, onReset }) {
   return (
     <div className="flex flex-col gap-3 border-b border-white/8 px-5 py-4 md:flex-row md:items-center md:justify-between">
       <div>
@@ -192,6 +227,15 @@ function AdvisorStatusBar({ province, setProvince, advisorReady, hasLawUpdates, 
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={onReset}
+          className="ghost-button inline-flex items-center gap-2 px-3 py-2 text-xs"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          New conversation
+        </button>
+
         <div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-300">
           <span className="mr-2 text-zinc-500">Province</span>
           <select
@@ -373,7 +417,7 @@ function DocumentDraftPanel({ draft, onSave, onExport, saveState, province }) {
         <div className="flex flex-wrap gap-2">
           <button onClick={onSave} className="gold-button inline-flex items-center gap-2 px-4 py-2 text-sm">
             <Save className="h-4 w-4" />
-            {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : "Save document"}
+            {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Save failed" : "Save document"}
           </button>
           <button onClick={onExport} className="ghost-button inline-flex items-center gap-2 px-4 py-2 text-sm">
             <Download className="h-4 w-4" />
@@ -412,19 +456,21 @@ function DocumentDraftPanel({ draft, onSave, onExport, saveState, province }) {
 }
 
 export default function Advisor() {
+  const persisted = loadPersistedAdvisorState();
   const { user } = useAuth();
   const { t } = useLang();
   const settings = getStoredSettings();
-  const [messages, setMessages] = useState(createInitialMessages);
+  const initialProvince = persisted?.province || settings.province || "Ontario";
+  const [messages, setMessages] = useState(() => persisted?.messages?.length ? persisted.messages : createInitialMessages());
   const [input, setInput] = useState("");
-  const [province, setProvince] = useState(settings.province || "Ontario");
+  const [province, setProvince] = useState(initialProvince);
   const [loading, setLoading] = useState(false);
   const [advisorError, setAdvisorError] = useState(null);
   const [advisorReady, setAdvisorReady] = useState(null);
   const [attachments, setAttachments] = useState([]);
   const [lawUpdates, setLawUpdates] = useState([]);
   const [rateLimitWarning, setRateLimitWarning] = useState(null);
-  const [draft, setDraft] = useState(() => createDraftFromPrompt("termination letter ontario without cause", settings.province || "Ontario"));
+  const [draft, setDraft] = useState(() => persisted?.draft || createDraftFromPrompt("termination letter ontario without cause", initialProvince));
   const [saveState, setSaveState] = useState("idle");
   const fileInputRef = useRef(null);
   const chatScrollRef = useRef(null);
@@ -447,6 +493,20 @@ export default function Advisor() {
   }, [user]);
 
   useEffect(() => {
+    persistAdvisorState({
+      province,
+      draft,
+      messages: messages.slice(-MAX_PERSISTED_MESSAGES).map((message) => ({
+        id: message.id,
+        role: message.role,
+        text: message.text,
+        createdAt: message.createdAt,
+        sources: message.sources || [],
+      })),
+    });
+  }, [draft, messages, province]);
+
+  useEffect(() => {
     if (messages.length > prevMsgCountRef.current) {
       prevMsgCountRef.current = messages.length;
       requestAnimationFrame(() => {
@@ -462,6 +522,18 @@ export default function Advisor() {
     setAttachments((cur) => [...cur, ...files.map((f) => ({ id: createId("att"), name: f.name }))]);
     e.target.value = "";
   };
+
+  const handleResetConversation = useCallback(() => {
+    const nextProvince = province || "Ontario";
+    setMessages(createInitialMessages());
+    setInput("");
+    setAttachments([]);
+    setAdvisorError(null);
+    setRateLimitWarning(null);
+    setSaveState("idle");
+    setDraft(createDraftFromPrompt("termination letter ontario without cause", nextProvince));
+    clearPersistedAdvisorState();
+  }, [province]);
 
   const handleSaveDraft = useCallback(async () => {
     if (!draft || !user?.id) {
@@ -562,6 +634,7 @@ export default function Advisor() {
             advisorReady={advisorReady}
             hasLawUpdates={hasLawUpdates}
             lawUpdatesCount={lawUpdates.length}
+            onReset={handleResetConversation}
           />
 
           <div
@@ -569,17 +642,6 @@ export default function Advisor() {
             className="w-full min-w-0 max-h-[calc(100vh-290px)] space-y-4 overflow-y-auto overflow-x-hidden px-5 py-5 md:px-6"
             style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box" }}
           >
-            {messages.length === 0 && (
-              <div className="py-12 text-center">
-                <div className="mx-auto max-w-2xl">
-                  <div className="text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">Ask any Canadian HR compliance question</div>
-                  <div className="mt-3 text-sm leading-7 text-zinc-400 md:text-base">
-                    Province-aware guidance, legislation-backed answers, and a faster path from question to action.
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div className="rounded-[22px] border border-white/6 bg-white/[0.03] p-4 md:p-5">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 rounded-2xl border border-amber-400/15 bg-amber-400/8 p-2.5 text-amber-300">
@@ -588,7 +650,7 @@ export default function Advisor() {
                 <div className="min-w-0">
                   <div className="text-sm font-semibold text-zinc-100">Start with a real workflow</div>
                   <div className="mt-1 text-sm leading-7 text-zinc-400">
-                    Ask a question, generate a draft, then export or save it from the panel beside the conversation.
+                    Ask a question, generate a draft, then export or save it from the panel beside the conversation. Your current session stays in place if you refresh.
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {starterSuggestions.map((item) => (
