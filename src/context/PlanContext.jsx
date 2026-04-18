@@ -3,6 +3,7 @@ import { useAuth } from "./AuthContext.jsx";
 import { supabase } from "../lib/supabase";
 
 const PlanContext = createContext({ plan: "free", subscriptionStatus: "inactive", loading: true });
+const FOUNDER_EMAILS = ["martin.constantineau@dutiva.ca"];
 
 export function PlanProvider({ children }) {
   const { user } = useAuth();
@@ -12,10 +13,27 @@ export function PlanProvider({ children }) {
 
   useEffect(() => {
     async function loadPlan() {
-      if (!user || !supabase) {
+      if (!user) {
         setLoading(false);
         return;
       }
+
+      const isFounder = Boolean(
+        user?.email && FOUNDER_EMAILS.includes(user.email.toLowerCase())
+      );
+
+      if (isFounder) {
+        setPlan("pro");
+        setSubscriptionStatus("active");
+        setLoading(false);
+        return;
+      }
+
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data } = await supabase
           .from("profiles")
